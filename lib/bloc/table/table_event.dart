@@ -1,0 +1,49 @@
+part of 'table_bloc.dart';
+
+abstract class TableEvent {}
+
+class FetchTables extends TableEvent {
+  final String type;
+  final bool nonDiner;
+  FetchTables(this.type, {this.nonDiner = false});
+}
+
+class AssignTables extends TableEvent {
+  final String id;
+  final List<int> tableId;
+  AssignTables(this.id, this.tableId);
+}
+
+class CloseReservation extends TableEvent {
+  final String id;
+  final bool close;
+  final bool open;
+  final bool nonDiner;
+  final int nonDiveResrvid;
+
+  CloseReservation(this.id,
+      {this.close = false,
+      this.open = false,
+      this.nonDiner = false,
+      this.nonDiveResrvid = 0});
+}
+
+class PrintKotEvent extends TableEvent {
+  final int id;
+  final int waiterId;
+  final bool kot;
+  PrintKotEvent(this.id, this.waiterId, {this.kot = true});
+}
+
+class FetchLeveltable extends TableEvent {
+  final String time;
+  final int levelId;
+
+  FetchLeveltable(this.time, this.levelId);
+}
+
+class FetchSpaces extends TableEvent {
+  
+
+  FetchSpaces();
+}

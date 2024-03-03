@@ -18,7 +18,7 @@ class DiscountModel {
 
   DiscountModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    discountCode = json['discount_code'];
+    discountCode = json['discount_code'] ?? "";
     parentId = json['parent_id'] ?? "";
     discountValue = json['discount_value'];
     discountType = json['discount_type'];

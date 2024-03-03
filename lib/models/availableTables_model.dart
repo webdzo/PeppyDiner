@@ -1,24 +1,22 @@
 class AvailableTablesModel {
   AvailableTablesModel({
     required this.tablesList,
-    required this.reservations,
-    required this.taxGst,
+
   });
   late final List<TablesList> tablesList;
-  late final List<dynamic> reservations;
-  late final TaxGst taxGst;
+
+
+  AvailableTablesModel.fromJson(Map<String, dynamic> json) {
+    tablesList = List.from(json['tablesList'])
+        .map((e) => TablesList.fromJson(e))
+        .toList();
   
-  AvailableTablesModel.fromJson(Map<String, dynamic> json){
-    tablesList = List.from(json['tablesList']).map((e)=>TablesList.fromJson(e)).toList();
-    reservations = List.castFrom<dynamic, dynamic>(json['reservations']);
-    taxGst = TaxGst.fromJson(json['tax_gst']);
   }
 
   Map<String, dynamic> toJson() {
     final datas = <String, dynamic>{};
-    datas['tablesList'] = tablesList.map((e)=>e.toJson()).toList();
-    datas['reservations'] = reservations;
-    datas['tax_gst'] = taxGst.toJson();
+    datas['tablesList'] = tablesList.map((e) => e.toJson()).toList();
+
     return datas;
   }
 }
@@ -42,8 +40,8 @@ class TablesList {
   late final bool isAvailable;
   late final String createdAt;
   late final String updatedAt;
-  
-  TablesList.fromJson(Map<String, dynamic> json){
+
+  TablesList.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     category = json['category'];
@@ -85,15 +83,15 @@ class TaxGst {
   late final int option;
   late final String createdAt;
   late final String updatedAt;
-  
-  TaxGst.fromJson(Map<String, dynamic> json){
-    id = json['id'];
-    tax = json['tax'];
-    gst = json['gst'];
-    gstin = json['gstin'];
-    option = json['option'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+
+  TaxGst.fromJson(Map<String, dynamic> json) {
+    id = json['id'] ?? 0;
+    tax = json['tax'] ?? "";
+    gst = json['gst'] ?? "";
+    gstin = json['gstin'] ?? "";
+    option = json['option'] ?? 0;
+    createdAt = json['created_at'] ?? "";
+    updatedAt = json['updated_at'] ?? "";
   }
 
   Map<String, dynamic> toJson() {

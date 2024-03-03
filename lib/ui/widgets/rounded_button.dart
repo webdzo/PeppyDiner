@@ -3,7 +3,8 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:hotelpro_mobile/ui/widgets/text_widget.dart';
 
 class RoundedBackButton extends StatelessWidget {
-  const RoundedBackButton({super.key});
+  final Function()? onTap;
+  const RoundedBackButton({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +16,10 @@ class RoundedBackButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            Navigator.pop(context);
-          },
+          onTap: onTap ??
+              () {
+                Navigator.pop(context);
+              },
           child: Container(
             padding: const EdgeInsets.all(10.0),
             decoration: BoxDecoration(

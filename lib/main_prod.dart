@@ -10,7 +10,8 @@ import 'main_qa.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  BaseUrl.appBaseurl = "http://3.111.162.219/api";
+  BaseUrl.appBaseurl = "http://65.2.117.47/api";
+
   pref = await SharedPreferences.getInstance();
   runApp(const MyApp());
 }

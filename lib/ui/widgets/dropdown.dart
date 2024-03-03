@@ -544,6 +544,7 @@ class DropdownButtonState<T> extends State<CustomDropdownButton<T>>
   }
 
   void _updateSelectedIndex(values) {
+    print("coming");
     assert((values) == null ||
         widget.items
                 .where((DropdownMenuItem<T> item) => item.value == (values))
@@ -643,10 +644,13 @@ class DropdownButtonState<T> extends State<CustomDropdownButton<T>>
           children: <Widget>[
             // If value is null (then _selectedIndex is null) then we display
             // the hint or nothing at all.
-            IndexedStack(
-              index: _selectedIndex ?? hintIndex,
-              alignment: AlignmentDirectional.centerStart,
-              children: items,
+            SizedBox(
+              width: widget.width,
+              child: IndexedStack(
+                index: _selectedIndex ?? hintIndex,
+                alignment: AlignmentDirectional.centerStart,
+                children: items,
+              ),
             ),
             IconTheme(
               data: IconThemeData(

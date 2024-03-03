@@ -7,6 +7,11 @@ class FetchItems extends ItemsEvent {
   FetchItems(this.id);
 }
 
+class FilterItems extends ItemsEvent {
+  final String searchString;
+  FilterItems(this.searchString);
+}
+
 class FetchItemConfig extends ItemsEvent {
   FetchItemConfig();
 }

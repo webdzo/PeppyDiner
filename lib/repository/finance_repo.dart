@@ -1,6 +1,11 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:hotelpro_mobile/bloc/finance/finance_bloc.dart';
+import 'package:hotelpro_mobile/models/bycat_model.dart';
+import 'package:hotelpro_mobile/models/bywaiter_model.dart';
+import 'package:hotelpro_mobile/models/cancelorder_model.dart';
+import 'package:hotelpro_mobile/models/deleted_item_model.dart';
 import 'package:hotelpro_mobile/models/itemstats_model.dart';
 import 'package:hotelpro_mobile/models/timestats_model.dart';
 import 'package:http/http.dart';
@@ -66,6 +71,57 @@ class FinanceRepository {
     List<TimestatsModel> statResponse = List.from(json.decode(response.body))
         .map((e) => TimestatsModel.fromJson(e))
         .toList();
+
+    return statResponse;
+  }
+
+  Future<List<CancelOrderModel>> fetchCancel(
+      String startDate, String endDate) async {
+    var response = await ApiBaseHelper().getMethod(
+        "/reports/multiple?category=cancelledorders&startDate=$startDate&endDate=$endDate");
+
+    List<CancelOrderModel> statResponse =
+        List.from(json.decode(response.body)["query_data"]) //
+            .map((e) => CancelOrderModel.fromJson(e))
+            .toList();
+
+    return statResponse;
+  }
+
+  Future<List<DeleteditemModel>> fetchDeleted(
+      String startDate, String endDate) async {
+    var response = await ApiBaseHelper().getMethod(
+        "/reports/multiple?category=deleteditems&startDate=$startDate&endDate=$endDate");
+
+    List<DeleteditemModel> statResponse =
+        List.from(json.decode(response.body)["query_data"]) //
+            .map((e) => DeleteditemModel.fromJson(e))
+            .toList();
+
+    return statResponse;
+  }
+
+  Future<List<BycatModel>> fetchbyCat(String startDate, String endDate) async {
+    var response = await ApiBaseHelper().getMethod(
+        "/reports/multiple?category=ordersbycategory&startDate=$startDate&endDate=$endDate");
+
+    List<BycatModel> statResponse =
+        List.from(json.decode(response.body)["query_data"]) //
+            .map((e) => BycatModel.fromJson(e))
+            .toList();
+
+    return statResponse;
+  }
+
+  Future<List<BywaiterModel>> fetchbywaiter(
+      String startDate, String endDate) async {
+    var response = await ApiBaseHelper().getMethod(
+        "/reports/multiple?category=ordersbywaiter&startDate=$startDate&endDate=$endDate");
+
+    List<BywaiterModel> statResponse =
+        List.from(json.decode(response.body)["query_data"]) //
+            .map((e) => BywaiterModel.fromJson(e))
+            .toList();
 
     return statResponse;
   }

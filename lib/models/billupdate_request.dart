@@ -21,17 +21,20 @@ class BillData {
     this.serviceCharge,
     this.flatDiscount,
     this.paymentMode,
+    this.paymentType,
   });
   String? taxGst;
   int? serviceCharge;
   String? flatDiscount;
   String? paymentMode;
+  String? paymentType;
 
   BillData.fromJson(Map<String, dynamic> json) {
     taxGst = json['tax_gst'];
     serviceCharge = json['service_charge'];
     flatDiscount = json['flat_discount'];
     paymentMode = json['payment_mode'];
+    paymentType = json['payment_type'];
   }
 
   Map<String, dynamic> toJson() {
@@ -40,6 +43,7 @@ class BillData {
     datas['service_charge'] = serviceCharge;
     datas['flat_discount'] = flatDiscount;
     datas['payment_mode'] = paymentMode;
+    datas['payment_type'] = paymentType;
     return datas;
   }
 }

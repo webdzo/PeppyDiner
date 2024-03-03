@@ -4,6 +4,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../bloc/login/login_bloc.dart';
 import '../../bloc/login/login_event.dart';
@@ -30,6 +31,30 @@ class _SigninState extends State<Signin> {
   String? verifiedId;
   LoginBloc loginBloc = LoginBloc();
 
+  String role = "";
+
+  getRole() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    role = pref.getString("role") ?? "";
+    setState(() {});
+
+    if (role == "ROLE_CHEF") {
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        "/kdsScreen",
+        (route) {
+          return false;
+        },
+      );
+    } else {
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        "/home",
+        (route) {
+          return false;
+        },
+      );
+    }
+  }
+
   @override
   void initState() {
     loginBloc = BlocProvider.of<LoginBloc>(context)
@@ -39,12 +64,8 @@ class _SigninState extends State<Signin> {
         }
         if (event is LoginDone) {
           EasyLoading.showSuccess('Success!');
-          navigatorKey.currentState?.pushNamedAndRemoveUntil(
-            "/home",
-            (route) {
-              return false;
-            },
-          );
+
+          getRole();
         } else if (event is LoginError) {
           EasyLoading.showError('Failed with Error');
         }

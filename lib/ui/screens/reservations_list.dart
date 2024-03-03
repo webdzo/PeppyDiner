@@ -60,11 +60,11 @@ class _ReservationListState extends State<ReservationList> {
             ),
           ),
           actions: [
-             Padding(
+            Padding(
               padding: EdgeInsets.only(right: 10.w),
               child: GestureDetector(
                 onTap: () {
-                  navigatorKey.currentState!.pushNamed("/itemconfig");
+                  navigatorKey.currentState!.pushNamed("/profile");
                 },
                 child: const Icon(
                   Icons.settings,
@@ -117,6 +117,7 @@ class _ReservationListState extends State<ReservationList> {
                       ),
                     ),
                     body: TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
                       children: [
                         BlocProvider(
                           create: (context) => TableBloc(),

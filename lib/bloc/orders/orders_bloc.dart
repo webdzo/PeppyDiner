@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hotelpro_mobile/models/ongoing_model.dart';
 
 import '../../models/addOrders_request.dart';
 import '../../models/additem_model.dart';
@@ -29,6 +30,7 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<AddOrders>((AddOrders event, emit) async {
       emit(AddOrdersLoad());
       try {
+        print(event.addOrdersRequest.toJson());
         final resp = await OrdersRepository().addOrders(event.addOrdersRequest);
 
         emit(AddOrdersDone());
@@ -65,8 +67,8 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
     on<DeleteItem>((event, emit) async {
       emit(EditOrdersLoad());
       try {
-        final resp =
-            await OrdersRepository().deleteItem(event.orderId, event.itemId);
+        final resp = await OrdersRepository()
+            .deleteItem(event.orderId, event.itemId, event.reason);
 
         emit(EditOrdersDone());
       } catch (e) {
@@ -103,6 +105,67 @@ class OrdersBloc extends Bloc<OrdersEvent, OrdersState> {
         emit(GetnameDone(response));
       } catch (e) {
         emit(GetnameError());
+      }
+    });
+
+    on<CurrentOrders>((event, emit) async {
+      emit(OrdersLoad());
+      try {
+        final resp = await OrdersRepository().current();
+
+        List<OrderlistModel> response = resp;
+
+        emit(OrdersDone(response));
+      } catch (e) {
+        if (e == "204") {
+          emit(OrdersNodata());
+        } else {
+          emit(OrdersError());
+        }
+      }
+    });
+
+    on<OngoingOrders>((event, emit) async {
+      emit(OrdersLoad());
+      try {
+        final resp = await OrdersRepository().ongoing();
+
+        List<OngoingOrdermodel> response = resp;
+
+        emit(OngoingDone(response));
+      } catch (e) {
+        if (e == "204") {
+          emit(OrdersNodata());
+        } else {
+          emit(OrdersError());
+        }
+      }
+    });
+
+    on<KotEdit>((event, emit) async {
+      emit(EditOrdersLoad());
+      try {
+        final resp = await OrdersRepository().kotEdit(event.orderId,
+            itemId: event.itemId,
+            status: event.status,
+            reason: event.reason,
+            close: event.close);
+
+        emit(EditOrdersDone());
+      } catch (e) {
+        emit(EditOrdersError());
+      }
+    });
+
+    on<CompleteOrder>((event, emit) async {
+      emit(EditOrdersLoad());
+      try {
+        final resp =
+            await OrdersRepository().completeOrder(event.orderId, event.resId);
+
+        emit(EditOrdersDone());
+      } catch (e) {
+        emit(EditOrdersError());
       }
     });
   }

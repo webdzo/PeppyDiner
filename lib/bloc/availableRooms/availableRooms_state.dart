@@ -13,4 +13,10 @@ class AvailableRoomsDone extends AvailableRoomsState {
   AvailableRoomsDone(this.reservationList);
 }
 
+class FetchRoomsDone extends AvailableRoomsState {
+  final List<TablesList> tableList;
+
+  FetchRoomsDone(this.tableList);
+}
+
 class AvailableRoomsError extends AvailableRoomsState {}

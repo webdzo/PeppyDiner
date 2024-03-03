@@ -7,9 +7,15 @@ class ItemsInitial extends ItemsState {}
 class ItemsLoad extends ItemsState {}
 
 class ItemsDone extends ItemsState {
-  final List<ItemsModel> items;
+   List<ItemsModel> items = [];
 
-  ItemsDone(this.items);
+  List<ItemsModel> filterItemsList = [];
+   List<ItemsModel> allItems = [];
+
+   String searchText = "";
+
+
+  ItemsDone();
 }
 
 class ItemsError extends ItemsState {}

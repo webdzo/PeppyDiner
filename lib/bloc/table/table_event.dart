@@ -8,6 +8,15 @@ class FetchTables extends TableEvent {
   FetchTables(this.type, {this.nonDiner = false});
 }
 
+class FilterTables extends TableEvent {
+  final String searchText;
+  final String date;
+  final TimeOfDay? fromTime;
+  final TimeOfDay? toTime;
+
+  FilterTables(this.searchText, this.fromTime, this.toTime, this.date);
+}
+
 class AssignTables extends TableEvent {
   final String id;
   final List<int> tableId;
@@ -43,7 +52,5 @@ class FetchLeveltable extends TableEvent {
 }
 
 class FetchSpaces extends TableEvent {
-  
-
   FetchSpaces();
 }

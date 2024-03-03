@@ -15,6 +15,8 @@ int bottomIndex = 0;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   BaseUrl.appBaseurl = "http://13.200.118.169/api";
+
+  // http://65.2.117.47/api/
   pref = await SharedPreferences.getInstance();
   runApp(const MyApp());
 }
@@ -38,8 +40,11 @@ class MyApp extends StatelessWidget {
           ),
           onGenerateRoute: generateRoute,
           // navigatorObservers: [MyNavigatorObserver()],
-          initialRoute:
-              ((pref.getString("token") ?? "").isNotEmpty) ? "/home" : "/",
+          initialRoute: ((pref.getString("token") ?? "").isNotEmpty)
+              ? ((pref.getString("role") ?? "") == "ROLE_CHEF"
+                  ? "/kdsScreen"
+                  : "/home")
+              : "/",
           navigatorKey: navigatorKey,
           builder: EasyLoading.init(),
         );

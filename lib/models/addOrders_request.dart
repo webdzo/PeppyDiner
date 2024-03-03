@@ -1,16 +1,20 @@
+import 'package:intl/intl.dart';
+
 class AddOrdersRequest {
-  AddOrdersRequest({
-    this.data,
-  });
+  AddOrdersRequest({this.data, this.currentTime});
   Data? data;
+  String? currentTime;
 
   AddOrdersRequest.fromJson(Map<String, dynamic> json) {
     data = Data.fromJson(json['data']);
+    currentTime = json["current_time"];
   }
 
   Map<String, dynamic> toJson() {
     final datas = <String, dynamic>{};
     datas['data'] = data?.toJson();
+    datas["current_time"] =
+        DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(DateTime.now());
     return datas;
   }
 }

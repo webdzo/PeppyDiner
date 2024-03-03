@@ -5,3 +5,7 @@ class FetchAvailableRooms extends AvailableRoomsEvent {
   final String endDate;
   FetchAvailableRooms(this.startDate, this.endDate);
 }
+
+class FetchRooms extends AvailableRoomsEvent {
+  FetchRooms();
+}

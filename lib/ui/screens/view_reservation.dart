@@ -5,15 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:hotelpro_mobile/bloc/availableRooms/availableRooms_bloc.dart';
+import 'package:hotelpro_mobile/bloc/availableRooms/availableRooms_event.dart';
+import 'package:hotelpro_mobile/bloc/availableRooms/availableRooms_state.dart';
 import 'package:hotelpro_mobile/bloc/bloc/billpayment_bloc.dart';
+import 'package:hotelpro_mobile/main_qa.dart';
 import 'package:hotelpro_mobile/models/billupdate_request.dart';
+import 'package:hotelpro_mobile/models/paymentmode_model.dart';
 import 'package:hotelpro_mobile/models/payments_model.dart';
+import 'package:hotelpro_mobile/models/updatemode_request.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/widgets/dropdown.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pdfWidget;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../bloc/addReservation/add_reservation_bloc.dart';
 import '../../bloc/addReservation/add_reservation_event.dart';
@@ -50,9 +58,30 @@ class _ViewResercationsState extends State<ViewResercations> {
   TextEditingController notesController = TextEditingController();
   BillpaymentBloc billpaymentBloc = BillpaymentBloc();
   BillupdateRequest billupdateRequest = BillupdateRequest(data: BillData());
+  List<PaymentmodeModel> paymodes = [];
+  List<UpdatemodeRequest> modeReq = [];
 
+  String role = "";
+  getRole() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    role = pref.getString("role") ?? "";
+    print(role);
+  }
+
+  AvailableRoomsBloc availableRooms = AvailableRoomsBloc();
+  List<TablesList> tableList = [];
   @override
   void initState() {
+    getRole();
+    availableRooms = BlocProvider.of(context)
+      ..stream.listen((event) {
+        if (event is FetchRoomsDone) {
+          tableList = event.tableList;
+          setState(() {});
+        }
+      });
+
+    availableRooms.add(FetchRooms());
     billpaymentBloc = BlocProvider.of<BillpaymentBloc>(context)
       ..stream.listen((event) {
         if (event is UpdateLoad) {
@@ -63,8 +92,15 @@ class _ViewResercationsState extends State<ViewResercations> {
         } else if (event is UpdateError) {
           EasyLoading.showError('Failed with Error');
         }
+        if (event is PaymodeDone) {
+          print("akshaya");
+          print(event.modes);
+          setState(() {
+            paymodes = event.modes;
+          });
+        }
       });
-
+    billpaymentBloc.add(FetchPayModes());
     // billpaymentBloc.add(FetchDiscount());
     billpaymentBloc.add(FetchService(id: widget.id["rId"].toString()));
 
@@ -87,6 +123,30 @@ class _ViewResercationsState extends State<ViewResercations> {
 
     reservationBloc = BlocProvider.of<ReservationsBloc>(context)
       ..stream.listen((event) {
+        if (event is SwapDone) {
+          EasyLoading.showSuccess('Success!');
+          Future.delayed(const Duration(seconds: 2), () {
+            reservationBloc.add(ReservationDetailsEvent(widget.id["rId"]));
+          });
+        }
+        if (event is SwapLoad) {
+          EasyLoading.show(status: 'loading...');
+        }
+        if (event is SwapError) {
+          EasyLoading.showError('Failed with Error');
+        }
+        if (event is MarkDone) {
+          EasyLoading.showSuccess('Success!');
+          Future.delayed(const Duration(seconds: 2), () {
+            reservationBloc.add(ReservationDetailsEvent(widget.id["rId"]));
+          });
+        }
+        if (event is MarkLoad) {
+          EasyLoading.show(status: 'loading...');
+        }
+        if (event is MarkError) {
+          EasyLoading.showError('Failed with Error');
+        }
         //  print(event);
         if (event is ReservationDetailsDone) {
           /*  event.reservationList.guests.toList().forEach((element) {
@@ -95,6 +155,7 @@ class _ViewResercationsState extends State<ViewResercations> {
         }
         if (event is PaynowDone) {
           payController.text = "";
+          modeReq = [];
           EasyLoading.showSuccess('Success!');
           Future.delayed(const Duration(seconds: 2), () {
             reservationBloc.add(ReservationDetailsEvent(widget.id["rId"]));
@@ -108,6 +169,28 @@ class _ViewResercationsState extends State<ViewResercations> {
           Future.delayed(const Duration(seconds: 2), () {
             reservationBloc.add(ReservationDetailsEvent(widget.id["rId"]));
           });
+        }
+
+        if (event is SplitDone) {
+          selectedSplit = "0";
+          EasyLoading.showSuccess('Success!');
+        }
+        if (event is SplitLoad) {
+          EasyLoading.show(status: 'loading...');
+        }
+        if (event is SplitError) {
+          selectedSplit = "0";
+          EasyLoading.showError('Failed with Error');
+        }
+
+        if (event is PrintDone) {
+          EasyLoading.showSuccess('Success!');
+        }
+        if (event is PrintLoad) {
+          EasyLoading.show(status: 'loading...');
+        }
+        if (event is PrintError) {
+          EasyLoading.showError('Failed with Error');
         }
       });
     ordersBloc = BlocProvider.of<OrdersBloc>(context)
@@ -222,12 +305,19 @@ class _ViewResercationsState extends State<ViewResercations> {
                 builder: (context, state) {
                   // billupdateRequest.data.taxGst ??= 0;
                   if (state is BillDone) {
+                    print(state.bill.toJson());
                     billupdateRequest.data.serviceCharge ??=
                         state.bill.serviceCharge;
                     billupdateRequest.data.flatDiscount ??=
-                        state.bill.flatDiscount;
+                        state.bill.flatDiscount.toString();
                     billupdateRequest.data.taxGst ??=
                         state.bill.taxGst.toString();
+                    billupdateRequest.data.paymentMode ??=
+                        state.bill.paymentMode.toString();
+                    billupdateRequest.data.paymentType ??=
+                        state.bill.flatDiscountType.toString();
+
+                    print(billupdateRequest.data.paymentMode);
                   }
                   if (billupdateRequest.data.serviceCharge == null) {
                     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -241,9 +331,8 @@ class _ViewResercationsState extends State<ViewResercations> {
                       text: billupdateRequest.data.taxGst?.toString() ?? "",
                       selection: TextSelection.fromPosition(
                         TextPosition(
-                            offset:
-                                (billupdateRequest.data.taxGst.toString() )
-                                        .length ),
+                            offset: (billupdateRequest.data.taxGst.toString())
+                                .length),
                       ),
                     )),
                     onChanged: (value) {
@@ -291,14 +380,37 @@ class _ViewResercationsState extends State<ViewResercations> {
         SizedBox(
           height: 10.w,
         ),
-        Padding(
-          padding: EdgeInsets.only(left: 20.w),
-          child: const TextWidget(
-            "Discount",
-            fontweight: FontWeight.bold,
-          ),
+        const Divider(
+          height: 2,
+          color: Colors.black,
+        ),
+        SizedBox(
+          height: 10.w,
+        ),
+        BlocBuilder<BillpaymentBloc, BillpaymentState>(
+          buildWhen: (previous, current) {
+            return current is PaymentsDone ||
+                current is PaymentsError ||
+                current is PaymentsLoad;
+          },
+          builder: (context, state) {
+            return typesDropdown(context, typeList);
+          },
+        ),
+        SizedBox(
+          height: 20.w,
         ),
         discountWidget(),
+        SizedBox(
+          height: 20.w,
+        ),
+        const Divider(
+          height: 2,
+          color: Colors.black,
+        ),
+        SizedBox(
+          height: 10.w,
+        ),
         Padding(
           padding: EdgeInsets.only(left: 20.w),
           child: const TextWidget(
@@ -306,7 +418,9 @@ class _ViewResercationsState extends State<ViewResercations> {
             fontweight: FontWeight.bold,
           ),
         ),
-        serviceWidget(),
+        IgnorePointer(
+            ignoring: (role != "ROLE_MANAGER" && role != "ROLE_ADMIN"),
+            child: serviceWidget()),
         SizedBox(
           height: 10.w,
         ),
@@ -350,7 +464,8 @@ class _ViewResercationsState extends State<ViewResercations> {
         borderRadius: BorderRadius.circular(5.w),
       ),
       child: CustomDropdownButton(
-          value: billupdateRequest.data.paymentMode != null
+          value: (billupdateRequest.data.paymentMode != null &&
+                  billupdateRequest.data.paymentMode != "")
               ? payments
                   .where((element) =>
                       element.paymentName == billupdateRequest.data.paymentMode)
@@ -364,7 +479,6 @@ class _ViewResercationsState extends State<ViewResercations> {
           ),
           width: MediaQuery.of(context).size.width * 0.4,
           underline: Container(),
-          // value: cakeList.first,
           icon: const Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -383,6 +497,143 @@ class _ViewResercationsState extends State<ViewResercations> {
             setState(() {});
           },
           items: payments.toList().map((item) {
+            return DropdownMenuItem(
+              value: item,
+              child: Text(
+                item.paymentName,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w400, color: Colors.black),
+              ),
+            );
+          }).toList()),
+    );
+  }
+
+  typesDropdown(BuildContext context, List items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: 12.w),
+          child: const TextWidget(
+            "Discount Type",
+            fontweight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(
+          height: 5.w,
+        ),
+        Container(
+          alignment: Alignment.center,
+          height: 70.w,
+          // width: MediaQuery.of(context).size.width * 0.45,
+          margin: EdgeInsets.symmetric(horizontal: 15.w),
+          padding: const EdgeInsets.symmetric(horizontal: 7),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Colors.grey,
+              width: 0.7,
+            ),
+            borderRadius: BorderRadius.circular(5.w),
+          ),
+          child: CustomDropdownButton(
+              value: (billupdateRequest.data.paymentType != null &&
+                      billupdateRequest.data.paymentType != "")
+                  ? ["fixed", "percentage"]
+                      .where((element) =>
+                          element == billupdateRequest.data.paymentType)
+                      .toList()
+                      .first
+                  : null,
+              hint: TextWidget(
+                "Discount Type",
+                color: Colors.black54,
+                size: 20.sp,
+              ),
+              width: MediaQuery.of(context).size.width * 0.4,
+              underline: Container(),
+              icon: const Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+              dropdownColor: Colors.black,
+              iconEnabledColor: Colors.black,
+              iconDisabledColor: Colors.black,
+              style: const TextStyle(color: Colors.black),
+              onChanged: (value) {
+                billupdateRequest.data.paymentType = value.toString();
+                setState(() {});
+              },
+              items: ["fixed", "percentage"].toList().map((item) {
+                return DropdownMenuItem(
+                  value: item,
+                  child: Text(
+                    item.capitalize(),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w400, color: Colors.black),
+                  ),
+                );
+              }).toList()),
+        ),
+      ],
+    );
+  }
+
+  String payMode = "";
+  Container paymodeDropdown(
+      BuildContext context, List<PaymentmodeModel> items) {
+    print("-------------------");
+    print(items);
+    return Container(
+      alignment: Alignment.center,
+      height: 70.w,
+      // width: MediaQuery.of(context).size.width * 0.45,
+      margin: EdgeInsets.symmetric(horizontal: 5.w),
+
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.grey,
+          width: 0.7,
+        ),
+        borderRadius: BorderRadius.circular(5.w),
+      ),
+      child: CustomDropdownButton(
+          value: (payMode != "")
+              ? items
+                  .where((element) => element.paymentName == payMode)
+                  .toList()
+                  .first
+              : null,
+          hint: TextWidget(
+            "Select Mode",
+            color: Colors.black54,
+            size: 20.sp,
+          ),
+          width: MediaQuery.of(context).size.width * 0.4,
+          underline: Container(),
+          icon: const Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Icon(
+                Icons.arrow_drop_down,
+                color: Colors.black,
+              ),
+            ],
+          ),
+          dropdownColor: Colors.black,
+          iconEnabledColor: Colors.black,
+          iconDisabledColor: Colors.black,
+          style: const TextStyle(color: Colors.black),
+          onChanged: (value) {
+            payMode = value.paymentName.toString();
+            setState(() {});
+          },
+          items: items.toList().map((item) {
             return DropdownMenuItem(
               value: item,
               child: Text(
@@ -439,46 +690,205 @@ class _ViewResercationsState extends State<ViewResercations> {
                   },
                 )
               : Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     TextButton(
-                        style:
-                            TextButton.styleFrom(backgroundColor: Colors.green),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
                         onPressed: () {
-                          payController.clear();
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: TextWidget(
-                                  "Balance Amount: Rs. ${balanceAmount.toString()}",
-                                  fontweight: FontWeight.bold,
-                                ),
-                                content: TextFormField(
-                                  decoration: const InputDecoration(
-                                      labelText: "Enter Amount"),
-                                  controller: payController,
-                                ),
-                                actions: [
-                                  button("Cancel", () {
-                                    payController.text = "";
-                                    Navigator.pop(context);
-                                  }, Colors.red, size: 18.sp),
-                                  button("Submit", () {
-                                    Navigator.pop(context);
-                                    reservationBloc.add(PaynowEvent(
-                                        reservId.toString(),
-                                        payController.text.toString()));
-                                  }, Colors.green, size: 18.sp)
-                                ],
-                              );
-                            },
-                          );
-                          /*   */
+                          reservationBloc.add(PrintEvent(reservId.toString()));
                         },
-                        child: const TextWidget(
-                          "Pay Now",
-                          color: Colors.white,
+                        child: const Text(
+                          "Print Bill",
+                          style: TextStyle(color: Colors.white),
                         )),
+                    SizedBox(
+                      width: 5.w,
+                    ),
+                    Row(
+                      children: [
+                        TextButton(
+                            style: TextButton.styleFrom(
+                              side: const BorderSide(color: Colors.black),
+                              backgroundColor: Colors.white,
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const TextWidget(
+                                      "Split bills for this reservation",
+                                      fontweight: FontWeight.bold,
+                                    ),
+                                    content: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        userseDropdown(context, splitDtas),
+                                      ],
+                                    ),
+                                    actions: [
+                                      button("Cancel", () {
+                                        payController.text = "";
+                                        Navigator.pop(context);
+                                      }, Colors.red, size: 18.sp),
+                                      button("Submit", () {
+                                        Navigator.pop(context);
+                                        reservationBloc.add(SplitEvent(
+                                            reservId.toString(),
+                                            selectedSplit.toString()));
+                                      }, Colors.green, size: 18.sp)
+                                    ],
+                                  );
+                                },
+                              );
+
+                              //http://13.200.118.169/api/reservations/133/split-bill
+                            },
+                            child: const TextWidget(
+                              "Split Bill",
+                              color: Colors.black,
+                            )),
+                        SizedBox(
+                          width: 10.w,
+                        ),
+                        TextButton(
+                            style: TextButton.styleFrom(
+                                backgroundColor: Colors.green),
+                            onPressed: () {
+                              payController.clear();
+
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return StatefulBuilder(
+                                      builder: (context, setstate) {
+                                    return BlocProvider(
+                                      create: (context) => billpaymentBloc,
+                                      child: AlertDialog(
+                                        title: TextWidget(
+                                          "Balance Amount: Rs. ${balanceAmount.toString()}",
+                                          fontweight: FontWeight.bold,
+                                        ),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            paymodeDropdown(context, paymodes),
+                                            TextFormField(
+                                              decoration: const InputDecoration(
+                                                  labelText: "Enter Amount"),
+                                              controller: payController,
+                                            ),
+                                            SizedBox(
+                                              height: 10.w,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                button("Add", () {
+                                                  if (payMode.isNotEmpty &&
+                                                      payController
+                                                          .text.isNotEmpty) {
+                                                    modeReq.add(
+                                                        UpdatemodeRequest(
+                                                            mode: payMode,
+                                                            value: payController
+                                                                .text));
+
+                                                    payMode = "";
+                                                    payController.clear();
+                                                    setstate(() {});
+                                                  }
+                                                }, HexColor("#d4ac2c"),
+                                                    textcolor: Colors.black),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 10.w,
+                                            ),
+                                            Column(
+                                                children: List.generate(
+                                                    modeReq.length,
+                                                    (index) => Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Container(
+                                                                    color: HexColor(
+                                                                            "#d4ac2c")
+                                                                        .withOpacity(
+                                                                            0.3),
+                                                                    padding: EdgeInsets.symmetric(
+                                                                        horizontal: 10
+                                                                            .w,
+                                                                        vertical: 5
+                                                                            .w),
+                                                                    child:
+                                                                        TextWidget(
+                                                                      modeReq[index]
+                                                                          .mode,
+                                                                      fontweight:
+                                                                          FontWeight
+                                                                              .w500,
+                                                                    )),
+                                                                SizedBox(
+                                                                  width: 10.w,
+                                                                ),
+                                                                TextWidget(
+                                                                    "Rs.${modeReq[index].value}")
+                                                              ],
+                                                            ),
+                                                            GestureDetector(
+                                                                onTap: () {
+                                                                  modeReq
+                                                                      .removeAt(
+                                                                          index);
+                                                                  setstate(
+                                                                      () {});
+                                                                },
+                                                                child: const Icon(
+                                                                    Icons
+                                                                        .close_rounded))
+                                                          ],
+                                                        )))
+                                          ],
+                                        ),
+                                        actions: [
+                                          button("Cancel", () {
+                                            payController.text = "";
+                                            Navigator.pop(context);
+                                          }, Colors.red, size: 18.sp),
+                                          button("Submit", () {
+                                            if (modeReq.isNotEmpty) {
+                                              Navigator.pop(context);
+                                              reservationBloc.add(PaynowEvent(
+                                                  reservId.toString(),
+                                                  modeReq));
+                                            } else {
+                                              Fluttertoast.showToast(
+                                                  msg:
+                                                      "Please add the payment details");
+                                            }
+                                          }, Colors.green, size: 18.sp)
+                                        ],
+                                      ),
+                                    );
+                                  });
+                                },
+                              );
+                              /*   */
+                            },
+                            child: const TextWidget(
+                              "Pay Now",
+                              color: Colors.white,
+                            )),
+                      ],
+                    ),
                   ],
                 );
         });
@@ -561,14 +971,15 @@ class _ViewResercationsState extends State<ViewResercations> {
       leading: GestureDetector(
         onTap: () {
           Navigator.of(context).pushNamedAndRemoveUntil(
-              '/home',
-              arguments: widget.id["nonDiner"] ? 1 : 0,
-              (Route<dynamic> route) => false);
+              '/home', arguments: bottomIndex, (Route<dynamic> route) => false);
           // Navigator.pop(context);
         },
-        child: const Icon(
-          Icons.arrow_back_ios,
-          color: Colors.black,
+        child: const Padding(
+          padding: EdgeInsets.all(10.0),
+          child: Icon(
+            Icons.arrow_back_ios,
+            color: Colors.black,
+          ),
         ),
       ),
       backgroundColor: HexColor("#d4ac2c"),
@@ -590,7 +1001,7 @@ class _ViewResercationsState extends State<ViewResercations> {
           Expanded(
             child: BlocBuilder<ReservationsBloc, ReservationsState>(
               buildWhen: (previous, current) {
-                return current is ReservationError ||
+                return current is ReservationsError ||
                     current is ReservationsLoad ||
                     current is ReservationDetailsDone;
               },
@@ -669,6 +1080,10 @@ class _ViewResercationsState extends State<ViewResercations> {
                   );
                 }
 
+                if (state is ReservationsError) {
+                  return Text(state.errorMsg);
+                }
+
                 return Padding(
                   padding: EdgeInsets.symmetric(vertical: 50.w),
                   child: const Center(
@@ -683,6 +1098,8 @@ class _ViewResercationsState extends State<ViewResercations> {
     );
   }
 
+  TextEditingController deletereasonController = TextEditingController();
+  final _deletedialogKey = GlobalKey<FormState>();
   Container itemCard(ReservationDetailsDone state, int index) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.w),
@@ -745,7 +1162,7 @@ class _ViewResercationsState extends State<ViewResercations> {
               SizedBox(
                 height: 5.w,
               ),
-              Row(
+              /*  Row(
                 children: [
                   GestureDetector(
                       onTap: editList[index]
@@ -858,18 +1275,63 @@ class _ViewResercationsState extends State<ViewResercations> {
                           .toList()
                           .isEmpty) {
                         DialogWidget().dialogWidget(
-                            context, "Confirm Delete Item from Order?", () {
-                          Navigator.pop(context);
-                        }, () {
-                          Navigator.pop(context);
-                          ordersBloc.add(DeleteItem(
-                            state.reservationList.reservation.orders.first.id
-                                .toString(),
-                            state.reservationList.reservation.orders.first
-                                .itemOrders[index].id
-                                .toString(),
-                          ));
-                        });
+                          context,
+                          "Confirm Delete Item from Order?",
+                          () {
+                            deletereasonController.clear();
+                            Navigator.pop(context);
+                          },
+                          () {
+                            if (_deletedialogKey.currentState!.validate()) {
+                              Navigator.pop(context);
+                              ordersBloc.add(DeleteItem(
+                                  state.reservationList.reservation.orders.first
+                                      .id
+                                      .toString(),
+                                  state.reservationList.reservation.orders.first
+                                      .itemOrders[index].id
+                                      .toString(),
+                                  deletereasonController.text));
+                            } else {}
+                          },
+                          notefield: Form(
+                            key: _deletedialogKey,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 5.w),
+                              child: Card(
+                                elevation: 1,
+                                child: TextFormField(
+                                  minLines: 3,
+                                  maxLines: null,
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
+                                  validator: (value) {
+                                    if (value?.isEmpty ?? true) {
+                                      return "Please enter valid reason";
+                                    }
+                                    return null;
+                                  },
+                                  controller: deletereasonController,
+                                  keyboardType: TextInputType.multiline,
+                                  decoration: InputDecoration(
+                                    alignLabelWithHint: true,
+                                    labelStyle:
+                                        const TextStyle(color: Colors.black),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.grey.shade500,
+                                            width: 0.4)),
+                                    border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.grey.shade200,
+                                            width: 0.009)),
+                                    labelText: 'Enter valid reason to delete',
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
                       }
                     },
                     child: Container(
@@ -892,7 +1354,7 @@ class _ViewResercationsState extends State<ViewResercations> {
                         )),
                   )
                 ],
-              ),
+              ), */
             ],
           )
         ],
@@ -1018,7 +1480,7 @@ class _ViewResercationsState extends State<ViewResercations> {
         return current is ReservationsLoad ||
             current is ReservationNodata ||
             current is ReservationDetailsDone ||
-            current is ReservationError;
+            current is ReservationsError;
       },
       builder: (context, state) {
         if (state is ReservationNodata) {
@@ -1054,6 +1516,45 @@ class _ViewResercationsState extends State<ViewResercations> {
         paymentContainer("Amount Paid",
             "₹ ${state.reservationList.reservation.advancePaid}", Colors.blue),
         dividerWidget(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            button("Mark as No cost", () {
+              DialogWidget().dialogWidget(context, "Are you sure?", () {
+                Navigator.pop(context);
+              }, () {
+                Navigator.pop(context);
+                reservationBloc.add(MarkUpdate(reservId.toString(), "NS"));
+              },
+                  notefield: const TextWidget(
+                      "Are you sure you want to mark this Reservation as No Cost? "));
+
+              //akshaya
+              // reservationBloc.add(MarkUpdate(reservId.toString(), "NS"));
+            }, HexColor("#d4ac2c"), textcolor: Colors.black),
+            if (state.reservationList.reservation.status != "OP")
+              SizedBox(
+                width: 15.w,
+              ),
+            if (state.reservationList.reservation.status == "")
+              button("Mark as No show", () {
+                DialogWidget().dialogWidget(
+                  context,
+                  "Sure to confirm?",
+                  () {
+                    Navigator.pop(context);
+                  },
+                  () {
+                    print(state.reservationList.reservation.status);
+                    Navigator.pop(context);
+                    reservationBloc
+                        .add(MarkUpdate(reservId.toString(), "noshow"));
+                  },
+                );
+              }, HexColor("#d4ac2c"), textcolor: Colors.black),
+          ],
+        ),
+        dividerWidget(),
         guestWidget(state),
         dividerWidget(),
         userDataWidget(context, state),
@@ -1080,7 +1581,9 @@ class _ViewResercationsState extends State<ViewResercations> {
                       backgroundColor: HexColor("#d4ac2c")),
                   onPressed: () {
                     navigatorKey.currentState?.pushNamed("/addReservation",
-                        arguments: state.reservationList.reservation.id);
+                        arguments: {
+                          "id": state.reservationList.reservation.id
+                        });
                   },
                   child: const TextWidget(
                     "Add Tables",
@@ -1292,46 +1795,103 @@ class _ViewResercationsState extends State<ViewResercations> {
       builder: (context, state) {
         // print("discount stattt$state");
         if (state is DiscountDone) {
-          return Wrap(
-            direction: Axis.horizontal,
-            children: List.generate(state.discounts.length, (index) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (index == 0)
-                    Row(
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: TextEditingController.fromValue(TextEditingValue(
+                    text: billupdateRequest.data.flatDiscount?.toString() ?? "",
+                    selection: TextSelection.fromPosition(
+                      TextPosition(
+                          offset: (billupdateRequest.data.taxGst.toString())
+                              .length),
+                    ),
+                  )),
+                  onChanged: (value) {
+                    billupdateRequest.data.flatDiscount = value;
+                    setState(() {});
+                  },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Cannot be empty";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    suffixIcon: Container(
+                        decoration: const BoxDecoration(
+                            border: Border(
+                          left: BorderSide(
+                            color: Colors.grey,
+                            width: 1,
+                          ),
+                        )),
+                        child: billupdateRequest.data.paymentType == "fixed"
+                            ? const Icon(Icons.currency_rupee)
+                            : const Icon(Icons.percent)),
+                    labelText: "Discount",
+                    fillColor: Colors.white,
+                    contentPadding:
+                        const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                      borderSide: BorderSide(
+                        color: HexColor("#d4ac2c"),
+                      ),
+                    ),
+                    //fillColor: Colors.green
+                  ),
+                )
+                /*  Wrap(
+                  direction: Axis.horizontal,
+                  children: List.generate(state.discounts.length, (index) {
+                    return Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Radio(
-                            value: 0,
-                            groupValue: int.parse(
-                                billupdateRequest.data.flatDiscount ?? "0"),
-                            onChanged: (value) {
-                              billupdateRequest.data.flatDiscount =
-                                  value.toString();
-                              setState(() {});
-                            }),
-                        const TextWidget("No Discount"),
+                        if (index == 0)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Radio(
+                                  value: 0,
+                                  groupValue: int.tryParse(
+                                          billupdateRequest.data.flatDiscount ??
+                                              "0") ??
+                                      0,
+                                  onChanged: (value) {
+                                    billupdateRequest.data.flatDiscount =
+                                        value.toString();
+                                    setState(() {});
+                                  }),
+                              const TextWidget("No Discount"),
+                            ],
+                          ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Radio(
+                                value: state.discounts[index].discountValue,
+                                groupValue: int.tryParse(
+                                        billupdateRequest.data.flatDiscount ??
+                                            "0") ??
+                                    0,
+                                onChanged: (value) {
+                                  billupdateRequest.data.flatDiscount =
+                                      value.toString();
+                                  setState(() {});
+                                }),
+                            TextWidget(state.discounts[index].discountCode)
+                          ],
+                        ),
                       ],
-                    ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Radio(
-                          value: state.discounts[index].discountValue,
-                          groupValue: int.parse(
-                              billupdateRequest.data.flatDiscount ?? "0"),
-                          onChanged: (value) {
-                            billupdateRequest.data.flatDiscount =
-                                value.toString();
-                            setState(() {});
-                          }),
-                      TextWidget(state.discounts[index].discountCode)
-                    ],
-                  ),
-                ],
-              );
-            }),
+                    );
+                  }),
+                ), */
+              ],
+            ),
           );
         }
         if (state is DiscountLoad || state is BillpaymentInitial) {
@@ -1349,12 +1909,13 @@ class _ViewResercationsState extends State<ViewResercations> {
     return BlocBuilder<BillpaymentBloc, BillpaymentState>(
       buildWhen: (previous, current) {
         // print("stattt $previous-$current");
-        return current is ServiceLoad ||
+        return current is BillpaymentInitial ||
+            current is ServiceLoad ||
             current is ServiceError ||
             current is ServiceDone;
       },
       builder: (context, state) {
-        // print("service stattt$state");
+        print("service stattt$state");
         if (state is ServiceDone) {
           return Wrap(
             direction: Axis.horizontal,
@@ -1366,6 +1927,7 @@ class _ViewResercationsState extends State<ViewResercations> {
                       value: state.charges[index].percentage,
                       groupValue: billupdateRequest.data.serviceCharge,
                       onChanged: (value) {
+                        print(value);
                         billupdateRequest.data.serviceCharge = value;
                         setState(() {});
                       }),
@@ -1375,7 +1937,7 @@ class _ViewResercationsState extends State<ViewResercations> {
             }),
           );
         }
-        if (state is DiscountLoad || state is BillpaymentInitial) {
+        if (state is ServiceLoad || state is BillpaymentInitial) {
           return LinearProgressIndicator(
             minHeight: 4.0,
             color: HexColor("#d4ac2c"),
@@ -1417,7 +1979,7 @@ class _ViewResercationsState extends State<ViewResercations> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         const TextWidget(
-                          "Flavour : ",
+                          "Flavour   :  ",
                           fontweight: FontWeight.w500,
                         ),
                         TextWidget(
@@ -1435,7 +1997,7 @@ class _ViewResercationsState extends State<ViewResercations> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         const TextWidget(
-                          "Quantity : ",
+                          "Quantity :  ",
                           fontweight: FontWeight.w500,
                         ),
                         TextWidget(
@@ -1492,7 +2054,7 @@ class _ViewResercationsState extends State<ViewResercations> {
             return current is ReservationsLoad ||
                 current is ReservationNodata ||
                 current is ReservationDetailsDone ||
-                current is ReservationError;
+                current is ReservationsError;
           },
           builder: (context, state) {
             if (state is ReservationNodata) {
@@ -1764,7 +2326,8 @@ class _ViewResercationsState extends State<ViewResercations> {
                 TextFormField(
                   initialValue: heads,
                   onChanged: (value) {
-                    //  addrequest.guestfirstname = value;
+                    heads = value;
+                    setState(() {});
                   },
                   decoration: textfieldDecor("Occupancy"),
                 ),
@@ -1774,10 +2337,9 @@ class _ViewResercationsState extends State<ViewResercations> {
             actions: [
               button("Submit", () {
                 Navigator.pop(context);
-                addResevationBloc.add(Addreservation(
-                  addrequest,
-                  addGuest: true,
-                  id: widget.id["rId"].toString(),
+                addResevationBloc.add(UpdateGuestcount(
+                  heads,
+                  widget.id["rId"],
                 ));
               }, HexColor("#d4ac2c"), textcolor: Colors.black)
             ],
@@ -1786,6 +2348,8 @@ class _ViewResercationsState extends State<ViewResercations> {
       },
     );
   }
+
+  String selectedRoom = "";
 
   Container roomListwidget(ReservationDetailsDone state, int index) {
     return Container(
@@ -1818,16 +2382,113 @@ class _ViewResercationsState extends State<ViewResercations> {
               ),
             ],
           ),
-          Container(
-            decoration: BoxDecoration(
-                color: Colors.blue.shade100,
-                borderRadius: BorderRadius.circular(3),
-                border: Border.all(color: Colors.blue)),
-            padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.w),
-            child: const TextWidget(
-              "View Order",
-              fontweight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return StatefulBuilder(builder: (context, setstate) {
+                          return AlertDialog(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                TextWidget(
+                                  "Select table",
+                                  size: 22.sp,
+                                  fontweight: FontWeight.w500,
+                                ),
+                                GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Icon(Icons.close))
+                              ],
+                            ),
+                            content: Wrap(
+                                runSpacing: 5.w,
+                                spacing: 5.w,
+                                children: List.generate(
+                                    tableList.length,
+                                    (index) => GestureDetector(
+                                          onTap: () {
+                                            selectedRoom =
+                                                tableList[index].id.toString();
+                                            setstate(() {});
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(15.w),
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.black),
+                                                borderRadius:
+                                                    BorderRadius.circular(30.w),
+                                                color: selectedRoom ==
+                                                        tableList[index]
+                                                            .id
+                                                            .toString()
+                                                    ? HexColor("#d4ac2c")
+                                                    : Colors.white),
+                                            child: TextWidget(
+                                              tableList[index].name,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ))),
+                            actions: [
+                              button("Cancel", () {
+                                Navigator.pop(context);
+                                selectedRoom = "";
+                                setstate(() {});
+                              }, Colors.red),
+                              button("Swap", () {
+                                DialogWidget().dialogWidget(
+                                  context,
+                                  "Sure to confirm?",
+                                  () {
+                                    Navigator.pop(context);
+                                  },
+                                  () {
+                                    reservationBloc.add(SwapEvent(
+                                        reservId.toString(),
+                                        state.reservationList.reservation
+                                            .bookedTables[index].tableId
+                                            .toString(),
+                                        selectedRoom));
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  },
+                                );
+                              }, Colors.green)
+                            ],
+                          );
+                        });
+                      },
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: Icon(
+                      Icons.swap_horiz,
+                      size: 35.sp,
+                    ),
+                  )),
+              SizedBox(
+                width: 20.w,
+              ),
+              Container(
+                decoration: BoxDecoration(
+                    color: Colors.blue.shade100,
+                    borderRadius: BorderRadius.circular(3),
+                    border: Border.all(color: Colors.blue)),
+                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 3.w),
+                child: const TextWidget(
+                  "View Order",
+                  fontweight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -2501,7 +3162,7 @@ class _ViewResercationsState extends State<ViewResercations> {
               onTap: () {
                 state.reservationList.reservation.orders.first.itemOrders[index]
                     .itemQuantity = (state.reservationList.reservation.orders
-                            .first.itemOrders[index].itemQuantity) +
+                        .first.itemOrders[index].itemQuantity) +
                     1;
                 setState(() {});
               },
@@ -2516,5 +3177,147 @@ class _ViewResercationsState extends State<ViewResercations> {
         ],
       ),
     );
+  }
+
+  String selectedSplit = "0";
+  List splitDtas = [1, 2, 3, 4, 5];
+  userseDropdown(BuildContext context, List itemList,
+      {bool loading = false, bool error = false}) {
+    return SizedBox(
+      child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.w),
+              border: Border.all(color: Colors.grey)),
+          child: CustomDropdownButton(
+            width: MediaQuery.of(context).size.width * 0.26,
+            underline: const Divider(
+              color: Colors.transparent,
+            ),
+            hint: const TextWidget(
+              "",
+              color: Colors.grey,
+            ),
+            value: selectedSplit == "0" ? null : selectedSplit,
+            icon: error
+                ? Container(
+                    padding: EdgeInsets.all(8.w),
+                    width: 60.sp,
+                    height: 60.sp,
+                    child: Icon(
+                      Icons.error,
+                      size: 25.sp,
+                      color: Colors.red.shade900,
+                    ))
+                : loading
+                    ? Container(
+                        padding: EdgeInsets.all(14.w),
+                        width: 60.sp,
+                        height: 60.sp,
+                        child: const CircularProgressIndicator())
+                    : Container(
+                        padding: EdgeInsets.all(8.w),
+                        width: 60.sp,
+                        height: 60.sp,
+                        child: Icon(
+                          Icons.arrow_drop_down,
+                          size: 50.sp,
+                          color: HexColor("#135a92"),
+                        ),
+                      ),
+            onChanged: (value) {
+              selectedSplit = value.toString();
+              setState(() {});
+              /* reservationBloc.add(SplitEvent(
+                  reservId.toString(), payController.text.toString())); */
+            },
+            items: itemList.toList().map((item) {
+              return DropdownMenuItem(
+                value: item,
+                child: Text(
+                  item.toString(),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w400, color: Colors.black),
+                ),
+              );
+            }).toList(),
+          )),
+    );
+  }
+
+  List typeList = ["fixed", "percentage"];
+  typeDropdown(BuildContext context, List itemList,
+      {bool loading = false, bool error = false}) {
+    return SizedBox(
+      child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 19.w),
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.w),
+              border: Border.all(color: Colors.grey)),
+          child: CustomDropdownButton(
+            width: MediaQuery.of(context).size.width * 0.26,
+            underline: const Divider(
+              color: Colors.transparent,
+            ),
+            hint: const TextWidget(
+              "Select Type",
+              color: Colors.grey,
+            ),
+            value: billupdateRequest.data.paymentType != null
+                ? itemList
+                    .where((element) =>
+                        element == billupdateRequest.data.paymentType)
+                    .toList()
+                    .first
+                : null,
+            icon: error
+                ? Container(
+                    padding: EdgeInsets.all(8.w),
+                    width: 60.sp,
+                    height: 60.sp,
+                    child: Icon(
+                      Icons.error,
+                      size: 25.sp,
+                      color: Colors.red.shade900,
+                    ))
+                : loading
+                    ? Container(
+                        padding: EdgeInsets.all(14.w),
+                        width: 60.sp,
+                        height: 60.sp,
+                        child: const CircularProgressIndicator())
+                    : Container(
+                        padding: EdgeInsets.all(8.w),
+                        width: 60.sp,
+                        height: 60.sp,
+                        child: Icon(
+                          Icons.arrow_drop_down,
+                          size: 50.sp,
+                          color: HexColor("#135a92"),
+                        ),
+                      ),
+            onChanged: (value) {
+              billupdateRequest.data.paymentType = value.toString();
+              setState(() {});
+            },
+            items: itemList.toList().map((item) {
+              return DropdownMenuItem(
+                value: item,
+                child: Text(
+                  item,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w400, color: Colors.black),
+                ),
+              );
+            }).toList(),
+          )),
+    );
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
   }
 }

@@ -17,8 +17,8 @@ import '../widgets/search_bar.dart';
 import '../widgets/text_widget.dart';
 
 class AddReservation extends StatefulWidget {
-  final int? id;
-  const AddReservation({super.key, this.id});
+  final dynamic argue;
+  const AddReservation({super.key, this.argue});
 
   @override
   State<AddReservation> createState() => _AddReservationState();
@@ -44,8 +44,13 @@ class _AddReservationState extends State<AddReservation> {
     addResevationBloc = BlocProvider.of<AddResevationBloc>(context)
       ..stream.listen((event) {
         if (event is AddReservationDone) {
-          navigatorKey.currentState?.pushReplacementNamed("/viewReservation",
-              arguments: {"rId": widget.id});
+          if (widget.argue["fromList"] ?? false) {
+            Navigator.of(context).pushNamedAndRemoveUntil(
+                '/home', arguments: 2, (Route<dynamic> route) => false);
+          } else {
+            navigatorKey.currentState?.pushReplacementNamed("/viewReservation",
+                arguments: {"rId": widget.argue["id"]});
+          }
         } else if (event is AddReservationError) {}
       });
     startDate.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -64,40 +69,33 @@ class _AddReservationState extends State<AddReservation> {
       resizeToAvoidBottomInset: true,
       bottomSheet: BlocBuilder<AvailableRoomsBloc, AvailableRoomsState>(
         builder: (context, state) {
-          return (state is AvailableRoomsDone &&
-                  (addReservRequest.selectedTables?.isNotEmpty ?? false))
+          return (state is AvailableRoomsDone)
               ? Container(
                   decoration: BoxDecoration(
                       color: HexColor("#d4ac2c"),
                       borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(15),
                           topRight: Radius.circular(15))),
-                  padding:
-                      EdgeInsets.symmetric(vertical: 10.w, horizontal: 10.w),
+                  /*  padding:
+                      EdgeInsets.symmetric(vertical: 10.w, horizontal: 10.w), */
                   //  height: MediaQuery.of(context).size.height * 0.2,
 
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      //  if (widget.id != 0 && widget.id != null)
-                      /* Row(
-                        children: [
-                          const TextWidget("Total Room Price : "),
-                          TextWidget(
-                            "₹  ${addReservRequest.totalPayment}",
-                            fontweight: FontWeight.w600,
-                            size: 20.sp,
-                          ),
-                        ],
-                      ), */
-                      (widget.id != 0 && widget.id != null)
-                          ? Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10.w),
-                              child: TextButton(
-                                  style: TextButton.styleFrom(
-                                      backgroundColor: Colors.white),
-                                  onPressed: () {
-                                    /*   addReservRequest.totalPayment =
+                      (widget.argue != null &&
+                              widget.argue["id"] != 0 &&
+                              widget.argue["id"] != null)
+                          ? ((addReservRequest.selectedTables?.isNotEmpty ??
+                                  false)
+                              ? Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 10.w, vertical: 10.w),
+                                  child: TextButton(
+                                      style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white),
+                                      onPressed: () {
+                                        /*   addReservRequest.totalPayment =
                                         double.tryParse(addReservRequest
                                                     .roomsBooked
                                                     ?.toList()
@@ -112,22 +110,34 @@ class _AddReservationState extends State<AddReservation> {
                                                 }).toString() ??
                                                 "0.0")
                                             ?.toInt(); */
-                                    addResevationBloc.add(Updatereservation(
-                                        addReservRequest, widget.id ?? 0));
-                                  },
-                                  child: TextWidget(
-                                    "Save",
-                                    color: Colors.black,
-                                    size: 21.sp,
-                                    fontweight: FontWeight.w600,
-                                  )),
-                            )
+                                        addResevationBloc.add(Updatereservation(
+                                            addReservRequest,
+                                            widget.argue["id"] ?? 0));
+                                      },
+                                      child: TextWidget(
+                                        "Save",
+                                        color: Colors.black,
+                                        size: 21.sp,
+                                        fontweight: FontWeight.w600,
+                                      )),
+                                )
+                              : Container(
+                                  height: 0,
+                                ))
                           : Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10.w),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10.w, vertical: 10.w),
                               child: TextButton(
                                   style: TextButton.styleFrom(
                                       backgroundColor: Colors.white),
                                   onPressed: () {
+                                    var data =
+                                        "${addReservRequest.date}T${addReservRequest.time}:00Z";
+                                    print(data);
+                                    addReservRequest.startDate = data;
+                                    print(
+                                        "${addReservRequest.toJson()}-------");
+
                                     addReservRequest.totalPayment = 0;
                                     addReservRequest.balanceAmount ??=
                                         addReservRequest.totalPayment;

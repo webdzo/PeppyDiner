@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:hotelpro_mobile/models/billpayment_model.dart';
 import 'package:hotelpro_mobile/models/billupdate_request.dart';
 import 'package:hotelpro_mobile/models/discount_model.dart';
+import 'package:hotelpro_mobile/models/paymentmode_model.dart';
 import 'package:hotelpro_mobile/models/payments_model.dart';
 import 'package:hotelpro_mobile/models/servicecharge_model.dart';
 import 'package:hotelpro_mobile/repository/billpayment_repo.dart';
@@ -88,6 +89,17 @@ class BillpaymentBloc extends Bloc<BillpaymentEvent, BillpaymentState> {
         emit(UpdateDone());
       } catch (e) {
         emit(UpdateError());
+      }
+    });
+
+    on<FetchPayModes>((event, emit) async {
+      emit(PaymodeLoad());
+      try {
+        final contacts = await BillRepo().modes();
+
+        emit(PaymodeDone(contacts));
+      } catch (e) {
+        emit(PaymodeError());
       }
     });
   }

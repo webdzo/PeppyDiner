@@ -13,7 +13,6 @@ import '../main_qa.dart';
 class ApiBaseHelper {
   Future<http.Response> postMethod(String url, String request,
       {bool isMultipart = false}) async {
-   
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token") ?? "";
 
@@ -38,9 +37,10 @@ class ApiBaseHelper {
     String url,
     String request,
   ) async {
+    print(request);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token") ?? "";
-   
+    print(Uri.parse("${BaseUrl.appBaseurl}$url"));
     var response = await http.put(
       Uri.parse("${BaseUrl.appBaseurl}$url"),
       headers: {"x-access-token": token, "Content-Type": 'application/json'},
@@ -68,6 +68,8 @@ class ApiBaseHelper {
   }
 
   void handleResponse(http.Response response) {
+    print(response.request);
+    print(response.body);
     if (response.statusCode != 200) {
       logError(response.request.toString(), response.body);
 

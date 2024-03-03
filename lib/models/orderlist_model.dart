@@ -29,7 +29,7 @@ class OrderlistModel {
   OrderlistModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     orderNo = json['order_no'];
-    tableId = json['table_id'];
+    tableId = json['table_id'] ?? 0;
     diningType = json['dining_type'];
     deliveryPartner = json['delivery_partner'] ?? "";
     isDraft = json['is_draft'];
@@ -82,6 +82,8 @@ class ItemOrders {
   late final String createdAt;
   late final String updatedAt;
   late final int orderId;
+  late final bool completed;
+  late final bool rejected;
 
   ItemOrders.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -93,6 +95,8 @@ class ItemOrders {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     orderId = json['orderId'];
+    completed = json['completed'] ?? false;
+    rejected = json['rejected'] ?? false;
   }
 
   Map<String, dynamic> toJson() {

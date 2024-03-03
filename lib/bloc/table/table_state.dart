@@ -7,9 +7,11 @@ class TableInitial extends TableState {}
 class TableLoad extends TableState {}
 
 class TableDone extends TableState {
-  final List<TableModel> tables;
+  List<TableModel> tables = [];
 
-  TableDone(this.tables);
+  List<TableModel> filterTables = [];
+
+  TableDone();
 }
 
 class TableError extends TableState {}

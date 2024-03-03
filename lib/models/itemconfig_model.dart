@@ -33,11 +33,11 @@ class ItemConfigModel {
   ItemConfigModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
-    price = json['price'];
+    price = json['price'] ?? "";
     expectedTime = json['expectedTime'] ?? "";
-    enabled = json['enabled'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    enabled = json['enabled'] ?? 0;
+    createdAt = json['created_at'] ?? "";
+    updatedAt = json['updated_at'] ?? "";
     itemCategoryId = json['item_category_id'];
     type = json['type'] ?? "";
     description = json['description'] ?? "";

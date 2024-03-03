@@ -61,7 +61,6 @@ class _StepperScreenState extends State<StepperScreen> {
         }
 
         if (bottomIndex == 3) {
-          tableBloc.add(FetchLeveltable(selectedTime ?? "", 1000));
           // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           Future.delayed(const Duration(seconds: 1), () {
             if (_scrollController.positions.isNotEmpty) {
@@ -125,6 +124,7 @@ class _StepperScreenState extends State<StepperScreen> {
     );
   }
 
+  int selectedSpace = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -155,6 +155,11 @@ class _StepperScreenState extends State<StepperScreen> {
           },
           builder: (context, state) {
             if (state is SpaceDone) {
+              if (selectedSpace == 0) {
+                tableBloc.add(FetchLeveltable(selectedTime ?? "",
+                    state.spaces.isNotEmpty ? state.spaces.first.id : 0));
+              }
+              //
               return DefaultTabController(
                   length: state.spaces.length,
                   initialIndex: 0,
@@ -164,6 +169,8 @@ class _StepperScreenState extends State<StepperScreen> {
                       toolbarHeight: 5,
                       bottom: TabBar(
                           onTap: (value) {
+                            selectedSpace = state.spaces[value].id;
+                            setState(() {});
                             tableBloc.add(FetchLeveltable(
                                 selectedTime ?? "", state.spaces[value].id));
                             Future.delayed(const Duration(seconds: 1), () {
@@ -243,7 +250,10 @@ class _StepperScreenState extends State<StepperScreen> {
                     margin: EdgeInsets.all(10.w),
                     padding: EdgeInsets.all(20.w),
                     decoration: BoxDecoration(
-                        color: HexColor("#d4ac2c"), shape: BoxShape.circle),
+                        color: state.tables.bookedTables[i].status != "AL"
+                            ? HexColor("#d4ac2c")
+                            : Colors.red.shade900,
+                        shape: BoxShape.circle),
                     child: TextWidget(state.tables.bookedTables[i].name),
                   );
                 }),

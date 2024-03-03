@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:hotelpro_mobile/models/cakes_model.dart';
+import 'package:hotelpro_mobile/models/occasion_model.dart';
+import 'package:hotelpro_mobile/models/packages_model.dart';
+import 'package:hotelpro_mobile/models/user_model.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 
 import '../../bloc/addReservation/add_reservation_bloc.dart';
@@ -54,6 +57,7 @@ class _ReservationDetailsState extends State<ReservationDetails> {
         }
       });
     addResevationBloc.add(GetcakesEvent());
+    addResevationBloc.add(GetusersEvent());
     addResevationBloc.add(GetoccasionsEvent());
     addResevationBloc.add(GetpackagesEvent());
     addReservRequest = widget.addReservRequest;
@@ -365,6 +369,7 @@ class _ReservationDetailsState extends State<ReservationDetails> {
                   ],
                 ),
               ), */
+              agentWidget(),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Row(
@@ -410,12 +415,6 @@ class _ReservationDetailsState extends State<ReservationDetails> {
                           setState(() {});
                         },
                         autovalidateMode: AutovalidateMode.onUserInteraction,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Cannot be empty";
-                          }
-                          return null;
-                        },
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                               vertical: 0, horizontal: 5),
@@ -463,12 +462,6 @@ class _ReservationDetailsState extends State<ReservationDetails> {
                           setState(() {});
                         },
                         autovalidateMode: AutovalidateMode.onUserInteraction,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Cannot be empty";
-                          }
-                          return null;
-                        },
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
                               vertical: 0, horizontal: 5),
@@ -598,10 +591,8 @@ class _ReservationDetailsState extends State<ReservationDetails> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Container(
+                    /* Container(
                       alignment: Alignment.center,
-                      height: 70.w,
-                      width: MediaQuery.of(context).size.width * 0.45,
                       padding: const EdgeInsets.symmetric(horizontal: 7),
                       decoration: BoxDecoration(
                         border: Border.all(
@@ -618,7 +609,13 @@ class _ReservationDetailsState extends State<ReservationDetails> {
                         ),
                         width: MediaQuery.of(context).size.width * 0.4,
                         underline: Container(),
-                        // value: cakeList.first,
+                        value: (cakeList.isNotEmpty)
+                            ? cakeList
+                                .where((element) =>
+                                    element.id == addReservRequest.cake)
+                                .toList()
+                                .first
+                            : null,
                         icon: const Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -657,6 +654,20 @@ class _ReservationDetailsState extends State<ReservationDetails> {
                           );
                         }).toList(),
                       ),
+                    ), */
+                    BlocBuilder<AddResevationBloc, AddReservationState>(
+                      buildWhen: (previous, current) {
+                        return current is CakesDone ||
+                            current is CakesError ||
+                            current is CakesLoad;
+                      },
+                      builder: (context, state) {
+                        print(state);
+                        return cakeFlavour(
+                            context, state is CakesDone ? state.cakes : [],
+                            loading: state is CakesLoad,
+                            error: state is CakesError);
+                      },
                     ),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.45,
@@ -707,70 +718,9 @@ class _ReservationDetailsState extends State<ReservationDetails> {
             current is OccasionLoad;
       },
       builder: (context, state) {
-        return Container(
-            height: 70.w,
-            width: MediaQuery.of(context).size.width * 0.45,
-            padding: const EdgeInsets.symmetric(horizontal: 7),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey,
-                width: 0.7,
-              ),
-              borderRadius: BorderRadius.circular(5.w),
-            ),
-            alignment: (state is OccasionLoad || state is OccasionError)
-                ? Alignment.centerRight
-                : Alignment.center,
-            child: state is OccasionLoad
-                ? SizedBox(
-                    height: 30.w,
-                    width: 30.w,
-                    child: const CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ))
-                : state is OccasionDone
-                    ? CustomDropdownButton(
-                        hint: TextWidget(
-                          "Occasion",
-                          color: Colors.black54,
-                          size: 20.sp,
-                        ),
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        underline: Container(),
-                        value: state.occasions.first,
-                        icon: const Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Icon(
-                              Icons.arrow_drop_down,
-                              color: Colors.black,
-                            ),
-                          ],
-                        ),
-                        dropdownColor: Colors.black,
-                        iconEnabledColor: Colors.black,
-                        iconDisabledColor: Colors.black,
-                        style: const TextStyle(color: Colors.black),
-                        onChanged: (value) {
-                          addReservRequest.occasion = value.id;
-                          setState(() {});
-                        },
-                        items: state.occasions.map((item) {
-                          return DropdownMenuItem(
-                            value: item,
-                            child: Text(
-                              item.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.copyWith(
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black),
-                            ),
-                          );
-                        }).toList(),
-                      )
-                    : const Icon(Icons.error));
+        return occasionDropdown(
+            context, state is OccasionDone ? state.occasions : [],
+            loading: state is OccasionLoad, error: state is OccasionError);
       },
     );
   }
@@ -783,70 +733,23 @@ class _ReservationDetailsState extends State<ReservationDetails> {
             current is PackagesLoad;
       },
       builder: (context, state) {
-        return Container(
-            height: 70.w,
-            width: MediaQuery.of(context).size.width * 0.45,
-            padding: const EdgeInsets.symmetric(horizontal: 7),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.grey,
-                width: 0.7,
-              ),
-              borderRadius: BorderRadius.circular(5.w),
-            ),
-            alignment: (state is PackagesLoad || state is PackagesError)
-                ? Alignment.centerRight
-                : Alignment.center,
-            child: state is PackagesLoad
-                ? SizedBox(
-                    height: 30.w,
-                    width: 30.w,
-                    child: const CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ))
-                : state is PackagesDone
-                    ? CustomDropdownButton(
-                        hint: TextWidget(
-                          "Package",
-                          color: Colors.black54,
-                          size: 20.sp,
-                        ),
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        underline: Container(),
-                        value: state.packages.first,
-                        icon: const Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Icon(
-                              Icons.arrow_drop_down,
-                              color: Colors.black,
-                            ),
-                          ],
-                        ),
-                        dropdownColor: Colors.black,
-                        iconEnabledColor: Colors.black,
-                        iconDisabledColor: Colors.black,
-                        style: const TextStyle(color: Colors.black),
-                        onChanged: (value) {
-                          addReservRequest.package = value.id;
-                          setState(() {});
-                        },
-                        items: state.packages.map((item) {
-                          return DropdownMenuItem(
-                            value: item,
-                            child: Text(
-                              item.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyLarge
-                                  ?.copyWith(
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black),
-                            ),
-                          );
-                        }).toList(),
-                      )
-                    : const Icon(Icons.error));
+        return packageDropdown(
+            context, state is PackagesDone ? state.packages : [],
+            loading: state is PackagesLoad, error: state is PackagesError);
+      },
+    );
+  }
+
+  BlocBuilder<AddResevationBloc, AddReservationState> agentWidget() {
+    return BlocBuilder<AddResevationBloc, AddReservationState>(
+      buildWhen: (previous, current) {
+        return current is UsersDone ||
+            current is UsersError ||
+            current is UsersLoad;
+      },
+      builder: (context, state) {
+        return userseDropdown(context, state is UsersDone ? state.users : [],
+            loading: state is UsersLoad, error: state is UsersError);
       },
     );
   }
@@ -866,6 +769,277 @@ class _ReservationDetailsState extends State<ReservationDetails> {
   }
 
   bool showerror = false;
+
+  Container cakeFlavour(BuildContext context, List<CakesModel> itemList,
+      {bool loading = false, bool error = false}) {
+    return Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10.w),
+            border: Border.all(color: Colors.grey)),
+        child: CustomDropdownButton(
+          underline: const Divider(
+            color: Colors.transparent,
+          ),
+          hint: const TextWidget(
+            "Select Flavour",
+            color: Colors.grey,
+          ),
+          value: (addReservRequest.cake != null && itemList.isNotEmpty)
+              ? itemList
+                  .where((element) => element.id == addReservRequest.cake)
+                  .toList()
+                  .first
+              : null,
+          icon: error
+              ? Container(
+                  padding: EdgeInsets.all(8.w),
+                  width: 60.sp,
+                  height: 60.sp,
+                  child: Icon(
+                    Icons.error,
+                    size: 25.sp,
+                    color: Colors.red.shade900,
+                  ))
+              : loading
+                  ? Container(
+                      padding: EdgeInsets.all(14.w),
+                      width: 60.sp,
+                      height: 60.sp,
+                      child: const CircularProgressIndicator())
+                  : Container(
+                      padding: EdgeInsets.all(8.w),
+                      width: 60.sp,
+                      height: 60.sp,
+                      child: Icon(
+                        Icons.arrow_drop_down,
+                        size: 50.sp,
+                        color: HexColor("#135a92"),
+                      ),
+                    ),
+          onChanged: (value) {
+            addReservRequest.cake = value.id;
+
+            cakePrice = (double.tryParse(value.price) ?? 0.0);
+            totalCalc();
+
+            print(cakePrice);
+
+            setState(() {});
+          },
+          items: itemList.toList().map((item) {
+            return DropdownMenuItem(
+              value: item,
+              child: Text(
+                item.name,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w400, color: Colors.black),
+              ),
+            );
+          }).toList(),
+        ));
+  }
+
+  packageDropdown(BuildContext context, List<PackagesModel> itemList,
+      {bool loading = false, bool error = false}) {
+    return SizedBox(
+      child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.w),
+              border: Border.all(color: Colors.grey)),
+          child: CustomDropdownButton(
+            width: MediaQuery.of(context).size.width * 0.26,
+            underline: const Divider(
+              color: Colors.transparent,
+            ),
+            hint: const TextWidget(
+              "Select package",
+              color: Colors.grey,
+            ),
+            value: (addReservRequest.package != null && itemList.isNotEmpty)
+                ? itemList
+                    .where((element) => element.id == addReservRequest.package)
+                    .toList()
+                    .first
+                : null,
+            icon: error
+                ? Container(
+                    padding: EdgeInsets.all(8.w),
+                    width: 60.sp,
+                    height: 60.sp,
+                    child: Icon(
+                      Icons.error,
+                      size: 25.sp,
+                      color: Colors.red.shade900,
+                    ))
+                : loading
+                    ? Container(
+                        padding: EdgeInsets.all(14.w),
+                        width: 60.sp,
+                        height: 60.sp,
+                        child: const CircularProgressIndicator())
+                    : Container(
+                        padding: EdgeInsets.all(8.w),
+                        width: 60.sp,
+                        height: 60.sp,
+                        child: Icon(
+                          Icons.arrow_drop_down,
+                          size: 50.sp,
+                          color: HexColor("#135a92"),
+                        ),
+                      ),
+            onChanged: (value) {
+              addReservRequest.package = value.id;
+              setState(() {});
+            },
+            items: itemList.toList().map((item) {
+              return DropdownMenuItem(
+                value: item,
+                child: Text(
+                  item.name,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w400, color: Colors.black),
+                ),
+              );
+            }).toList(),
+          )),
+    );
+  }
+
+  userseDropdown(BuildContext context, List<UsersModel> itemList,
+      {bool loading = false, bool error = false}) {
+    return SizedBox(
+      child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.w),
+              border: Border.all(color: Colors.grey)),
+          child: CustomDropdownButton(
+            width: MediaQuery.of(context).size.width * 0.26,
+            underline: const Divider(
+              color: Colors.transparent,
+            ),
+            hint: const TextWidget(
+              "Select agent",
+              color: Colors.grey,
+            ),
+            value: (addReservRequest.agentId != null && itemList.isNotEmpty)
+                ? itemList
+                    .where((element) => element.id == addReservRequest.agentId)
+                    .toList()
+                    .first
+                : null,
+            icon: error
+                ? Container(
+                    padding: EdgeInsets.all(8.w),
+                    width: 60.sp,
+                    height: 60.sp,
+                    child: Icon(
+                      Icons.error,
+                      size: 25.sp,
+                      color: Colors.red.shade900,
+                    ))
+                : loading
+                    ? Container(
+                        padding: EdgeInsets.all(14.w),
+                        width: 60.sp,
+                        height: 60.sp,
+                        child: const CircularProgressIndicator())
+                    : Container(
+                        padding: EdgeInsets.all(8.w),
+                        width: 60.sp,
+                        height: 60.sp,
+                        child: Icon(
+                          Icons.arrow_drop_down,
+                          size: 50.sp,
+                          color: HexColor("#135a92"),
+                        ),
+                      ),
+            onChanged: (value) {
+              addReservRequest.agentId = value.id;
+              setState(() {});
+            },
+            items: itemList.toList().map((item) {
+              return DropdownMenuItem(
+                value: item,
+                child: Text(
+                  item.username,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w400, color: Colors.black),
+                ),
+              );
+            }).toList(),
+          )),
+    );
+  }
+
+  occasionDropdown(BuildContext context, List<OccasionsModel> itemList,
+      {bool loading = false, bool error = false}) {
+    return SizedBox(
+      child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10.w),
+              border: Border.all(color: Colors.grey)),
+          child: CustomDropdownButton(
+            width: MediaQuery.of(context).size.width * 0.26,
+            underline: const Divider(
+              color: Colors.transparent,
+            ),
+            hint: const TextWidget(
+              "Select occasion",
+              color: Colors.grey,
+            ),
+            value: (addReservRequest.occasion != null && itemList.isNotEmpty)
+                ? itemList
+                    .where((element) => element.id == addReservRequest.occasion)
+                    .toList()
+                    .first
+                : null,
+            icon: error
+                ? Container(
+                    padding: EdgeInsets.all(8.w),
+                    width: 60.sp,
+                    height: 60.sp,
+                    child: Icon(
+                      Icons.error,
+                      size: 25.sp,
+                      color: Colors.red.shade900,
+                    ))
+                : loading
+                    ? Container(
+                        padding: EdgeInsets.all(14.w),
+                        width: 60.sp,
+                        height: 60.sp,
+                        child: const CircularProgressIndicator())
+                    : Container(
+                        padding: EdgeInsets.all(8.w),
+                        width: 60.sp,
+                        height: 60.sp,
+                        child: Icon(
+                          Icons.arrow_drop_down,
+                          size: 50.sp,
+                          color: HexColor("#135a92"),
+                        ),
+                      ),
+            onChanged: (value) {
+              addReservRequest.occasion = value.id;
+              setState(() {});
+            },
+            items: itemList.toList().map((item) {
+              return DropdownMenuItem(
+                value: item,
+                child: Text(
+                  item.name,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w400, color: Colors.black),
+                ),
+              );
+            }).toList(),
+          )),
+    );
+  }
 
   //Use the above widget where you want the radio button
 }

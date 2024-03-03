@@ -35,3 +35,13 @@ class GetpackagesEvent extends AddreservationEvent {
 class GetcakesEvent extends AddreservationEvent {
   GetcakesEvent();
 }
+
+class GetusersEvent extends AddreservationEvent {
+  GetusersEvent();
+}
+
+class UpdateGuestcount extends AddreservationEvent {
+  final String count;
+  final int id;
+  UpdateGuestcount(this.count, this.id);
+}

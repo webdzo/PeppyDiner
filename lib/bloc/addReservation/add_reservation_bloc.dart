@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hotelpro_mobile/models/cakes_model.dart';
 import 'package:hotelpro_mobile/models/occasion_model.dart';
+import 'package:hotelpro_mobile/models/user_model.dart';
 
 import '../../models/packages_model.dart';
 import '../../repository/addResrvation_repo.dart';
@@ -30,6 +31,19 @@ class AddResevationBloc extends Bloc<AddreservationEvent, AddReservationState> {
       try {
         final response = await AddReservationRepository()
             .updateGuest(event.request, event.id);
+
+        emit(AddReservationDone());
+      } catch (e) {
+        emit(AddReservationError());
+        throw ("error");
+      }
+    });
+
+     on<UpdateGuestcount>((event, emit) async {
+      emit(AddReservationLoad());
+      try {
+        final response = await AddReservationRepository()
+            .updateGuestcount(event.count, event.id);
 
         emit(AddReservationDone());
       } catch (e) {
@@ -85,6 +99,18 @@ class AddResevationBloc extends Bloc<AddreservationEvent, AddReservationState> {
         emit(CakesDone(resp));
       } catch (e) {
         emit(CakesError());
+        throw ("error");
+      }
+    });
+
+    on<GetusersEvent>((event, emit) async {
+      emit(UsersLoad());
+      try {
+        List<UsersModel> resp = await AddReservationRepository().getUsers();
+
+        emit(UsersDone(resp));
+      } catch (e) {
+        emit(UsersError());
         throw ("error");
       }
     });

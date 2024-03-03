@@ -10,8 +10,9 @@ import '../resources/api_base_helper.dart';
 
 class ItemsRepository {
   Future<List<ItemsModel>> data(String id) async {
-    var response = await ApiBaseHelper().getMethod("/items/categories/$id");
-
+    var response = await ApiBaseHelper()
+        .getMethod(id == "All" ? "/items" : "/items/categories/$id");
+    print(response.body);
     List<ItemsModel> itemsResponse = List.from(
         json.decode(response.body).map((e) => ItemsModel.fromJson(e)));
 
@@ -33,15 +34,15 @@ class ItemsRepository {
     return response;
   }
 
-   Future<Response> edit(EditItemconfigRequest request,int id) async {
-    var response = await ApiBaseHelper().putMethod(
-        "/items/$id", json.encode({"data": request.toJson() }));
+  Future<Response> edit(EditItemconfigRequest request, int id) async {
+    var response = await ApiBaseHelper()
+        .putMethod("/items/$id", json.encode({"data": request.toJson()}));
     return response;
   }
 
-   Future<Response> delete(int id) async {
-    var response = await ApiBaseHelper().deleteMethod(
-        "/items/$id",jsonEncode({}));
+  Future<Response> delete(int id) async {
+    var response =
+        await ApiBaseHelper().deleteMethod("/items/$id", jsonEncode({}));
     return response;
   }
 }

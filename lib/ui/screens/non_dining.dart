@@ -67,7 +67,7 @@ class _NondiningState extends State<Nondining> {
               padding: EdgeInsets.only(right: 10.w),
               child: GestureDetector(
                 onTap: () {
-                  navigatorKey.currentState!.pushNamed("/itemconfig");
+                  navigatorKey.currentState!.pushNamed("/profile");
                 },
                 child: const Icon(
                   Icons.settings,
@@ -206,6 +206,7 @@ class _NondiningState extends State<Nondining> {
                       ),
                     ),
                     body: TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
                       children: [
                         Padding(
                           padding: EdgeInsets.only(top: 10.w),

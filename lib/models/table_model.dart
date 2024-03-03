@@ -49,6 +49,7 @@ class TableModel {
       required this.created,
       required this.createdTime,
       required this.orders,
+      required this.dateTime,
       this.tableSelected = const []});
   late final int reservationId;
   late final String startTime;
@@ -69,6 +70,7 @@ class TableModel {
   late final String uniqueId;
   late final String diningType;
   late final int id;
+  late final String dateTime;
   late final List<Orders> orders;
 
   TableModel.fromJson(Map<String, dynamic> json) {
@@ -81,7 +83,7 @@ class TableModel {
                 .format(DateTime.parse(json['start_time']))
             : json['start_time'])
         : "";
-    endTime = json['end_time'];
+    endTime = json['end_time'] ?? "";
     identifier = json['identifier'];
     guestName = json['guest_name'] ?? "";
     contactNo = json['contact_no'] ?? "";
@@ -90,7 +92,7 @@ class TableModel {
     status = json['status'] ?? "";
     pax = json['pax'] ?? "-";
     paymentStatus = json['payment_status'] ?? "";
-    balanceAmount = json['balance_amount'] ?? "";
+    balanceAmount = json['balance_amount']?.toString() ?? "";
     completed = json['completed'] ?? false;
     tableSelected = List.from(json['tables_selected'] ?? [])
         .map((e) => TableSelected.fromJson(e))
@@ -107,7 +109,7 @@ class TableModel {
             : "-")
         : "";
     diningType = json["dining_type"] ?? "";
-
+    dateTime = json['created_at'] ?? "";
     orders = json['orders'] != null
         ? List.from(json['orders']).map((e) => Orders.fromJson(e)).toList()
         : [];
@@ -143,7 +145,6 @@ class TableSelected {
       {required this.id,
       required this.startTime,
       required this.endTime,
-      required this.reservationId,
       required this.tableId,
       required this.waiterId,
       required this.spaceId,
@@ -155,7 +156,7 @@ class TableSelected {
   late final int id;
   late final String startTime;
   late final String endTime;
-  late final int reservationId;
+
   late final int tableId;
   late final int waiterId;
   late final int spaceId;
@@ -167,9 +168,9 @@ class TableSelected {
 
   TableSelected.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    startTime = json['start_time'];
-    endTime = json['end_time'];
-    reservationId = json['reservation_id'];
+    startTime = json['start_time'] ?? "";
+    endTime = json['end_time'] ?? "";
+
     tableId = json['table_id'];
     waiterId = json["waiter_id"] ?? 0;
     spaceId = json['space_id'];
@@ -185,7 +186,7 @@ class TableSelected {
     datas['id'] = id;
     datas['start_time'] = startTime;
     datas['end_time'] = endTime;
-    datas['reservation_id'] = reservationId;
+
     datas['table_id'] = tableId;
     datas['waiter_id'] = waiterId;
     datas['space_id'] = spaceId;

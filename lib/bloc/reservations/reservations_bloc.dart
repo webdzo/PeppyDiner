@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hotelpro_mobile/models/reservation_details_model.dart';
+import 'package:hotelpro_mobile/models/updatemode_request.dart';
 import 'package:hotelpro_mobile/repository/reservation_repo.dart';
 
 import '../../repository/addResrvation_repo.dart';
@@ -32,7 +33,7 @@ class ReservationsBloc extends Bloc<ReservationsEvent, ReservationsState> {
         if (e == "204") {
           emit(ReservationNodata());
         } else {
-          emit(ReservationError());
+          emit(ReservationsError(e.toString()));
           throw ("error");
         }
       }
@@ -110,6 +111,57 @@ class ReservationsBloc extends Bloc<ReservationsEvent, ReservationsState> {
         emit(PaynowDone());
       } catch (e) {
         emit(PaynowError());
+        throw ("error");
+      }
+    });
+
+    on<SplitEvent>((event, emit) async {
+      emit(SplitLoad());
+      try {
+        final response =
+            await AddReservationRepository().split(event.id, event.splitdata);
+
+        emit(SplitDone());
+      } catch (e) {
+        emit(SplitError());
+        throw ("error");
+      }
+    });
+
+    on<PrintEvent>((event, emit) async {
+      emit(PrintLoad());
+      try {
+        final response = await AddReservationRepository().printBill(event.id);
+
+        emit(PrintDone());
+      } catch (e) {
+        emit(PrintError());
+        throw ("error");
+      }
+    });
+
+    on<MarkUpdate>((event, emit) async {
+      emit(MarkLoad());
+      try {
+        final response =
+            await AddReservationRepository().mark(event.id, event.status);
+
+        emit(MarkDone());
+      } catch (e) {
+        emit(MarkError());
+        throw ("error");
+      }
+    });
+
+    on<SwapEvent>((event, emit) async {
+      emit(SwapLoad());
+      try {
+        final response = await AddReservationRepository()
+            .swap(event.id, event.oldid, event.newid);
+
+        emit(SwapDone());
+      } catch (e) {
+        emit(SwapError());
         throw ("error");
       }
     });

@@ -6,11 +6,15 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:hotelpro_mobile/bloc/checkout/checkout_bloc.dart';
+import 'package:hotelpro_mobile/bloc/items/items_bloc.dart';
 import 'package:hotelpro_mobile/bloc/orders/orders_bloc.dart';
 import 'package:hotelpro_mobile/bloc/reservations/reservations_bloc.dart';
 import 'package:hotelpro_mobile/models/addOrders_request.dart';
+import 'package:hotelpro_mobile/models/items_model.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/screens/details.dart';
+import 'package:hotelpro_mobile/ui/widgets/dialog_widget.dart';
+import 'package:hotelpro_mobile/ui/widgets/search_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../bloc/category/category_bloc.dart';
@@ -33,12 +37,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
   ReservationsBloc reservationsBloc = ReservationsBloc();
   late CheckoutBloc checkoutBloc;
 
-  String? selectedCategory;
   late OrdersBloc ordersBloc;
   AddOrdersRequest addOrdersRequest = AddOrdersRequest();
   TextEditingController notesController = TextEditingController();
+  late ItemsBloc itemsBloc;
   @override
   void initState() {
+    itemsBloc = BlocProvider.of<ItemsBloc>(context);
+    selectedCategory = "All";
+    itemsBloc.add(FetchItems(selectedCategory));
     getUsername();
     checkoutBloc = BlocProvider.of<CheckoutBloc>(context);
     categoryBloc = BlocProvider.of<CategoryBloc>(context);
@@ -56,11 +63,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
             EasyLoading.showError('Failed with Error');
           }
           if (event is AddOrdersDone) {
+            print(widget.roomDetails);
             EasyLoading.showSuccess('Success!');
 
             checkoutBloc.checkoutDone.cartItems = [];
             Navigator.pop(context);
-            if (widget.roomDetails["reservId"] == "0") {
+            if (widget.roomDetails["reservId"] == "0" ||
+                widget.roomDetails["reservId"] == 0) {
               navigatorKey.currentState
                   ?.pushReplacementNamed("/home", arguments: 1);
             } else if (widget.roomDetails["tableId"] == "") {
@@ -75,7 +84,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               navigatorKey.currentState?.pushNamedAndRemoveUntil(
                 "/details",
                 arguments: {
-                  "rId": int.parse(widget.roomDetails["reservId"]),
+                  "rId": int.parse(widget.roomDetails["reservId"].toString()),
                   "tId":
                       int.tryParse(widget.roomDetails["tableId"].toString()) ??
                           0,
@@ -105,129 +114,558 @@ class _CategoryScreenState extends State<CategoryScreen> {
     setState(() {});
   }
 
+  String selectedCategory = "";
+
+  ValueNotifier searchString = ValueNotifier("");
+  String filter = "";
+  TextEditingController searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: bottomCurvewidget(checkoutBloc.checkoutDone.cartItems
-          .fold("0", (previousValue, element) {
-        return (double.parse(previousValue) +
-                ((element.quantity ?? 0) *
-                    double.parse(element.price ?? "0.0")))
-            .toString();
-      })),
-      appBar: AppBar(
-        leading: Padding(
-          padding: EdgeInsets.all(5.w),
-          child: Image.asset("assets/appLogo.png"),
-        ),
-        backgroundColor: HexColor("#d4ac2c"),
-        elevation: 1,
-        title: TextWidget(
-          "Hi ${username != "" ? username.capitalize() : username},",
-          style: GoogleFonts.belleza(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 33.w,
+    return WillPopScope(
+      onWillPop: () async {
+        print(addOrdersRequest.data?.orders);
+        if (checkoutBloc.checkoutDone.cartItems.isNotEmpty) {
+          DialogWidget()
+              .dialogWidget(context, "Are you sure you want to go back?", () {
+            Navigator.pop(context);
+          }, () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+          }, notefield: const TextWidget("The items added will be discarded."));
+        } else {
+          Navigator.pop(context);
+        }
+
+        return false;
+      },
+      child: Scaffold(
+        bottomNavigationBar: bottomCurvewidget(checkoutBloc
+            .checkoutDone.cartItems
+            .fold("0", (previousValue, element) {
+          return (double.parse(previousValue) +
+                  ((element.quantity ?? 0) *
+                      double.parse(element.price ?? "0.0")))
+              .toString();
+        })),
+        appBar: AppBar(
+          leading: Padding(
+            padding: EdgeInsets.all(5.w),
+            child: Image.asset("assets/appLogo.png"),
           ),
-        ),
-        bottom: PreferredSize(
-            preferredSize: Size.fromHeight(
-                (widget.roomDetails["tableId"] != "" &&
-                        widget.roomDetails["tableId"] != null)
-                    ? 80.w
-                    : 40.w),
-            child: Column(
-              children: [
-                if (widget.roomDetails["tableId"] != "" &&
-                    widget.roomDetails["tableId"] != null)
-                  const Divider(
-                    height: 1,
-                    thickness: 0.5,
-                    color: Colors.grey,
-                  ),
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 5.w, horizontal: 5.w),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        if (widget.roomDetails["tableId"] != "")
-                          Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(6.w),
-                                child: Row(children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                        border:
-                                            Border.all(color: Colors.black38),
-                                        shape: BoxShape.circle),
-                                    child: const Icon(
-                                      Icons.restaurant_menu_rounded,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 7.w,
-                                  ),
-                                  TextWidget(
-                                    widget.roomDetails["tableId"].toString(),
-                                    color: Colors.black54,
-                                  )
-                                ]),
-                              ),
-                            ],
-                          ),
-                      ]),
-                ),
-              ],
-            )),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(15.w),
-                  child: TextWidget(
-                    "Categories",
-                    size: 22.sp,
-                    fontweight: FontWeight.bold,
-                  ),
-                ),
-                const RoundedBackButton()
-              ],
+          backgroundColor: HexColor("#d4ac2c"),
+          elevation: 1,
+          title: TextWidget(
+            "Hi ${username != "" ? username.capitalize() : username},",
+            style: GoogleFonts.belleza(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 33.w,
             ),
           ),
-          BlocBuilder<CategoryBloc, CategoryState>(
-            buildWhen: (previous, current) {
-              return current is SubCategoryLoad ||
-                  current is SubCategoryDone ||
-                  current is SubCategoryError;
-            },
-            builder: (context, state) {
-              if (state is SubCategoryLoad) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (state is SubCategoryDone) {
-                return Expanded(
-                    child: SingleChildScrollView(
-                  child: Wrap(
-                    children: List.generate(state.subcategory.length,
-                        (index) => gridWidget(state, index)),
+          bottom: PreferredSize(
+              preferredSize: Size.fromHeight(
+                  (widget.roomDetails["tableId"] != "" &&
+                          widget.roomDetails["tableId"] != null)
+                      ? 80.w
+                      : 40.w),
+              child: Column(
+                children: [
+                  if (widget.roomDetails["tableId"] != "" &&
+                      widget.roomDetails["tableId"] != null)
+                    const Divider(
+                      height: 1,
+                      thickness: 0.5,
+                      color: Colors.grey,
+                    ),
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 5.w, horizontal: 5.w),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          if (widget.roomDetails["tableId"] != "")
+                            Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(6.w),
+                                  child: Row(children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: BoxDecoration(
+                                          border:
+                                              Border.all(color: Colors.black38),
+                                          shape: BoxShape.circle),
+                                      child: const Icon(
+                                        Icons.restaurant_menu_rounded,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 7.w,
+                                    ),
+                                    TextWidget(
+                                      widget.roomDetails["tableId"].toString(),
+                                      color: Colors.black54,
+                                    )
+                                  ]),
+                                ),
+                              ],
+                            ),
+                        ]),
                   ),
-                ));
-              }
+                ],
+              )),
+        ),
+        body: Column(
+          children: [
+            BlocBuilder<CategoryBloc, CategoryState>(
+              buildWhen: (previous, current) {
+                return current is SubCategoryLoad ||
+                    current is SubCategoryDone ||
+                    current is SubCategoryError;
+              },
+              builder: (context, state) {
+                if (state is SubCategoryLoad) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-              return const Center(child: TextWidget("No Data"));
-            },
-          ),
-        ],
+                if (state is SubCategoryDone) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.w),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            showModalBottomSheet(
+                                context: navigatorKey.currentContext!,
+                                builder: (context) {
+                                  return StatefulBuilder(
+                                      builder: (context, setstate) {
+                                    return Container(
+                                      child: SizedBox(
+                                        child: SingleChildScrollView(
+                                          child: Column(
+                                            children: [
+                                              Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 20.w,
+                                                    horizontal: 15.w),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      "Select Category",
+                                                      style: TextStyle(
+                                                          fontSize: 20.sp,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                    GestureDetector(
+                                                        onTap: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        child: const Icon(
+                                                            Icons.close))
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    bottom: 10.w),
+                                                child: Wrap(
+                                                    direction: Axis.horizontal,
+                                                    runSpacing: 5,
+                                                    crossAxisAlignment:
+                                                        WrapCrossAlignment
+                                                            .center,
+                                                    children: List.generate(
+                                                        state
+                                                            .subcategory.length,
+                                                        (index) => Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                if (index == 0)
+                                                                  GestureDetector(
+                                                                    onTap: () {
+                                                                      selectedCategory =
+                                                                          "All";
+                                                                      itemsBloc.add(
+                                                                          FetchItems(
+                                                                              selectedCategory));
+                                                                      setstate(
+                                                                          () {});
+                                                                    },
+                                                                    child:
+                                                                        Container(
+                                                                      decoration: BoxDecoration(
+                                                                          color: selectedCategory == "All"
+                                                                              ? HexColor("#d4ac2c")
+                                                                              : Colors.white,
+                                                                          border: Border.all(color: Colors.black)),
+                                                                      padding: EdgeInsets.symmetric(
+                                                                          horizontal: 10
+                                                                              .w,
+                                                                          vertical:
+                                                                              5.w),
+                                                                      child: const Text(
+                                                                          "All"),
+                                                                    ),
+                                                                  ),
+                                                                GestureDetector(
+                                                                  onTap: () {
+                                                                    selectedCategory =
+                                                                        state.subcategory[index].name ??
+                                                                            "";
+                                                                    itemsBloc.add(FetchItems(state
+                                                                        .subcategory[
+                                                                            index]
+                                                                        .id
+                                                                        .toString()));
+                                                                    setstate(
+                                                                        () {});
+                                                                  },
+                                                                  child:
+                                                                      Container(
+                                                                    margin: EdgeInsets.symmetric(
+                                                                        horizontal:
+                                                                            5.w,
+                                                                        vertical:
+                                                                            5.w),
+                                                                    decoration: BoxDecoration(
+                                                                        color: selectedCategory == state.subcategory[index].name
+                                                                            ? HexColor(
+                                                                                "#d4ac2c")
+                                                                            : Colors
+                                                                                .white,
+                                                                        border: Border.all(
+                                                                            color:
+                                                                                Colors.black)),
+                                                                    padding: EdgeInsets.symmetric(
+                                                                        horizontal: 10
+                                                                            .w,
+                                                                        vertical:
+                                                                            5.w),
+                                                                    child: Text(
+                                                                        state.subcategory[index].name ??
+                                                                            ""),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ))),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  });
+                                });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: HexColor("#d4ac2c").withOpacity(0.5)),
+                            padding: EdgeInsets.all(15.w),
+                            margin: EdgeInsets.symmetric(horizontal: 10.w),
+                            child: TextWidget(
+                              "Categories",
+                              size: 21.sp,
+                              fontweight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        RoundedBackButton(
+                          onTap: () {
+                            if (checkoutBloc
+                                .checkoutDone.cartItems.isNotEmpty) {
+                              DialogWidget().dialogWidget(
+                                  context, "Are you sure you want to go back?",
+                                  () {
+                                Navigator.pop(context);
+                              }, () {
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                              },
+                                  notefield: const TextWidget(
+                                      "The items added will be discarded."));
+                            } else {
+                              Navigator.pop(context);
+                            }
+                          },
+                        )
+                      ],
+                    ),
+                  );
+                }
+
+                return const Center(child: TextWidget("No Data"));
+              },
+            ),
+            ValueListenableBuilder(
+                valueListenable: searchString,
+                builder: (context, snapshot, _) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 15.w),
+                    child: TextFormField(
+                      controller:
+                          TextEditingController.fromValue(TextEditingValue(
+                        text: snapshot ?? "",
+                        selection: TextSelection.fromPosition(
+                          TextPosition(offset: snapshot?.length ?? 0),
+                        ),
+                      )),
+                      textAlign: TextAlign.start,
+                      onChanged: (v) async {
+                        selectedCategory = "All";
+                        searchString.value = v;
+                        setState(() {});
+                        itemsBloc.add(FilterItems(v));
+                      },
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        suffixIcon: InkWell(
+                            onTap: () {
+                              searchString.value = "";
+                              itemsBloc.add(FilterItems(""));
+
+                              /*   if (searchString.value.isNotEmpty ) {
+                      searchString.value = "";
+                      setState(() {
+                        
+                      });
+                        itemsBloc.add(FilterItems(""));
+                    } */
+                            },
+                            child: searchString.value.isEmpty
+                                ? const Icon(
+                                    Icons.search,
+                                    color: Colors.grey,
+                                  )
+                                : const Icon(
+                                    Icons.cancel,
+                                    color: Colors.black,
+                                  )),
+                        floatingLabelStyle:
+                            TextStyle(color: HexColor("#d4ac2c")),
+                        focusColor: HexColor("#d4ac2c"),
+                        hintText: 'Search here',
+                        hintStyle: const TextStyle(fontSize: 16),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide: const BorderSide(
+                            width: 0,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: const BorderSide(
+                            color: Colors.grey,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide(
+                            color: HexColor("#d4ac2c"),
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 13, horizontal: 10),
+                      ),
+                    ),
+                  );
+                }),
+            BlocBuilder<ItemsBloc, ItemsState>(
+              builder: (context, state) {
+                if (state is ItemsLoad) {
+                  const Center(child: CircularProgressIndicator());
+                }
+
+                if (state is ItemsDone) {
+                  List<ItemsModel> searchData = state.filterItemsList;
+                  print("length ${searchData.length}");
+                  print(filter);
+                  if (filter == "veg") {
+                    searchData = searchData
+                        .where((element) => element.type == "veg")
+                        .toList();
+                  }
+                  if (filter == "nonveg") {
+                    searchData = searchData
+                        .where((element) => element.type == "nonveg")
+                        .toList();
+                  }
+                  return Expanded(
+                    child: Column(
+                      children: [
+                        /* Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 15.w, vertical: 10.w),
+                          child: searchBox(
+                              searchController, "Search", "Search here", () {
+                            setState(() {});
+                          }),
+                        ), */
+                        Expanded(
+                          child: (searchData.isNotEmpty)
+                              ? ListView.builder(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 12.w, horizontal: 15.w),
+                                  itemCount: searchData.length,
+                                  itemBuilder: (context, index) {
+                                    return Column(
+                                      children: [
+                                        listviewContent(
+                                            searchData, index, context),
+                                      ],
+                                    );
+                                  },
+                                )
+                              : const Center(
+                                  child: TextWidget("No Items"),
+                                ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return const Center(child: CircularProgressIndicator());
+              },
+            ),
+
+            /*    BlocBuilder<CategoryBloc, CategoryState>(
+              buildWhen: (previous, current) {
+                return current is SubCategoryLoad ||
+                    current is SubCategoryDone ||
+                    current is SubCategoryError;
+              },
+              builder: (context, state) {
+                if (state is SubCategoryLoad) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+    
+                if (state is SubCategoryDone) {
+                  return Expanded(
+                      child: SingleChildScrollView(
+                    child: Wrap(
+                      children: List.generate(state.subcategory.length,
+                          (index) => gridWidget(state, index)),
+                    ),
+                  ));
+                }
+    
+                return const Center(child: TextWidget("No Data"));
+              },
+            ), */
+          ],
+        ),
       ),
+    );
+  }
+
+  Container listviewContent(
+      List<ItemsModel> items, int index, BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8.w),
+      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.w),
+      alignment: Alignment.centerLeft,
+      decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(15.w),
+          color: Colors.grey.shade200),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Padding(
+          padding: EdgeInsets.only(top: 5.w, bottom: 15.w),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Image.asset(
+                    "assets/vegLogo.png",
+                    height: 35.w,
+                    width: 35.w,
+                    fit: BoxFit.fill,
+                  ),
+                  SizedBox(
+                    width: 5.w,
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: TextWidget(
+                      items[index].name,
+                      size: 18.sp,
+                    ),
+                  ),
+                ],
+              ),
+              TextWidget(
+                "₹ ${items[index].price}",
+                size: 22.sp,
+                color: Colors.black87,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 5.w,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            /* SizedBox(
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: TextWidget(
+                state.items[index].description ?? "--",
+                color: Colors.grey,
+              ),
+            ), */
+            if (checkoutBloc.checkoutDone.cartItems.indexWhere(
+                    (element) => element.name == items[index].name) <
+                0)
+              Directionality(
+                textDirection: TextDirection.rtl,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      side: const BorderSide(color: Colors.black54, width: 0.7),
+                      backgroundColor: Colors.grey.shade300.withOpacity(0.8)),
+                  onPressed: () {
+                    checkoutBloc.checkoutDone.cartItems.add(CartItems(
+                        category: "Food",
+                        eta: "00:30",
+                        itemId: items[index].id,
+                        name: items[index].name,
+                        price: items[index].price,
+                        quantity: 1,
+                        subCategory: items[index].itemCategoryId.toString(),
+                        split: false,
+                        modifiedEta: "2023-06-30T06:28:10.758Z",
+                        key: items[index].name));
+                    setState(() {});
+                  },
+                  icon: Icon(
+                    Icons.add,
+                    size: 23.sp,
+                    color: Colors.black54,
+                  ),
+                  label: const TextWidget("Add"),
+                ),
+              )
+            else
+              quantityCounter(checkoutBloc.checkoutDone.cartItems
+                  .firstWhere((element) => element.itemId == items[index].id)),
+          ],
+        ),
+      ]),
     );
   }
 
@@ -246,7 +684,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
           "type": widget.roomDetails["type"],
           "waiter": widget.roomDetails["waiter"],
           "fromtable": widget.roomDetails["fromtable"],
-          "bloc":checkoutBloc
+          "bloc": checkoutBloc
         }).then((value) {
           setState(() {});
         });
@@ -355,14 +793,16 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                                 .map((e) =>
                                                     addItem.Data.fromJson(
                                                         e.toJson()))),
-                                            reservationId: int.parse(
-                                                widget.roomDetails["reservId"]),
+                                            reservationId: int.parse(widget
+                                                .roomDetails["reservId"]
+                                                .toString()),
                                             notes: notesController.text);
 
                                     bottomSheet
                                         ? ordersBloc.add(AddItems(
                                             addItemsRequest,
-                                            widget.roomDetails["orderId"]))
+                                            widget.roomDetails["orderId"]
+                                                .toString()))
                                         : bottomsheetWidget(checkoutBloc
                                             .checkoutDone.cartItems);
                                   } else {
@@ -375,18 +815,19 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                                         .toString()) ??
                                                     0,
                                                 reservationIdentifier: widget
-                                                    .roomDetails["identifier"],
+                                                    .roomDetails["identifier"]
+                                                    .toString(),
                                                 diningType: widget.roomDetails["tableId"] == ""
                                                     ? widget.roomDetails["type"]
                                                     : "dining",
                                                 deliveryPartner: "",
                                                 isDraft: false,
-                                                waiterId: int.tryParse(widget
-                                                        .roomDetails["waiter"]
-                                                        .toString()) ??
-                                                    0,
+                                                waiterId:
+                                                    int.tryParse(widget.roomDetails["waiter"].toString()) ??
+                                                        0,
                                                 notes: notesController.text),
-                                            orders: checkoutBloc.checkoutDone.cartItems));
+                                            orders: checkoutBloc
+                                                .checkoutDone.cartItems));
                                     bottomSheet
                                         ? ordersBloc
                                             .add(AddOrders(addOrdersRequest))
@@ -428,167 +869,170 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
-  void bottomsheetWidget(List<CartItems> itemList)async {
-   await showModalBottomSheet(
+  void bottomsheetWidget(List<CartItems> itemList) async {
+    await showModalBottomSheet(
+      //showDragHandle: true,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(15), topRight: Radius.circular(15))),
-      context: context,
+      context: navigatorKey.currentContext!,
       builder: (context) {
-        return StatefulBuilder(builder: (context, setstate) {
-          return SizedBox(
-            height: MediaQuery.of(context).size.height * 0.75,
-            child: Scaffold(
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(80),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15, horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(top: 5.w),
-                            child: const TextWidget(
-                              "Your order summary",
-                              size: 20,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          GestureDetector(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Icon(Icons.close))
-                        ],
-                      ),
-                    ),
-                    Container(
-                      height: 10,
-                      margin: EdgeInsets.only(bottom: 10.w),
-                      child: const Divider(
-                        thickness: 0.6,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              bottomNavigationBar: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 10.w),
-                    child: Divider(
-                      height: 2,
-                      thickness: 0.5,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.w),
-                    child: Card(
-                      elevation: 1,
-                      child: TextFormField(
-                        minLines: 3,
-                        maxLines: null,
-                        controller: notesController,
-                        keyboardType: TextInputType.multiline,
-                        decoration: InputDecoration(
-                          alignLabelWithHint: true,
-                          labelStyle: const TextStyle(color: Colors.black),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: Colors.grey.shade500, width: 0.4)),
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: Colors.grey.shade200, width: 0.009)),
-                          labelText:
-                              'Enter any additional information about your order.',
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 15.w,
-                  ),
-                  bottomCurvewidget(
-                      checkoutBloc.checkoutDone.cartItems.fold("0",
-                          (previousValue, element) {
-                        return (double.parse(previousValue) +
-                                ((element.quantity ?? 0) *
-                                    double.parse(element.price ?? "0.0")))
-                            .toString();
-                      }),
-                      bottomSheet: true)
-                ],
-              ),
-              body: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Padding(
-                  padding: MediaQuery.of(context).viewInsets,
+        return BlocProvider(
+          create: (context) => CheckoutBloc(),
+          child: StatefulBuilder(builder: (context, setstate) {
+            return SizedBox(
+              height: MediaQuery.of(context).size.height * 0.75,
+              child: Scaffold(
+                appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(80),
                   child: Column(
                     children: [
-                      if (checkoutBloc.checkoutDone.cartItems.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.only(bottom: 30),
-                          child: TextWidget("No items found"),
-                        )
-                      else
-                        ListView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            padding: const EdgeInsets.only(bottom: 10),
-                            shrinkWrap: true,
-                            itemCount:
-                                checkoutBloc.checkoutDone.cartItems.length,
-                            itemBuilder: (context, index) {
-                              return ListTile(
-                                  minLeadingWidth: 10,
-                                  leading: Image.asset(
-                                    "assets/vegLogo.png",
-                                    height: 20,
-                                  ),
-                                  title: TextWidget(
-                                    checkoutBloc.checkoutDone.cartItems[index]
-                                            .name ??
-                                        "--",
-                                    size: 21.sp,
-                                  ),
-                                  trailing: SizedBox(
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 7.w),
-                                          child: TextWidget(
-                                            "₹ ${checkoutBloc.checkoutDone.cartItems[index].price ?? "--"}",
-                                            size: 22.sp,
-                                          ),
-                                        ),
-                                        quantityCounter(
-                                            checkoutBloc
-                                                .checkoutDone.cartItems[index],
-                                            setstate: setstate)
-                                      ],
-                                    ),
-                                  ));
-                            }),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(top: 5.w),
+                              child: const TextWidget(
+                                "Your order summary",
+                                size: 20,
+                                color: Colors.black54,
+                              ),
+                            ),
+                            GestureDetector(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Icon(Icons.close))
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 10,
+                        margin: EdgeInsets.only(bottom: 10.w),
+                        child: const Divider(
+                          thickness: 0.6,
+                        ),
+                      ),
                     ],
                   ),
                 ),
+                bottomNavigationBar: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 10.w),
+                      child: Divider(
+                        height: 2,
+                        thickness: 0.5,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.w),
+                      child: Card(
+                        elevation: 1,
+                        child: TextFormField(
+                          minLines: 3,
+                          maxLines: null,
+                          controller: notesController,
+                          keyboardType: TextInputType.multiline,
+                          decoration: InputDecoration(
+                            alignLabelWithHint: true,
+                            labelStyle: const TextStyle(color: Colors.black),
+                            focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Colors.grey.shade500, width: 0.4)),
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Colors.grey.shade200, width: 0.009)),
+                            labelText:
+                                'Enter any additional information about your order.',
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 15.w,
+                    ),
+                    bottomCurvewidget(
+                        checkoutBloc.checkoutDone.cartItems.fold("0",
+                            (previousValue, element) {
+                          return (double.parse(previousValue) +
+                                  ((element.quantity ?? 0) *
+                                      double.parse(element.price ?? "0.0")))
+                              .toString();
+                        }),
+                        bottomSheet: true)
+                  ],
+                ),
+                body: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    padding: MediaQuery.of(context).viewInsets,
+                    child: Column(
+                      //   scrollDirection: Axis.vertical,
+                      children: [
+                        if (checkoutBloc.checkoutDone.cartItems.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 30),
+                            child: TextWidget("No items found"),
+                          )
+                        else
+                          ListView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: const EdgeInsets.only(bottom: 10),
+                              shrinkWrap: true,
+                              itemCount:
+                                  checkoutBloc.checkoutDone.cartItems.length,
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                    minLeadingWidth: 10,
+                                    leading: Image.asset(
+                                      "assets/vegLogo.png",
+                                      height: 20,
+                                    ),
+                                    title: TextWidget(
+                                      checkoutBloc.checkoutDone.cartItems[index]
+                                              .name ??
+                                          "--",
+                                      size: 21.sp,
+                                    ),
+                                    trailing: SizedBox(
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 7.w),
+                                            child: TextWidget(
+                                              "₹ ${checkoutBloc.checkoutDone.cartItems[index].price ?? "--"}",
+                                              size: 22.sp,
+                                            ),
+                                          ),
+                                          quantityCounter(
+                                              checkoutBloc.checkoutDone
+                                                  .cartItems[index],
+                                              setstate: setstate)
+                                        ],
+                                      ),
+                                    ));
+                              }),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-          );
-        });
+            );
+          }),
+        );
       },
     );
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
   Container quantityCounter(CartItems item, {setstate}) {

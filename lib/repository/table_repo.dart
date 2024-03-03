@@ -5,6 +5,7 @@ import 'package:hotelpro_mobile/models/leveltable_model.dart';
 import 'package:hotelpro_mobile/models/space_model.dart';
 import 'package:hotelpro_mobile/models/table_model.dart';
 import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../resources/api_base_helper.dart';
@@ -18,7 +19,6 @@ class TablesRepository {
             ? "/reservations/$type"
             : "/reservations/current?dining_type=dining");
 
-  
     List<TableModel> tableResponse = List.from(
         json.decode(response.body).map((e) => TableModel.fromJson(e)));
 
@@ -31,8 +31,6 @@ class TablesRepository {
     var response = await ApiBaseHelper().putMethod(
         "/reservations/$id/assign-waiter/$waiterId",
         json.encode({"tables_ids": tableId}));
-
-   
 
     return response;
   }
@@ -49,25 +47,31 @@ class TablesRepository {
                 ? "/orders/$id/complete"
                 : "/reservations/$id/status/${open ? "OP" : close ? "CN" : "CO"}",
         (nonDiner && !close && !open)
-            ? json.encode({"reservation_id": nonDiveResrvid})
-            : json.encode({}));
+            ? json.encode({
+                "reservation_id": nonDiveResrvid,
+                "current_time":
+                    "${DateFormat('yyyy-MM-ddTHH:mm:ss').format(DateTime.now())}Z"
+              })
+            : json.encode({
+                "current_time":
+                    "${DateFormat('yyyy-MM-ddTHH:mm:ss').format(DateTime.now())}Z"
+              }));
 
-   
     return response;
   }
 
   Future<Response> printKot(int id, int waiterId, {bool kot = true}) async {
-    var response = await ApiBaseHelper().getMethod(kot
-        ? "/reservations/$id/print-kot?waiter_id=$waiterId"
-        : "/reservations/$id/print-bill");
+    var response = await ApiBaseHelper().getMethod(
+        kot ? "/reservations/$id/print-kot" : "/reservations/$id/print-bill");
+// "/reservations/$id/print-kot?waiter_id=$waiterId"
 
-   
     return response;
   }
 
+  ///reservations/:id/print-kot
   Future<LeveltableModel> getLeveltables(String time, int levelId) async {
-    var response = await ApiBaseHelper()
-        .getMethod("/tables/reserved?time=$time&spaceId=$levelId");
+    var response = await ApiBaseHelper().getMethod(
+        "/tables/reserved?time=${"${DateFormat('yyyy-MM-ddTHH:mm:ss').format(DateTime.now())}Z"}&spaceId=$levelId");
 
     LeveltableModel res = LeveltableModel.fromJson(json.decode(response.body));
 
@@ -76,7 +80,7 @@ class TablesRepository {
 
   Future<List<SpaceModel>> getSpaces() async {
     var response = await ApiBaseHelper().getMethod("/tables/space-categories");
-   
+
     List<SpaceModel> res = List.from(
         json.decode(response.body).map((e) => SpaceModel.fromJson(e)));
 

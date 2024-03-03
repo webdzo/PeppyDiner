@@ -1,24 +1,24 @@
 import 'availableTables_model.dart';
 
 class AddReservRequest {
-  AddReservRequest({
-    this.user,
-    this.selectedTables,
-    this.date,
-    this.time,
-    this.totalPayment,
-    this.advancePaid,
-    this.flatDiscount,
-    this.commission,
-    this.balanceAmount,
-    this.cake,
-    this.quantity,
-    this.occasion,
-    this.package,
-    this.event,
-    this.notes,
-    this.totalHeads,
-  });
+  AddReservRequest(
+      {this.user,
+      this.selectedTables,
+      this.date,
+      this.time,
+      this.totalPayment,
+      this.advancePaid,
+      this.flatDiscount,
+      this.commission,
+      this.balanceAmount,
+      this.cake,
+      this.quantity,
+      this.occasion,
+      this.package,
+      this.event,
+      this.notes,
+      this.totalHeads,
+      this.agentId});
   User? user;
   List<TablesList>? selectedTables;
   String? date;
@@ -35,6 +35,8 @@ class AddReservRequest {
   String? event;
   String? notes;
   String? totalHeads;
+  int? agentId;
+  String? startDate;
 
   AddReservRequest.fromJson(Map<String, dynamic> json) {
     user = User.fromJson(json['user']);
@@ -55,6 +57,8 @@ class AddReservRequest {
     event = json['event'];
     notes = json['notes'];
     totalHeads = json['total_heads'];
+    agentId = json['agent_id'];
+    startDate = json['start_date'];
   }
 
   Map<String, dynamic> toJson() {
@@ -75,6 +79,8 @@ class AddReservRequest {
     datas['event'] = event;
     datas['notes'] = notes;
     datas['total_heads'] = totalHeads;
+    datas['agent_id'] = agentId;
+    datas['start_date'] = startDate;
     return datas;
   }
 }

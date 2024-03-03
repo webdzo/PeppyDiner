@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:hotelpro_mobile/bloc/items/items_bloc.dart';
@@ -143,8 +144,7 @@ class _ItemConfigState extends State<ItemConfig> {
                                       setState(() {});
                                       Navigator.pop(context);
                                     },
-                                    titleTextStyle:
-                                        TextStyle(fontSize: 18.sp),
+                                    titleTextStyle: TextStyle(fontSize: 18.sp),
                                     title: const TextWidget(
                                       "All",
                                     ),
@@ -159,14 +159,13 @@ class _ItemConfigState extends State<ItemConfig> {
                                     onTap: () {
                                       selectedFilter = "enabled";
                                       items = state.items
-                                          .where((element) =>
-                                              element.enabled == 1)
+                                          .where(
+                                              (element) => element.enabled == 1)
                                           .toList();
                                       setState(() {});
                                       Navigator.pop(context);
                                     },
-                                    titleTextStyle:
-                                        TextStyle(fontSize: 18.sp),
+                                    titleTextStyle: TextStyle(fontSize: 18.sp),
                                     title: const TextWidget(
                                       "Enabled",
                                     ),
@@ -181,15 +180,14 @@ class _ItemConfigState extends State<ItemConfig> {
                                     onTap: () {
                                       selectedFilter = "disabled";
                                       items = state.items
-                                          .where((element) =>
-                                              element.enabled == 0)
+                                          .where(
+                                              (element) => element.enabled == 0)
                                           .toList();
 
                                       setState(() {});
                                       Navigator.pop(context);
                                     },
-                                    titleTextStyle:
-                                        TextStyle(fontSize: 18.sp),
+                                    titleTextStyle: TextStyle(fontSize: 18.sp),
                                     title: const TextWidget("Disabled"),
                                     trailing: selectedFilter == "disabled"
                                         ? const Icon(
@@ -209,8 +207,7 @@ class _ItemConfigState extends State<ItemConfig> {
                                       setState(() {});
                                       Navigator.pop(context);
                                     },
-                                    titleTextStyle:
-                                        TextStyle(fontSize: 18.sp),
+                                    titleTextStyle: TextStyle(fontSize: 18.sp),
                                     title: const TextWidget("Nonveg"),
                                     trailing: selectedFilter == "nv"
                                         ? const Icon(
@@ -230,8 +227,7 @@ class _ItemConfigState extends State<ItemConfig> {
                                       setState(() {});
                                       Navigator.pop(context);
                                     },
-                                    titleTextStyle:
-                                        TextStyle(fontSize: 18.sp),
+                                    titleTextStyle: TextStyle(fontSize: 18.sp),
                                     title: const TextWidget("Veg"),
                                     trailing: selectedFilter == "veg"
                                         ? const Icon(
@@ -261,7 +257,18 @@ class _ItemConfigState extends State<ItemConfig> {
                     Row(
                       children: [
                         button("Enable", () {
-                          itemsBloc.add(EnableItems(selectedItems, true));
+                          if (selectedItems.isNotEmpty) {
+                            itemsBloc.add(EnableItems(selectedItems, true));
+                          } else {
+                            Fluttertoast.showToast(
+                                msg: "Please select items",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.CENTER,
+                                timeInSecForIosWeb: 1,
+                                backgroundColor: Colors.red,
+                                textColor: Colors.white,
+                                fontSize: 16.0);
+                          }
                         },
                             selectedItems.isNotEmpty
                                 ? HexColor("#d4ac2c")
@@ -271,7 +278,18 @@ class _ItemConfigState extends State<ItemConfig> {
                           width: 10.w,
                         ),
                         button("Disable", () {
-                          itemsBloc.add(EnableItems(selectedItems, false));
+                          if (selectedItems.isNotEmpty) {
+                            itemsBloc.add(EnableItems(selectedItems, false));
+                          } else {
+                            Fluttertoast.showToast(
+                                msg: "Please select items",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.CENTER,
+                                timeInSecForIosWeb: 1,
+                                backgroundColor: Colors.red,
+                                textColor: Colors.white,
+                                fontSize: 16.0);
+                          }
                         },
                             selectedItems.isNotEmpty
                                 ? HexColor("#d4ac2c")

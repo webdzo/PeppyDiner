@@ -1,74 +1,42 @@
 class BillpaymentModel {
   BillpaymentModel({
-    required this.allItems,
-    required this.taxGst,
+    required this.subTotalAmount,
     required this.serviceCharge,
+    required this.taxGst,
     required this.flatDiscount,
+    required this.flatDiscountType,
+    required this.totalAmount,
     required this.paymentMode,
   });
-  late final List<dynamic> allItems;
-  late final int taxGst;
+  late final int subTotalAmount;
   late final int serviceCharge;
-  late final String flatDiscount;
+  late final int taxGst;
+  late final int flatDiscount;
+  late final String flatDiscountType;
+  late final int totalAmount;
   late final String paymentMode;
 
   BillpaymentModel.fromJson(Map<String, dynamic> json) {
-    allItems = List.castFrom<dynamic, dynamic>(json['all_items']);
-    taxGst = json['tax_gst'];
-    //TaxGst.fromJson(json['tax_gst']);
-    serviceCharge = json['service_charge'];
-    flatDiscount = json['flat_discount'];
-    paymentMode = json["payment_mode"] ?? "";
+    subTotalAmount = json['sub_total_amount'];
+    serviceCharge = json['service_charge'] ?? 0;
+    taxGst = int.tryParse(json['tax_gst'].toString())?.toInt() ?? 0;
+    flatDiscount = json['flat_discount'] ?? 0;
+    flatDiscountType = json['flat_discount_type'];
+    totalAmount = json['total_amount'] ?? 0;
+    paymentMode = json['payment_mode'].isNotEmpty
+        ? (json['payment_mode'].first ?? "")
+        : "";
   }
 
   Map<String, dynamic> toJson() {
     final datas = <String, dynamic>{};
-    datas['all_items'] = allItems;
-    datas['tax_gst'] = taxGst;
+    datas['sub_total_amount'] = subTotalAmount;
     datas['service_charge'] = serviceCharge;
+    datas['tax_gst'] = taxGst;
     datas['flat_discount'] = flatDiscount;
+    datas['flat_discount_type'] = flatDiscountType;
+    datas['total_amount'] = totalAmount;
     datas['payment_mode'] = paymentMode;
-    return datas;
-  }
-}
-
-class TaxGst {
-  TaxGst({
-    required this.id,
-    required this.tax,
-    required this.gst,
-    required this.gstin,
-    required this.option,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-  late final int id;
-  late final String tax;
-  late final String gst;
-  late final String gstin;
-  late final int option;
-  late final String createdAt;
-  late final String updatedAt;
-
-  TaxGst.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    tax = json['tax'];
-    gst = json['gst'];
-    gstin = json['gstin'];
-    option = json['option'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final datas = <String, dynamic>{};
-    datas['id'] = id;
-    datas['tax'] = tax;
-    datas['gst'] = gst;
-    datas['gstin'] = gstin;
-    datas['option'] = option;
-    datas['created_at'] = createdAt;
-    datas['updated_at'] = updatedAt;
     return datas;
   }
 }

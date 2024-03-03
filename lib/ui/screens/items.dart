@@ -164,6 +164,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                             .startsWith(searchController.text.toLowerCase())))
                         .toList();
                 print("length ${searchData.length}");
+                print(filter);
                 if (filter == "veg") {
                   searchData = searchData
                       .where((element) => element.type == "veg")

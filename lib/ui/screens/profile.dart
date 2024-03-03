@@ -4,6 +4,7 @@ import 'package:hotelpro_mobile/route_generator.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/widgets/button.dart';
 import 'package:hotelpro_mobile/ui/widgets/text_widget.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyProfile extends StatefulWidget {
@@ -251,60 +252,68 @@ class _MyProfileState extends State<MyProfile> {
             ),
           ), */
 
-          button("Logout", () async {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextWidget(
-                        "Logout",
-                        fontweight: FontWeight.bold,
-                        size: 22.sp,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              button("Manage Items", () async {
+                navigatorKey.currentState!.pushNamed("/itemconfig");
+              }, HexColor("#d4ac2c"), size: 18.sp, textcolor: Colors.black),
+              button("       Logout       ", () async {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextWidget(
+                            "Logout",
+                            fontweight: FontWeight.bold,
+                            size: 22.sp,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Icon(Icons.close),
+                          )
+                        ],
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Icon(Icons.close),
-                      )
-                    ],
-                  ),
-                  actionsAlignment: MainAxisAlignment.center,
-                  content: const Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextWidget("Are you sure you want to logout?"),
-                    ],
-                  ),
-                  actions: [
-                    button(
-                      "Cancel",
-                      () async {
-                        Navigator.pop(context);
-                      },
-                      Colors.red,
-                    ),
-                    button("Ok", () async {
-                      Navigator.pop(navigatorKey.currentContext!);
-                      SharedPreferences preferences =
-                          await SharedPreferences.getInstance();
-                      preferences.clear();
-                      navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                        "/",
-                        (route) {
-                          return false;
-                        },
-                      );
-                    }, Colors.green)
-                  ],
+                      actionsAlignment: MainAxisAlignment.center,
+                      content: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextWidget("Are you sure you want to logout?"),
+                        ],
+                      ),
+                      actions: [
+                        button(
+                          "Cancel",
+                          () async {
+                            Navigator.pop(context);
+                          },
+                          Colors.red,
+                        ),
+                        button("Ok", () async {
+                          Navigator.pop(navigatorKey.currentContext!);
+                          SharedPreferences preferences =
+                              await SharedPreferences.getInstance();
+                          preferences.clear();
+                          navigatorKey.currentState?.pushNamedAndRemoveUntil(
+                            "/",
+                            (route) {
+                              return false;
+                            },
+                          );
+                        }, Colors.green)
+                      ],
+                    );
+                  },
                 );
-              },
-            );
-          }, HexColor("#d4ac2c"), size: 18.sp, textcolor: Colors.black)
+              }, HexColor("#d4ac2c"), size: 18.sp, textcolor: Colors.black)
+            ],
+          )
         ],
       ),
     );

@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:core';
+import 'dart:developer';
 
 import 'package:hotelpro_mobile/models/occasion_model.dart';
+import 'package:hotelpro_mobile/models/updatemode_request.dart';
+import 'package:hotelpro_mobile/models/user_model.dart';
 import 'package:http/http.dart';
 
 import '../models/addReserv_request.dart';
@@ -16,42 +19,9 @@ class AddReservationRepository {
       bool addGuest = false,
       String id = "",
       String guestId = ""}) async {
-  
-    /*  if (edit) {
-      var response = await ApiBaseHelper().putMethod(
-          "/guests/$guestId",
-          jsonEncode({
-            "reservation_id": int.parse(id),
-            "data": {
-              "firstname": request.guestfirstname,
-              "lastname": request.guestlastname,
-              "email": request.guestemail,
-              "phone": request.guestphone,
-              "dob": request.guestdob ?? "",
-              "gender": request.guestgender?.toString()
-            }
-          }));
-      return response;
-    } else */
-    /*    if (addGuest) {
-      var response = await ApiBaseHelper().postMethod(
-          "/guests",
-          jsonEncode({
-            "reservation_id": int.parse(id),
-            "data": {
-              "firstname": request.guestfirstname,
-              "lastname": request.guestlastname,
-              "email": request.guestemail,
-              "phone": request.guestphone,
-              "dob": request.guestdob ?? "",
-              "gender": request.guestgender?.toString()
-            }
-          }));
-      return response;
-    } else { */
+    log(request.toJson().toString());
     var response = await ApiBaseHelper().postMethod(
       "/reservations",
-      //isMultipart: true,
       jsonEncode(request.toJson()),
     );
     return response;
@@ -67,8 +37,16 @@ class AddReservationRepository {
     return response;
   }
 
+  Future<Response> updateGuestcount(String count, int id) async {
+    var response = await ApiBaseHelper().putMethod(
+      "/reservations/$id/update-occupancy",
+      jsonEncode({"occupancy": count}),
+    );
+
+    return response;
+  }
+
   Future<Response> updateData(AddReservRequest request, int id) async {
-   
     var response = await ApiBaseHelper().putMethod(
       "/reservations/$id/tables",
       jsonEncode({
@@ -95,11 +73,24 @@ class AddReservationRepository {
     return response;
   }
 
-  Future<Response> paynow(String id, String amount) async {
+  Future<Response> paynow(String id, List<UpdatemodeRequest> amount) async {
     var response = await ApiBaseHelper().putMethod(
-      "/reservations/$id/pay-amount",
-      jsonEncode({"amount": amount}),
+      "/reservations/$id/update-payment-modes",
+      jsonEncode({"data": amount}),
     );
+
+    return response;
+  }
+
+  Future<Response> split(String id, String splitData) async {
+    var response = await ApiBaseHelper().postMethod(
+      "/reservations/$id/split-bill",
+      jsonEncode({
+        "data": {"split_value": int.tryParse(splitData)}
+      }),
+    );
+
+    //http://13.200.118.169/api/reservations/133/split-bill
 
     return response;
   }
@@ -166,5 +157,44 @@ class AddReservationRepository {
         json.decode(response.body).map((e) => CakesModel.fromJson(e)));
 
     return packagesResponse;
+  }
+
+  Future<List<UsersModel>> getUsers() async {
+    var response = await ApiBaseHelper().getMethod("/users/all");
+
+    List<UsersModel> res = List.from(
+        json.decode(response.body).map((e) => UsersModel.fromJson(e)));
+
+    return res;
+  }
+
+  Future<Response> printBill(String id) async {
+    var response =
+        await ApiBaseHelper().getMethod("/reservations/$id/print-bill");
+
+    return response;
+  }
+
+  Future<Response> mark(String id, String status) async {
+    var response = await ApiBaseHelper().putMethod(
+      status == "NS"
+          ? "/reservations/$id/status/NS"
+          : "/reservations/$id/mark-no-cost",
+      jsonEncode({}),
+    );
+
+    return response;
+  }
+
+  Future<Response> swap(String id, String oldid, String newid) async {
+    var response = await ApiBaseHelper().putMethod(
+      "/reservations/$id/swap-table",
+      jsonEncode({
+        "currentTableId": int.tryParse(oldid),
+        "swapTableId": int.tryParse(newid)
+      }),
+    );
+
+    return response;
   }
 }

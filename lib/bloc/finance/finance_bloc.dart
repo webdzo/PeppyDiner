@@ -1,4 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hotelpro_mobile/models/bycat_model.dart';
+import 'package:hotelpro_mobile/models/bywaiter_model.dart';
+import 'package:hotelpro_mobile/models/cancelorder_model.dart';
+import 'package:hotelpro_mobile/models/deleted_item_model.dart';
 
 import '../../models/add_exp_request.dart';
 import '../../models/expense_cat_model.dart';
@@ -45,22 +49,6 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
       }
     });
 
-    /*  on<FetchExpenseCat>((event, emit) async {
-      emit(ExpenseCatLoad());
-      try {
-        final response = await FinanceRepository().getExpenseCat();
-
-        emit(ExpenseCatDone(response));
-      } catch (e) {
-        if (e == "204") {
-          emit(ExpenseCatNodata());
-        } else {
-          emit(ExpenseCatError());
-          throw ("error");
-        }
-      }
-    }); */
-
     on<AddExpenseEvent>((event, emit) async {
       emit(AddExpenseLoad());
       try {
@@ -103,6 +91,74 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
           emit(TimestatsError());
         } else {
           emit(TimestatsError());
+          throw ("error");
+        }
+      }
+    });
+
+    on<FetchCanclledorder>((event, emit) async {
+      emit(OrderLoad());
+      try {
+        final response = await FinanceRepository()
+            .fetchCancel(event.startDate, event.endDate);
+
+        emit(OrderDone(response));
+      } catch (e) {
+        if (e == "204") {
+          emit(NoOrder());
+        } else {
+          emit(OrderError());
+          throw ("error");
+        }
+      }
+    });
+
+    on<FetchDeletedorder>((event, emit) async {
+      emit(OrderLoad());
+      try {
+        final response = await FinanceRepository()
+            .fetchDeleted(event.startDate, event.endDate);
+
+        emit(DeletedOrderDone(response));
+      } catch (e) {
+        if (e == "204") {
+          emit(NoOrder());
+        } else {
+          emit(OrderError());
+          throw ("error");
+        }
+      }
+    });
+
+    on<FetchbyCategory>((event, emit) async {
+      emit(OrderLoad());
+      try {
+        final response = await FinanceRepository()
+            .fetchbyCat(event.startDate, event.endDate);
+
+        emit(BycatDone(response));
+      } catch (e) {
+        if (e == "204") {
+          emit(NoOrder());
+        } else {
+          emit(OrderError());
+          throw ("error");
+        }
+      }
+    });
+
+    on<FetchbyWaiter>((event, emit) async {
+      emit(OrderLoad());
+      try {
+        final response = await FinanceRepository()
+            .fetchbywaiter(event.startDate, event.endDate);
+
+        emit(BywaiterDone(response));
+      } catch (e) {
+        if (e == "204") {
+          emit(NoOrder());
+        } else {
+          emit(OrderError());
           throw ("error");
         }
       }

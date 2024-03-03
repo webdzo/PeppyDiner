@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hotelpro_mobile/models/leveltable_model.dart';
 import 'package:hotelpro_mobile/models/space_model.dart';
 import 'package:hotelpro_mobile/repository/table_repo.dart';
 import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/table_model.dart';
@@ -14,6 +16,7 @@ part 'table_event.dart';
 part 'table_state.dart';
 
 class TableBloc extends Bloc<TableEvent, TableState> {
+  final TableDone tableDone = TableDone();
   TableBloc() : super(TableInitial()) {
     on<FetchTables>((event, emit) async {
       emit(TableLoad());
@@ -23,6 +26,8 @@ class TableBloc extends Bloc<TableEvent, TableState> {
         String waiterId = pref.getString("userId") ?? "";
         List<TableModel> items = await TablesRepository()
             .data(type: event.type, nonDiner: event.nonDiner);
+
+        items.sort((a, b) => b.dateTime.compareTo(a.dateTime));
         if (event.type != "upcoming" &&
             event.type != "past" &&
             event.type != "current" &&
@@ -46,7 +51,9 @@ class TableBloc extends Bloc<TableEvent, TableState> {
                   .toList();
               return e;
             }).toList();
-            emit(TableDone(items));
+            emit(tableDone
+              ..tables = items
+              ..filterTables = items);
           } else if (event.type == "unassigned") {
             items = items
                 .where((element) => element.tableSelected
@@ -61,12 +68,18 @@ class TableBloc extends Bloc<TableEvent, TableState> {
                   .toList();
               return e;
             }).toList();
-            emit(TableDone(items));
+            emit(tableDone
+              ..tables = items
+              ..filterTables = items);
           } else {
-            emit(TableDone(items));
+            emit(tableDone
+              ..tables = items
+              ..filterTables = items);
           }
         } else {
-          emit(TableDone(items));
+          emit(tableDone
+            ..tables = items
+            ..filterTables = items);
         }
       } catch (e) {
         log(e.toString());
@@ -166,6 +179,118 @@ class TableBloc extends Bloc<TableEvent, TableState> {
         }
       }
     });
+
+    on<FilterTables>((event, emit) async {
+      emit(TableLoad());
+      try {
+        List<TableModel> issueList = List.from(tableDone.tables);
+
+        if (event.searchText.isNotEmpty) {
+          issueList.retainWhere((element) => (element.guestName
+                  .toLowerCase()
+                  .contains(event.searchText.toLowerCase()) ||
+              element.identifier
+                  .toLowerCase()
+                  .contains(event.searchText.toLowerCase()) ||
+              element.contactNo
+                  .toLowerCase()
+                  .contains(event.searchText.toLowerCase())));
+        }
+        if (event.date.isNotEmpty) {
+          log(filterItemsByDate(issueList, DateTime.parse(event.date))
+              .length
+              .toString());
+          issueList = filterItemsByDate(issueList, DateTime.parse(event.date));
+        }
+
+        if (event.fromTime != null && event.toTime == null) {
+          issueList = filterItemsByFromTime(issueList, event.fromTime!);
+        }
+
+        if (event.toTime != null && event.fromTime == null) {
+          issueList = filterItemsByToTime(issueList, event.toTime!);
+        }
+
+        if (event.fromTime != null && event.toTime != null) {
+          issueList = issueList.where((item) {
+            // Convert item's time to minutes for comparison
+            int itemMinutes = parseDateTime(item.startTime).hour * 60 +
+                parseDateTime(item.startTime).minute;
+            int fromTimeMinutes =
+                event.fromTime!.hour * 60 + event.fromTime!.minute;
+            int toTimeMinutes = event.toTime!.hour * 60 + event.toTime!.minute;
+
+            // Check if item's time falls within the specified range
+            return itemMinutes >= fromTimeMinutes &&
+                itemMinutes <= toTimeMinutes;
+          }).toList();
+        }
+
+        emit(tableDone..filterTables = issueList);
+      } catch (e) {
+        emit(TableError());
+      }
+    });
+  }
+
+  DateTime parseDateTime(String dateTimeString) {
+    // Parse the date and time
+    DateFormat dateFormat = DateFormat("dd MMM hh:mm a");
+    DateTime dateTime = dateFormat.parse(dateTimeString);
+
+    // Adjust the time to match AM/PM format
+    if (dateTime.hour == 12 && dateTimeString.endsWith("AM")) {
+      dateTime = dateTime.subtract(const Duration(hours: 12));
+    } else if (dateTime.hour < 12 && dateTimeString.endsWith("PM")) {
+      dateTime = dateTime.add(const Duration(hours: 12));
+    }
+
+    return dateTime;
+  }
+
+  List<TableModel> filterItemsByDate(
+      List<TableModel> items, DateTime targetDate) {
+    return items.where((item) {
+      print(item.startTime);
+      return isSameDay(parseDateTime(item.startTime), targetDate);
+    }).toList();
+  }
+
+  DateTime parseDate(String dateTimeString) {
+    // Parse the string into a DateTime object
+    DateFormat dateFormat = DateFormat("dd MMM hh:mm a");
+    return dateFormat.parse(dateTimeString);
+  }
+
+  bool isSameDay(DateTime dateTime1, DateTime dateTime2) {
+    print("$dateTime1 -- $dateTime2");
+    return dateTime1.month == dateTime2.month && dateTime1.day == dateTime2.day;
+  }
+
+  List<TableModel> filterItemsByFromTime(
+      List<TableModel> items, TimeOfDay fromTime) {
+    return items.where((item) {
+      // Convert item's time to minutes for comparison
+      int itemMinutes = parseDateTime(item.startTime).hour * 60 +
+          parseDateTime(item.startTime).minute;
+      int fromTimeMinutes = fromTime.hour * 60 + fromTime.minute;
+
+      // Check if item's time is greater than or equal to the "from time"
+      return itemMinutes >= fromTimeMinutes;
+    }).toList();
+  }
+
+  List<TableModel> filterItemsByToTime(
+      List<TableModel> items, TimeOfDay toTime) {
+    return items.where((item) {
+      // Convert item's time to minutes for comparison
+      int itemMinutes = parseDateTime(item.startTime).hour * 60 +
+          parseDateTime(item.startTime).minute;
+      int toTimeMinutes = toTime.hour * 60 + toTime.minute;
+
+      // Check if item's time is less than or equal to the "to time"
+      return itemMinutes <= toTimeMinutes;
+    }).toList();
   }
 
   void dispose() {

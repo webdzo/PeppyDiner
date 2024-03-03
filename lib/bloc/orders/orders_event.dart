@@ -27,17 +27,20 @@ class EditOrders extends OrdersEvent {
   EditOrders(
     this.orderId,
     this.itemId,
-    this.quanity, this.notes,
+    this.quanity,
+    this.notes,
   );
 }
 
 class DeleteItem extends OrdersEvent {
   final String orderId;
   final String itemId;
+  final String reason;
 
   DeleteItem(
     this.orderId,
     this.itemId,
+    this.reason,
   );
 }
 
@@ -53,4 +56,31 @@ class GetUsername extends OrdersEvent {
   final int id;
 
   GetUsername(this.id);
+}
+
+class CurrentOrders extends OrdersEvent {
+  CurrentOrders();
+}
+
+class OngoingOrders extends OrdersEvent {
+  OngoingOrders();
+}
+
+class KotEdit extends OrdersEvent {
+  final String orderId;
+  final String? itemId;
+  final String? status;
+
+  final String? reason;
+  final bool close;
+
+  KotEdit(this.orderId,
+      {this.itemId, this.status, this.reason, this.close = false});
+}
+
+class CompleteOrder extends OrdersEvent {
+  final String orderId;
+  final int resId;
+
+  CompleteOrder(this.orderId, this.resId);
 }

@@ -60,8 +60,8 @@ class Reservation {
   late final String totalHeads;
   late final String event;
   late final String totalPayment;
-  late final TaxGst taxGst;
-  late final String flatDiscount;
+  late final int taxGst;
+  late final int flatDiscount;
   late final int serviceCharge;
   late final String balanceAmount;
   late final String commission;
@@ -96,10 +96,11 @@ class Reservation {
     notes = json['notes'] ?? "";
     totalHeads = json['total_heads'] ?? "";
     event = json["event"] ?? "";
-    totalPayment = json['total_payment'] ?? "0";
-    taxGst = TaxGst.fromJson(json['tax_gst']);
-    flatDiscount = json['flat_discount'] ?? "";
-    serviceCharge = json['service_charge'];
+    totalPayment = json['total_amount']?.toString() ?? "0";
+    taxGst = json["taxGst"] ?? 0;
+    //taxGst = TaxGst.fromJson(json['tax_gst'] ?? {});
+    flatDiscount = json['flat_discount'] ?? 0;
+    serviceCharge = json['service_charge'] ?? 0;
     balanceAmount = json['balance_amount'] ?? "0";
     commission = json['commission'] ?? "0";
     advancePaid = json['advance_paid'] ?? "0";
@@ -142,7 +143,7 @@ class Reservation {
     datas['total_heads'] = totalHeads;
     datas['event'] = event;
     datas['total_payment'] = totalPayment;
-    datas['tax_gst'] = taxGst.toJson();
+    datas['tax_gst'] = taxGst;
     datas['flat_discount'] = flatDiscount;
     datas['service_charge'] = serviceCharge;
     datas['balance_amount'] = balanceAmount;
@@ -293,7 +294,6 @@ class BookedTables {
     required this.id,
     required this.startTime,
     required this.endTime,
-    required this.reservationId,
     required this.tableId,
     this.waiterId,
     required this.spaceId,
@@ -306,7 +306,7 @@ class BookedTables {
   late final int id;
   late final String startTime;
   late final String endTime;
-  late final int reservationId;
+
   late final int tableId;
   late final int? waiterId;
   late final int spaceId;
@@ -318,9 +318,9 @@ class BookedTables {
 
   BookedTables.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    startTime = json['start_time'];
-    endTime = json['end_time'];
-    reservationId = json['reservation_id'];
+    startTime = json['start_time'] ?? "";
+    endTime = json['end_time'] ?? "";
+
     tableId = json['table_id'];
     waiterId = json['waiter_id'] ?? 0;
     spaceId = json['space_id'];
@@ -336,7 +336,7 @@ class BookedTables {
     datas['id'] = id;
     datas['start_time'] = startTime;
     datas['end_time'] = endTime;
-    datas['reservation_id'] = reservationId;
+
     datas['table_id'] = tableId;
     datas['waiter_id'] = waiterId;
     datas['space_id'] = spaceId;
@@ -368,13 +368,13 @@ class TaxGst {
   late final String updatedAt;
 
   TaxGst.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    tax = json['tax'];
-    gst = json['gst'];
-    gstin = json['gstin'];
-    option = json['option'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    id = json['id'] ?? 0;
+    tax = json['tax'] ?? "";
+    gst = json['gst'] ?? "";
+    gstin = json['gstin'] ?? "";
+    option = json['option'] ?? 0;
+    createdAt = json['created_at'] ?? "";
+    updatedAt = json['updated_at'] ?? "";
   }
 
   Map<String, dynamic> toJson() {

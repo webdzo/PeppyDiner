@@ -9,13 +9,45 @@ part 'items_event.dart';
 part 'items_state.dart';
 
 class ItemsBloc extends Bloc<ItemsEvent, ItemsState> {
+  final ItemsDone itemsDone = ItemsDone();
   ItemsBloc() : super(ItemsInitial()) {
     on<FetchItems>((event, emit) async {
       emit(ItemsLoad());
       try {
-        final items = await ItemsRepository().data(event.id);
+        if (event.id == "All") {
+          final items = await ItemsRepository().data(event.id);
 
-        emit(ItemsDone(items));
+          emit(itemsDone
+            ..items = items
+            ..filterItemsList = items
+            ..allItems = items);
+        } else {
+          final items = await ItemsRepository().data(event.id);
+
+          emit(itemsDone
+            ..items = items
+            ..filterItemsList = items);
+        }
+      } catch (e) {
+        emit(ItemsError());
+        throw ("error");
+      }
+    });
+
+    on<FilterItems>((event, emit) async {
+      emit(ItemsLoad());
+      try {
+        List<ItemsModel> itemsList = List.from(itemsDone.allItems);
+        if (event.searchString.isNotEmpty) {
+          itemsList = itemsList
+              .where((element) => (element.name
+                  .toLowerCase()
+                  .toString()
+                  .contains(event.searchString.toLowerCase())))
+              .toList();
+        }
+
+        emit(itemsDone..filterItemsList = itemsList);
       } catch (e) {
         emit(ItemsError());
         throw ("error");

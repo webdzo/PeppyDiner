@@ -30,3 +30,32 @@ class FetchTimestats extends FinanceEvent {
   final String endDate;
   FetchTimestats(this.startDate, this.endDate);
 }
+
+class FetchCanclledorder extends FinanceEvent {
+  final String startDate;
+  final String endDate;
+
+  FetchCanclledorder(this.startDate, this.endDate);
+}
+
+class FetchDeletedorder extends FinanceEvent {
+  final String startDate;
+  final String endDate;
+
+  FetchDeletedorder(this.startDate, this.endDate);
+}
+
+class FetchbyCategory extends FinanceEvent {
+  final String startDate;
+  final String endDate;
+
+  FetchbyCategory(this.startDate, this.endDate);
+}
+
+class FetchbyWaiter extends FinanceEvent {
+  final String startDate;
+  final String endDate;
+
+  FetchbyWaiter(this.startDate, this.endDate);
+}
+

@@ -65,3 +65,35 @@ class TimestatsDone extends FinanceState {
 }
 
 class TimestatsError extends FinanceState {}
+
+//------------------------------------
+
+class OrderLoad extends FinanceState {}
+
+class OrderError extends FinanceState {}
+
+class NoOrder extends FinanceState {}
+
+class OrderDone extends FinanceState {
+  final List<CancelOrderModel> orders;
+
+  OrderDone(this.orders);
+}
+
+class DeletedOrderDone extends FinanceState {
+  final List<DeleteditemModel> orders;
+
+  DeletedOrderDone(this.orders);
+}
+
+class BycatDone extends FinanceState {
+  final List<BycatModel> orders;
+
+  BycatDone(this.orders);
+}
+
+class BywaiterDone extends FinanceState {
+  final List<BywaiterModel> orders;
+
+  BywaiterDone(this.orders);
+}

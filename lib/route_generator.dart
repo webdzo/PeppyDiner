@@ -12,7 +12,9 @@ import 'package:hotelpro_mobile/ui/screens/details.dart';
 import 'package:hotelpro_mobile/ui/screens/edit_itemconfig.dart';
 import 'package:hotelpro_mobile/ui/screens/item_config.dart';
 import 'package:hotelpro_mobile/ui/screens/items.dart';
+import 'package:hotelpro_mobile/ui/screens/kds.dart';
 import 'package:hotelpro_mobile/ui/screens/login_page.dart';
+import 'package:hotelpro_mobile/ui/screens/profile.dart';
 import 'package:hotelpro_mobile/ui/screens/reserv_details.dart';
 import 'package:hotelpro_mobile/ui/screens/view_reservation.dart';
 import 'package:hotelpro_mobile/ui/widgets/scaffold_widget.dart';
@@ -66,6 +68,18 @@ Route<dynamic> generateRoute(RouteSettings settings) {
                 child: const ItemConfig(),
               ));
 
+    case "/profile":
+      return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+                create: (context) => ItemsBloc(),
+                child: const MyProfile(),
+              ));
+    case "/kdsScreen":
+      return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+                create: (context) => OrdersBloc(),
+                child: const KdsScreen(),
+              ));
     case "/edititemconfig":
       return MaterialPageRoute(
           builder: (_) => MultiBlocProvider(
@@ -108,6 +122,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
                     create: (context) => CategoryBloc(),
                   ),
                   BlocProvider(
+                    create: (context) => ItemsBloc(),
+                  ),
+                  BlocProvider(
                     create: (context) => ReservationsBloc(),
                   ),
                 ],
@@ -125,7 +142,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
                     create: (context) => AddResevationBloc(),
                   ),
                 ],
-                child: AddReservation(id: (args ?? 0) as int),
+                child: AddReservation(argue: (args) as dynamic),
               ));
 
     case '/reservDetails':
@@ -165,6 +182,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
                   ),
                   BlocProvider(
                     create: (context) => OrdersBloc(),
+                  ),
+                  BlocProvider(
+                    create: (context) => AvailableRoomsBloc(),
                   ),
                   BlocProvider(
                     create: (context) => AddResevationBloc(),

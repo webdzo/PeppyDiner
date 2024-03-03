@@ -19,9 +19,16 @@ class ReservationActions extends ReservationsEvent {
 
 class PaynowEvent extends ReservationsEvent {
   final String id;
-  final String amount;
+  final List<UpdatemodeRequest> amount;
 
   PaynowEvent(this.id, this.amount);
+}
+
+class SplitEvent extends ReservationsEvent {
+  final String id;
+  final String splitdata;
+
+  SplitEvent(this.id, this.splitdata);
 }
 
 class ResendmailEvent extends ReservationsEvent {
@@ -49,4 +56,25 @@ class EditCountEvent extends ReservationsEvent {
   final dynamic count;
 
   EditCountEvent(this.id, this.count);
+}
+
+class PrintEvent extends ReservationsEvent {
+  final String id;
+
+  PrintEvent(this.id);
+}
+
+class MarkUpdate extends ReservationsEvent {
+  final String id;
+  final String status;
+
+  MarkUpdate(this.id, this.status);
+}
+
+class SwapEvent extends ReservationsEvent {
+  final String id;
+  final String oldid;
+  final String newid;
+
+  SwapEvent(this.id, this.oldid, this.newid);
 }

@@ -15,6 +15,10 @@ class FetchPayments extends BillpaymentEvent {
   FetchPayments();
 }
 
+class FetchPayModes extends BillpaymentEvent {
+  FetchPayModes();
+}
+
 class FetchBill extends BillpaymentEvent {
   final String id;
   FetchBill(this.id);

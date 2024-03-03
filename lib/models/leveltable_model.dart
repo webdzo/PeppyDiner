@@ -7,7 +7,7 @@ class LeveltableModel {
   late final List<BookedTables> bookedTables;
 
   LeveltableModel.fromJson(Map<String, dynamic> json) {
-    message = json['message'];
+    message = json['message'] ?? "";
     bookedTables = List.from(json['booked_tables'])
         .map((e) => BookedTables.fromJson(e))
         .toList();
@@ -31,6 +31,7 @@ class BookedTables {
     required this.isAvailable,
     required this.createdAt,
     required this.updatedAt,
+    required this.status,
   });
   late final int id;
   late final String name;
@@ -40,6 +41,7 @@ class BookedTables {
   late final bool isAvailable;
   late final String createdAt;
   late final String updatedAt;
+  late final String status;
 
   BookedTables.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -50,6 +52,7 @@ class BookedTables {
     isAvailable = json['isAvailable'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    status = json['status'] ?? "";
   }
 
   Map<String, dynamic> toJson() {
@@ -61,7 +64,7 @@ class BookedTables {
     datas['occupancy'] = occupancy;
     datas['isAvailable'] = isAvailable;
     datas['created_at'] = createdAt;
-    datas['updated_at'] = updatedAt;
+    datas['status'] = status;
     return datas;
   }
 }

@@ -12,6 +12,14 @@ class OrdersDone extends OrdersState {
   OrdersDone(this.orders);
 }
 
+class OrdersNodata extends OrdersState {}
+
+class OngoingDone extends OrdersState {
+  final List<OngoingOrdermodel> orders;
+
+  OngoingDone(this.orders);
+}
+
 class AddOrdersLoad extends OrdersState {}
 
 class AddOrdersError extends OrdersState {}

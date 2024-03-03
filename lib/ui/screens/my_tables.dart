@@ -66,7 +66,7 @@ class _MyTablesState extends State<MyTables> {
               padding: EdgeInsets.only(right: 10.w),
               child: GestureDetector(
                 onTap: () {
-                  navigatorKey.currentState!.pushNamed("/itemconfig");
+                  navigatorKey.currentState!.pushNamed("/profile");
                 },
                 child: const Icon(
                   Icons.settings,
@@ -105,6 +105,7 @@ class _MyTablesState extends State<MyTables> {
                 ),
               ),
               body: TabBarView(
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
                   BlocProvider(
                     create: (context) => TableBloc(),

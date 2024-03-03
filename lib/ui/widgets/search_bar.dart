@@ -8,7 +8,7 @@ TextField searchBox(controller, label, hint, function) {
     onChanged: (v) {
       function();
     },
-  controller: controller,
+    controller: controller,
     keyboardType: TextInputType.text,
     decoration: InputDecoration(
       isDense: true,

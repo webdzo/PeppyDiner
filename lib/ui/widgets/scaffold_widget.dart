@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:hotelpro_mobile/bloc/finance/finance_bloc.dart';
+import 'package:hotelpro_mobile/bloc/orders/orders_bloc.dart';
 import 'package:hotelpro_mobile/main_qa.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/screens/finance.dart';
+import 'package:hotelpro_mobile/ui/screens/kds.dart';
 import 'package:hotelpro_mobile/ui/screens/my_tables.dart';
 import 'package:hotelpro_mobile/ui/screens/non_dining.dart';
 import 'package:hotelpro_mobile/ui/screens/profile.dart';
@@ -34,17 +36,22 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
   }
 
   String role = "";
-
+//testing
   getRole() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     role = pref.getString("role") ?? "";
     setState(() {});
   }
 
+  // admin@aruvirestaurant.com
+  //Admin@2023
+
   late final PersistentTabController _controller;
   List<Widget> _buildScreens() {
     return [
-      if (role == "ROLE_ADMIN" || role == "ROLE_MANAGER")
+      if (role == "ROLE_ADMIN" ||
+          role == "ROLE_MANAGER" ||
+          role == "ROLE_WAITER")
         const ReservationList(),
       const Nondining(),
       const MyTables(),
@@ -52,18 +59,23 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
         create: (context) => TableBloc(),
         child: const StepperScreen(),
       ),
+      BlocProvider(
+        create: (context) => OrdersBloc(),
+        child: const KdsScreen(),
+      ),
       if (role == "ROLE_ADMIN")
         BlocProvider(
           create: (context) => FinanceBloc(),
           child: const FinanceScreen(),
         ),
-      const MyProfile(),
     ];
   }
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
     return [
-      if (role == "ROLE_ADMIN" || role == "ROLE_MANAGER")
+      if (role == "ROLE_ADMIN" ||
+          role == "ROLE_MANAGER" ||
+          role == "ROLE_WAITER")
         PersistentBottomNavBarItem(
           icon: const Icon(Icons.room_service),
           textStyle: const TextStyle(fontWeight: FontWeight.bold),
@@ -103,6 +115,13 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
         activeColorPrimary: CupertinoColors.black,
         inactiveColorPrimary: CupertinoColors.white,
       ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.food_bank),
+        title: ("KDS"),
+        textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
+        activeColorPrimary: CupertinoColors.black,
+        inactiveColorPrimary: CupertinoColors.white,
+      ),
       if (role == "ROLE_ADMIN")
         PersistentBottomNavBarItem(
           icon: const Icon(
@@ -114,13 +133,6 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
           activeColorPrimary: CupertinoColors.black,
           inactiveColorPrimary: CupertinoColors.white,
         ),
-      PersistentBottomNavBarItem(
-        icon: const Icon(CupertinoIcons.person_fill),
-        title: ("Profile"),
-        textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
-        activeColorPrimary: CupertinoColors.black,
-        inactiveColorPrimary: CupertinoColors.white,
-      ),
     ];
   }
 

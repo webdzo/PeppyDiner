@@ -49,3 +49,15 @@ class UpdateLoad extends BillpaymentState {}
 class UpdateDone extends BillpaymentState {}
 
 class UpdateError extends BillpaymentState {}
+
+
+
+class PaymodeLoad extends BillpaymentState {}
+
+class PaymodeDone extends BillpaymentState {
+  final List<PaymentmodeModel> modes;
+
+  PaymodeDone(this.modes);
+}
+
+class PaymodeError extends BillpaymentState {}

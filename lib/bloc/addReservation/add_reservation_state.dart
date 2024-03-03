@@ -1,4 +1,5 @@
 import 'package:hotelpro_mobile/models/occasion_model.dart';
+import 'package:hotelpro_mobile/models/user_model.dart';
 
 import '../../models/cakes_model.dart';
 import '../../models/packages_model.dart';
@@ -52,3 +53,13 @@ class CakesDone extends AddReservationState {
 }
 
 class CakesError extends AddReservationState {}
+
+class UsersLoad extends AddReservationState {}
+
+class UsersDone extends AddReservationState {
+  final List<UsersModel> users;
+
+  UsersDone(this.users);
+}
+
+class UsersError extends AddReservationState {}

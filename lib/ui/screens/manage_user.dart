@@ -51,6 +51,10 @@ class _ManageUserState extends State<ManageUser> {
     super.initState();
   }
 
+  _refresh() async {
+    addResevationBloc.add(GetusersEvent());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,7 +63,7 @@ class _ManageUserState extends State<ManageUser> {
         actions: [
           GestureDetector(
               onTap: () {
-                // _refresh();
+                _refresh();
               },
               child: Padding(
                 padding: EdgeInsets.only(right: 10.w),

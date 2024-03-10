@@ -382,13 +382,6 @@ class _ReservationDetailsState extends State<ReservationDetails> {
                           addReservRequest.user?.name = value;
                           setState(() {});
                         },
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return "Cannot be empty";
-                          }
-                          return null;
-                        },
                         decoration: InputDecoration(
                           labelStyle: const TextStyle(
                             color: Colors.black54,

@@ -53,6 +53,7 @@ class TableModel {
       this.tableSelected = const []});
   late final int reservationId;
   late final String startTime;
+  late final String actualTime;
   late final String endTime;
   late final String identifier;
   late final String guestName;
@@ -83,6 +84,7 @@ class TableModel {
                 .format(DateTime.parse(json['start_time']))
             : json['start_time'])
         : "";
+    actualTime = json['start_time'] ?? "";
     endTime = json['end_time'] ?? "";
     identifier = json['identifier'];
     guestName = json['guest_name'] ?? "";

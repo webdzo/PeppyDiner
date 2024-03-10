@@ -11,7 +11,6 @@ import 'package:hotelpro_mobile/ui/screens/finance.dart';
 import 'package:hotelpro_mobile/ui/screens/kds.dart';
 import 'package:hotelpro_mobile/ui/screens/my_tables.dart';
 import 'package:hotelpro_mobile/ui/screens/non_dining.dart';
-import 'package:hotelpro_mobile/ui/screens/profile.dart';
 import 'package:hotelpro_mobile/ui/screens/reservations_list.dart';
 import 'package:hotelpro_mobile/ui/screens/stepper_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
@@ -30,7 +29,8 @@ class ScaffoldWidget extends StatefulWidget {
 class _ScaffoldWidgetState extends State<ScaffoldWidget> {
   @override
   void initState() {
-    _controller = PersistentTabController(initialIndex: widget.inititalIndex);
+    _controller = PersistentTabController(initialIndex: 0);
+
     getRole();
     super.initState();
   }
@@ -40,7 +40,11 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
   getRole() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     role = pref.getString("role") ?? "";
+
     setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _controller.jumpToTab(widget.inititalIndex);
+    });
   }
 
   // admin@aruvirestaurant.com
@@ -145,7 +149,9 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
       },
       child: PersistentTabView(
         context,
+
         onItemSelected: (value) {
+          print("akkk $value");
           bottomIndex = value;
           setState(() {});
         },

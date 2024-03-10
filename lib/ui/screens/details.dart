@@ -16,7 +16,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../bloc/orders/orders_bloc.dart';
 import '../../bloc/table/table_bloc.dart';
-
 import '../widgets/dialog_widget.dart';
 import '../widgets/text_widget.dart';
 
@@ -36,9 +35,11 @@ class _DetailScreenState extends State<DetailScreen> {
   TextEditingController notesController = TextEditingController();
   TextEditingController deletereasonController = TextEditingController();
   String role = "";
+  String roleId = "";
   getRole() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     role = pref.getString("role") ?? "";
+    roleId = pref.getString("userId") ?? "";
     print(role);
   }
 
@@ -248,11 +249,13 @@ class _DetailScreenState extends State<DetailScreen> {
                           editList.add(false);
                         });
                       }
-                      ordersBloc.add(GetUsername(widget.data["waiter"]));
+                      ordersBloc.add(GetUsername(
+                          int.tryParse(widget.data["waiter"].toString()) ?? 0));
                       return Column(
                         children: [
                           if (widget.data["waiter"].toString() !=
-                              userId.toString())
+                                  userId.toString() &&
+                              role != "ROLE_ADMIN")
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10.w),
                               child: Row(
@@ -298,7 +301,8 @@ class _DetailScreenState extends State<DetailScreen> {
                               ),
                             ),
                           if (widget.data["waiter"].toString() ==
-                              userId.toString())
+                                  userId.toString() ||
+                              role == "ROLE_ADMIN")
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -362,7 +366,12 @@ class _DetailScreenState extends State<DetailScreen> {
                                           "update": state.orders.isNotEmpty,
                                           "tableId": widget.data["tId"],
                                           "type": widget.data["type"],
-                                          "waiter": widget.data["waiter"],
+                                          "waiter": (widget.data["waiter"]
+                                                          .toString() !=
+                                                      userId.toString() &&
+                                                  role == "ROLE_ADMIN")
+                                              ? roleId
+                                              : widget.data["waiter"],
                                           "fromtable": widget.data["fromtable"]
                                         });
                                   }, HexColor("#d4ac2c"),

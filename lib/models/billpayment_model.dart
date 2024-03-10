@@ -6,7 +6,6 @@ class BillpaymentModel {
     required this.flatDiscount,
     required this.flatDiscountType,
     required this.totalAmount,
-    required this.paymentMode,
   });
   late final int subTotalAmount;
   late final int serviceCharge;
@@ -14,7 +13,6 @@ class BillpaymentModel {
   late final int flatDiscount;
   late final String flatDiscountType;
   late final int totalAmount;
-  late final String paymentMode;
 
   BillpaymentModel.fromJson(Map<String, dynamic> json) {
     subTotalAmount = json['sub_total_amount'];
@@ -24,9 +22,6 @@ class BillpaymentModel {
     flatDiscountType = json['flat_discount_type'];
     totalAmount =
         double.tryParse(json['total_amount'].toString())?.toInt() ?? 0;
-    paymentMode = json['payment_mode'].isNotEmpty
-        ? (json['payment_mode'].first ?? "")
-        : "";
   }
 
   Map<String, dynamic> toJson() {
@@ -37,7 +32,7 @@ class BillpaymentModel {
     datas['flat_discount'] = flatDiscount;
     datas['flat_discount_type'] = flatDiscountType;
     datas['total_amount'] = totalAmount;
-    datas['payment_mode'] = paymentMode;
+
     return datas;
   }
 }

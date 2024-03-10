@@ -53,6 +53,7 @@ class _ViewResercationsState extends State<ViewResercations> {
   String reservId = "";
   String guestName = "";
   String balanceAmount = "";
+  String? tempBal;
   List<bool> editGuest = [];
   Map<String, String> guestData = {};
   List<bool> editList = [];
@@ -61,7 +62,6 @@ class _ViewResercationsState extends State<ViewResercations> {
   BillupdateRequest billupdateRequest = BillupdateRequest(data: BillData());
   List<PaymentmodeModel> paymodes = [];
   List<UpdatemodeRequest> modeReq = [];
-
   TextEditingController startDate = TextEditingController();
 
   TextEditingController endDate = TextEditingController();
@@ -108,6 +108,7 @@ class _ViewResercationsState extends State<ViewResercations> {
     billpaymentBloc.add(FetchPayModes());
     // billpaymentBloc.add(FetchDiscount());
     billpaymentBloc.add(FetchService(id: widget.id["rId"].toString()));
+    billpaymentBloc.add(FetchBill(widget.id["rId"].toString()));
 
     addResevationBloc = BlocProvider.of<AddResevationBloc>(context)
       ..stream.listen((event) {
@@ -141,8 +142,6 @@ class _ViewResercationsState extends State<ViewResercations> {
           EasyLoading.showError('Failed with Error');
         }
         if (event is MarkDone) {
-          startDate.clear();
-          endDate.clear();
           EasyLoading.showSuccess('Success!');
           Future.delayed(const Duration(seconds: 2), () {
             reservationBloc.add(ReservationDetailsEvent(widget.id["rId"]));
@@ -226,10 +225,10 @@ class _ViewResercationsState extends State<ViewResercations> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.of(context).pushNamedAndRemoveUntil(
+        navigatorKey.currentState!.pushNamedAndRemoveUntil(
             '/home',
             arguments: widget.id["nonDiner"] ? 1 : 0,
-            (Route<dynamic> route) => false);
+            (Route<dynamic> route) => true);
         return false;
       },
       child: Scaffold(
@@ -310,7 +309,6 @@ class _ViewResercationsState extends State<ViewResercations> {
                       current is BillLoad;
                 },
                 builder: (context, state) {
-                  // billupdateRequest.data.taxGst ??= 0;
                   if (state is BillDone) {
                     print(state.bill.toJson());
                     billupdateRequest.data.serviceCharge ??=
@@ -319,13 +317,11 @@ class _ViewResercationsState extends State<ViewResercations> {
                         state.bill.flatDiscount.toString();
                     billupdateRequest.data.taxGst ??=
                         state.bill.taxGst.toString();
-                    billupdateRequest.data.paymentMode ??=
-                        state.bill.paymentMode.toString();
+
                     billupdateRequest.data.paymentType ??=
                         state.bill.flatDiscountType.toString();
-
-                    print(billupdateRequest.data.paymentMode);
                   }
+
                   if (billupdateRequest.data.serviceCharge == null) {
                     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                       setState(() {});
@@ -396,14 +392,25 @@ class _ViewResercationsState extends State<ViewResercations> {
         ),
         BlocBuilder<BillpaymentBloc, BillpaymentState>(
           buildWhen: (previous, current) {
-            return current is PaymentsDone ||
-                current is PaymentsError ||
-                current is PaymentsLoad;
+            return current is BillDone ||
+                current is BillError ||
+                current is BillLoad;
           },
           builder: (context, state) {
             return typesDropdown(context, typeList);
           },
         ),
+        // BlocBuilder<BillpaymentBloc, BillpaymentState>(
+        //   buildWhen: (previous, current) {
+        //     return current is PaymentsDone ||
+        //         current is PaymentsError ||
+        //         current is PaymentsLoad;
+        //   },
+        //   builder: (context, state) {
+
+        //     return typesDropdown(context, typeList);
+        //   },
+        // ),
         SizedBox(
           height: 20.w,
         ),
@@ -412,7 +419,7 @@ class _ViewResercationsState extends State<ViewResercations> {
           height: 20.w,
         ),
         const Divider(
-          height: 2,
+          height: 1,
           color: Colors.black,
         ),
         SizedBox(
@@ -431,19 +438,19 @@ class _ViewResercationsState extends State<ViewResercations> {
         SizedBox(
           height: 10.w,
         ),
-        BlocBuilder<BillpaymentBloc, BillpaymentState>(
-          buildWhen: (previous, current) {
-            return current is PaymentsDone ||
-                current is PaymentsError ||
-                current is PaymentsLoad;
-          },
-          builder: (context, state) {
-            return paymentDropdown(
-                context, state is PaymentsDone ? state.payments : []);
-          },
-        ),
+        // BlocBuilder<BillpaymentBloc, BillpaymentState>(
+        //   buildWhen: (previous, current) {
+        //     return current is PaymentsDone ||
+        //         current is PaymentsError ||
+        //         current is PaymentsLoad;
+        //   },
+        //   builder: (context, state) {
+        //     return paymentDropdown(
+        //         context, state is PaymentsDone ? state.payments : []);
+        //   },
+        // ),
         SizedBox(
-          height: 10.w,
+          height: 5.w,
         ),
         Center(
           child: button("Update", () {
@@ -771,11 +778,13 @@ class _ViewResercationsState extends State<ViewResercations> {
                                 builder: (context) {
                                   return StatefulBuilder(
                                       builder: (context, setstate) {
+                                    print(
+                                        "$balanceAmount-$tempBal ${((double.tryParse(balanceAmount) ?? 0) - (double.tryParse(tempBal ?? "") ?? 0)).toString()}");
                                     return BlocProvider(
                                       create: (context) => billpaymentBloc,
                                       child: AlertDialog(
                                         title: TextWidget(
-                                          "Balance Amount: Rs. ${balanceAmount.toString()}",
+                                          "Balance Amount: Rs. ${((double.tryParse(balanceAmount) ?? 0) - (double.tryParse(tempBal ?? "") ?? 0)).toString()}",
                                           fontweight: FontWeight.bold,
                                         ),
                                         content: Column(
@@ -806,6 +815,17 @@ class _ViewResercationsState extends State<ViewResercations> {
 
                                                     payMode = "";
                                                     payController.clear();
+                                                    tempBal = modeReq
+                                                        .fold(
+                                                            0,
+                                                            (previousValue,
+                                                                    element) =>
+                                                                previousValue +
+                                                                (int.tryParse(
+                                                                        element
+                                                                            .value) ??
+                                                                    0))
+                                                        .toString();
                                                     setstate(() {});
                                                   }
                                                 }, HexColor("#d4ac2c"),
@@ -867,11 +887,14 @@ class _ViewResercationsState extends State<ViewResercations> {
                                         ),
                                         actions: [
                                           button("Cancel", () {
+                                            tempBal = null;
+                                            modeReq = [];
                                             payController.text = "";
                                             Navigator.pop(context);
                                           }, Colors.red, size: 18.sp),
                                           button("Submit", () {
                                             if (modeReq.isNotEmpty) {
+                                              tempBal = null;
                                               Navigator.pop(context);
                                               reservationBloc.add(PaynowEvent(
                                                   reservId.toString(),
@@ -977,8 +1000,8 @@ class _ViewResercationsState extends State<ViewResercations> {
       automaticallyImplyLeading: false,
       leading: GestureDetector(
         onTap: () {
-          Navigator.of(context).pushNamedAndRemoveUntil(
-              '/home', arguments: bottomIndex, (Route<dynamic> route) => false);
+          navigatorKey.currentState
+              ?.pushReplacementNamed("/home", arguments: bottomIndex);
           // Navigator.pop(context);
         },
         child: const Padding(
@@ -1156,30 +1179,6 @@ class _ViewResercationsState extends State<ViewResercations> {
               ),
             ))
       ],
-    );
-  }
-
-  InputDecoration calendarDecoration({bool timer = false}) {
-    return InputDecoration(
-      suffixIcon: Icon(
-        timer ? Icons.access_time : Icons.calendar_month,
-        color: Colors.grey.shade800,
-      ),
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
-      fillColor: Colors.red,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(0),
-        borderSide: const BorderSide(color: Colors.black, width: 0.5),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(0),
-        borderSide: const BorderSide(color: Colors.black, width: 0.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(0),
-        borderSide: const BorderSide(color: Colors.black, width: 0.5),
-      ),
     );
   }
 
@@ -1976,15 +1975,68 @@ class _ViewResercationsState extends State<ViewResercations> {
     );
   }
 
-  BlocBuilder<BillpaymentBloc, BillpaymentState> discountWidget() {
-    return BlocBuilder<BillpaymentBloc, BillpaymentState>(
+  discountWidget() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 15.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            controller: TextEditingController.fromValue(TextEditingValue(
+              text: billupdateRequest.data.flatDiscount?.toString() ?? "",
+              selection: TextSelection.fromPosition(
+                TextPosition(
+                    offset: (billupdateRequest.data.taxGst.toString()).length),
+              ),
+            )),
+            onChanged: (value) {
+              billupdateRequest.data.flatDiscount = value;
+              setState(() {});
+            },
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return "Cannot be empty";
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              suffixIcon: Container(
+                  decoration: const BoxDecoration(
+                      border: Border(
+                    left: BorderSide(
+                      color: Colors.grey,
+                      width: 1,
+                    ),
+                  )),
+                  child: billupdateRequest.data.paymentType == "fixed"
+                      ? const Icon(Icons.currency_rupee)
+                      : const Icon(Icons.percent)),
+              labelText: "Discount",
+              fillColor: Colors.white,
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5.0),
+                borderSide: BorderSide(
+                  color: HexColor("#d4ac2c"),
+                ),
+              ),
+              //fillColor: Colors.green
+            ),
+          )
+        ],
+      ),
+    );
+
+    /* BlocBuilder<BillpaymentBloc, BillpaymentState>(
       buildWhen: (previous, current) {
         return current is DiscountLoad ||
             current is DiscountError ||
             current is DiscountDone;
       },
       builder: (context, state) {
-        // print("discount stattt$state");
+        print("discount stattt$state");
         if (state is DiscountDone) {
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 15.w),
@@ -2036,51 +2088,6 @@ class _ViewResercationsState extends State<ViewResercations> {
                     //fillColor: Colors.green
                   ),
                 )
-                /*  Wrap(
-                  direction: Axis.horizontal,
-                  children: List.generate(state.discounts.length, (index) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (index == 0)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Radio(
-                                  value: 0,
-                                  groupValue: int.tryParse(
-                                          billupdateRequest.data.flatDiscount ??
-                                              "0") ??
-                                      0,
-                                  onChanged: (value) {
-                                    billupdateRequest.data.flatDiscount =
-                                        value.toString();
-                                    setState(() {});
-                                  }),
-                              const TextWidget("No Discount"),
-                            ],
-                          ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Radio(
-                                value: state.discounts[index].discountValue,
-                                groupValue: int.tryParse(
-                                        billupdateRequest.data.flatDiscount ??
-                                            "0") ??
-                                    0,
-                                onChanged: (value) {
-                                  billupdateRequest.data.flatDiscount =
-                                      value.toString();
-                                  setState(() {});
-                                }),
-                            TextWidget(state.discounts[index].discountCode)
-                          ],
-                        ),
-                      ],
-                    );
-                  }),
-                ), */
               ],
             ),
           );
@@ -2093,7 +2100,7 @@ class _ViewResercationsState extends State<ViewResercations> {
         }
         return const TextWidget("error");
       },
-    );
+    ); */
   }
 
   BlocBuilder<BillpaymentBloc, BillpaymentState> serviceWidget() {
@@ -3503,6 +3510,30 @@ class _ViewResercationsState extends State<ViewResercations> {
               );
             }).toList(),
           )),
+    );
+  }
+
+  InputDecoration calendarDecoration({bool timer = false}) {
+    return InputDecoration(
+      suffixIcon: Icon(
+        timer ? Icons.access_time : Icons.calendar_month,
+        color: Colors.grey.shade800,
+      ),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+      fillColor: Colors.red,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(0),
+        borderSide: const BorderSide(color: Colors.black, width: 0.5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(0),
+        borderSide: const BorderSide(color: Colors.black, width: 0.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(0),
+        borderSide: const BorderSide(color: Colors.black, width: 0.5),
+      ),
     );
   }
 }

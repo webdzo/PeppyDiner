@@ -12,6 +12,8 @@ int? reservIndex;
 int? nondineIndex;
 int? tableIndex;
 int bottomIndex = 0;
+// final GlobalKey<ScaffoldState> drawerKey1 = GlobalKey();
+// final GlobalKey<ScaffoldState> drawerKey2 = GlobalKey();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   BaseUrl.appBaseurl = "http://13.200.118.169/api";

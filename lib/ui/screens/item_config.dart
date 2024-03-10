@@ -8,6 +8,8 @@ import 'package:hotelpro_mobile/bloc/items/items_bloc.dart';
 import 'package:hotelpro_mobile/models/itemconfig_model.dart';
 import 'package:hotelpro_mobile/route_generator.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
+import 'package:hotelpro_mobile/ui/screens/drawer_widget.dart';
+import 'package:hotelpro_mobile/ui/widgets/applogo_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/button.dart';
 import 'package:hotelpro_mobile/ui/widgets/text_widget.dart';
 
@@ -46,9 +48,14 @@ class _ItemConfigState extends State<ItemConfig> {
     super.initState();
   }
 
+  _refresh() async {
+    itemsBloc.add(FetchItemConfig());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // key: drawerKey2,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           navigatorKey.currentState!
@@ -60,14 +67,27 @@ class _ItemConfigState extends State<ItemConfig> {
           color: Colors.black,
         ),
       ),
+      drawer: const NavDrawer(),
       appBar: AppBar(
+        actions: [
+          GestureDetector(
+              onTap: () {
+                _refresh();
+              },
+              child: Padding(
+                padding: EdgeInsets.only(right: 10.w),
+                child: const Icon(
+                  Icons.replay_outlined,
+                  color: Colors.black,
+                ),
+              ))
+        ],
         backgroundColor: HexColor("#d4ac2c"),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
-        /*  leading: Padding(
-          padding: EdgeInsets.all(5.w),
-          child: Image.asset("assets/appLogo.png"),
-        ), */
+        leading: const ApplogoButton(
+            // keys: drawerKey2,
+            ),
         title: TextWidget(
           "All Items",
           style: GoogleFonts.belleza(

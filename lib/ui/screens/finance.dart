@@ -6,6 +6,8 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:hotelpro_mobile/models/timestats_model.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/screens/details.dart';
+import 'package:hotelpro_mobile/ui/screens/drawer_widget.dart';
+import 'package:hotelpro_mobile/ui/widgets/applogo_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -102,17 +104,41 @@ class _FinanceScreenState extends State<FinanceScreen> {
   }
 
   String selected = "Cancelled";
+  int selectedIndex = 0;
+  _refresh() async {
+    // Simulate a delay
+    if (selectedIndex == 0) {
+      financeBloc.add(FetchIncome());
+      financeBloc.add(FetchItemstats(itemstartDate.text, itemendDate.text));
+      financeBloc.add(FetchTimestats(timestartDate.text, timeendDate.text));
+    }
+    if (selectedIndex == 1) {
+      if (selected == "Cancelled") {
+        financeBloc
+            .add(FetchCanclledorder(orderstartDate.text, orderendDate.text));
+      }
+      if (selected == "Deleted") {
+        financeBloc
+            .add(FetchDeletedorder(orderstartDate.text, orderendDate.text));
+      }
+      if (selected == "Category") {
+        financeBloc
+            .add(FetchbyCategory(orderstartDate.text, orderendDate.text));
+      }
+      if (selected == "Waiter") {
+        financeBloc.add(FetchbyWaiter(orderstartDate.text, orderendDate.text));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        drawer: const NavDrawer(),
         appBar: AppBar(
           toolbarHeight: 100.w,
           backgroundColor: HexColor("#d4ac2c"),
-          leading: Padding(
-            padding: EdgeInsets.all(5.w),
-            child: Image.asset("assets/appLogo.png"),
-          ),
+          leading: const ApplogoButton(),
           title: Row(
             children: [
               TextWidget(
@@ -125,6 +151,19 @@ class _FinanceScreenState extends State<FinanceScreen> {
               ),
             ],
           ),
+          actions: [
+            GestureDetector(
+                onTap: () {
+                  _refresh();
+                },
+                child: Padding(
+                  padding: EdgeInsets.only(right: 10.w),
+                  child: const Icon(
+                    Icons.replay_outlined,
+                    color: Colors.black,
+                  ),
+                ))
+          ],
         ),
         body: DefaultTabController(
             length: 2,
@@ -148,6 +187,8 @@ class _FinanceScreenState extends State<FinanceScreen> {
                         financeBloc.add(FetchCanclledorder(
                             orderstartDate.text, orderendDate.text));
                       }
+                      selectedIndex = value;
+                      setState(() {});
                     },
                     automaticIndicatorColorAdjustment: true,
                     indicatorColor: HexColor("#d4ac2c"),
@@ -166,6 +207,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
                   ),
                 ),
                 body: TabBarView(
+                  physics: const NeverScrollableScrollPhysics(),
                   children: [
                     tab1Widget(context),
                     Column(

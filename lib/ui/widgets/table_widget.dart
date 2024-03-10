@@ -55,6 +55,22 @@ class _TableWidgetState extends State<TableWidget> {
   TimeOfDay? fromTime;
   TimeOfDay? toTime;
 
+  isTimeDifferenceGreaterThan5Minutes(DateTime reservationTime) {
+    DateTime resTime =
+        reservationTime.subtract(const Duration(hours: 5, minutes: 30));
+    DateTime currentTime = DateTime.now();
+
+    Duration difference = currentTime.difference(resTime);
+
+    int differenceInMinutes = difference.inMinutes;
+
+    if (difference.inMinutes > 5) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   Future<void> _selectFromTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -412,48 +428,79 @@ class _TableWidgetState extends State<TableWidget> {
     );
   }
 
-  GestureDetector listCardwidget(int index, BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (widget.type == "past" ||
-            widget.type == "current" ||
-            widget.type == "upcoming") {
-          if (role == "ROLE_ADMIN" || role == "ROLE_MANAGER") {
-            navigatorKey.currentState
-                ?.pushNamed("/viewReservation", arguments: {
-              "rId": widget.nonDiner
-                  ? widget.tableList[index].id
-                  : widget.tableList[index].reservationId,
-              "nonDiner": (widget.tableList[index].diningType == "takeaway" ||
-                  widget.tableList[index].diningType == "delivery")
-            }).then((value) => tableBloc
-                    .add(FetchTables(widget.type, nonDiner: widget.nonDiner)));
-          }
-        }
-      },
-      child: Container(
-          decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              border: Border.all(color: Colors.grey, width: 0.5),
-              borderRadius: BorderRadius.circular(10)),
-          margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.w),
-          child: ExpandablePanel(
-            theme: ExpandableThemeData(
-              headerAlignment: ExpandablePanelHeaderAlignment.center,
-              animationDuration: const Duration(milliseconds: 500),
-              tapHeaderToExpand: (widget.type == "past" ||
-                      widget.type == "current" ||
-                      widget.type == "upcoming")
-                  ? false
-                  : true,
-              hasIcon: false,
-            ),
-            collapsed: const SizedBox(
-              height: 2,
-            ),
-            header: listViewcontent(index, context),
-            expanded: expandedWidget(index, context),
-          )),
+  listCardwidget(int index, BuildContext context) {
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(
+              top: ((!widget.nonDiner) &&
+                      isTimeDifferenceGreaterThan5Minutes(
+                          DateTime.parse(widget.tableList[index].actualTime)) &&
+                      (widget.type == "past" ||
+                          widget.type == "current" ||
+                          widget.type == "upcoming"))
+                  ? 10.w
+                  : 0),
+          child: GestureDetector(
+            onTap: () {
+              if (widget.type == "past" ||
+                  widget.type == "current" ||
+                  widget.type == "upcoming") {
+                if (role == "ROLE_ADMIN" || role == "ROLE_MANAGER") {
+                  navigatorKey.currentState
+                      ?.pushNamed("/viewReservation", arguments: {
+                    "rId": widget.nonDiner
+                        ? widget.tableList[index].id
+                        : widget.tableList[index].reservationId,
+                    "nonDiner":
+                        (widget.tableList[index].diningType == "takeaway" ||
+                            widget.tableList[index].diningType == "delivery")
+                  }).then((value) => tableBloc.add(
+                          FetchTables(widget.type, nonDiner: widget.nonDiner)));
+                }
+              }
+            },
+            child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    border: Border.all(color: Colors.grey, width: 0.5),
+                    borderRadius: BorderRadius.circular(10)),
+                margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.w),
+                child: ExpandablePanel(
+                  theme: ExpandableThemeData(
+                    headerAlignment: ExpandablePanelHeaderAlignment.center,
+                    animationDuration: const Duration(milliseconds: 500),
+                    tapHeaderToExpand: (widget.type == "past" ||
+                            widget.type == "current" ||
+                            widget.type == "upcoming")
+                        ? false
+                        : true,
+                    hasIcon: false,
+                  ),
+                  collapsed: const SizedBox(
+                    height: 2,
+                  ),
+                  header: listViewcontent(index, context),
+                  expanded: expandedWidget(index, context),
+                )),
+          ),
+        ),
+        if ((!widget.nonDiner) &&
+            isTimeDifferenceGreaterThan5Minutes(
+                DateTime.parse(widget.tableList[index].actualTime)))
+          if ((!widget.nonDiner) &&
+              isTimeDifferenceGreaterThan5Minutes(
+                  DateTime.parse(widget.tableList[index].actualTime)) &&
+              (widget.type == "past" ||
+                  widget.type == "current" ||
+                  widget.type == "upcoming"))
+            const Positioned(
+                child: Icon(
+              Icons.warning,
+              color: Colors.red,
+            )),
+      ],
     );
   }
 

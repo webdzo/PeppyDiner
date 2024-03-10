@@ -1,6 +1,4 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -53,6 +51,17 @@ class _KdsScreenState extends State<KdsScreen> {
     super.initState();
   }
 
+  _refresh() async {
+    // Simulate a delay
+
+    if (selectedIndex == 1) {
+      ordersBloc.add(CurrentOrders());
+    } else {
+      ordersBloc.add(OngoingOrders());
+    }
+  }
+
+  int selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,6 +86,17 @@ class _KdsScreenState extends State<KdsScreen> {
              */
         ),
         actions: [
+          GestureDetector(
+              onTap: () {
+                _refresh();
+              },
+              child: Padding(
+                padding: EdgeInsets.only(right: 10.w),
+                child: const Icon(
+                  Icons.replay_outlined,
+                  color: Colors.black,
+                ),
+              )),
           if (role == "ROLE_CHEF")
             GestureDetector(
               onTap: () {
@@ -154,6 +174,8 @@ class _KdsScreenState extends State<KdsScreen> {
                   } else {
                     ordersBloc.add(OngoingOrders());
                   }
+                  selectedIndex = value;
+                  setState(() {});
                 },
                 automaticIndicatorColorAdjustment: true,
                 indicatorColor: HexColor("#d4ac2c"),

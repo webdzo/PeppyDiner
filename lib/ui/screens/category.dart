@@ -14,6 +14,7 @@ import 'package:hotelpro_mobile/models/items_model.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/screens/details.dart';
 import 'package:hotelpro_mobile/ui/widgets/dialog_widget.dart';
+import 'package:hotelpro_mobile/ui/widgets/search_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../bloc/category/category_bloc.dart';

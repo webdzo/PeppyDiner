@@ -6,6 +6,8 @@ import 'package:hotelpro_mobile/bloc/table/table_bloc.dart';
 import 'package:hotelpro_mobile/main_qa.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/screens/details.dart';
+import 'package:hotelpro_mobile/ui/screens/drawer_widget.dart';
+import 'package:hotelpro_mobile/ui/widgets/applogo_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/text_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,13 +49,11 @@ class _NondiningState extends State<Nondining> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        drawer: const NavDrawer(),
         appBar: AppBar(
           backgroundColor: HexColor("#d4ac2c"),
           elevation: 0,
-          leading: Padding(
-            padding: EdgeInsets.all(5.w),
-            child: Image.asset("assets/appLogo.png"),
-          ),
+          leading: const ApplogoButton(),
           title: TextWidget(
             "Hi ${username != "" ? username.capitalize() : username},",
             style: GoogleFonts.belleza(

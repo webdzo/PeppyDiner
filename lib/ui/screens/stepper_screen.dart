@@ -5,6 +5,8 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:hotelpro_mobile/bloc/table/table_bloc.dart';
 import 'package:hotelpro_mobile/main_qa.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
+import 'package:hotelpro_mobile/ui/screens/drawer_widget.dart';
+import 'package:hotelpro_mobile/ui/widgets/applogo_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/text_widget.dart';
 import 'package:intl/intl.dart';
 
@@ -128,13 +130,24 @@ class _StepperScreenState extends State<StepperScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const NavDrawer(),
       appBar: AppBar(
+        actions: [
+          GestureDetector(
+              onTap: () {
+                _refresh(selectedSpace);
+              },
+              child: Padding(
+                padding: EdgeInsets.only(right: 10.w),
+                child: const Icon(
+                  Icons.replay_outlined,
+                  color: Colors.black,
+                ),
+              ))
+        ],
         backgroundColor: HexColor("#d4ac2c"),
         elevation: 0,
-        leading: Padding(
-          padding: EdgeInsets.all(5.w),
-          child: Image.asset("assets/appLogo.png"),
-        ),
+        leading: const ApplogoButton(),
         title: TextWidget(
           "Dining",
           style: GoogleFonts.belleza(
@@ -205,6 +218,7 @@ class _StepperScreenState extends State<StepperScreen> {
                                   ))),
                     ),
                     body: TabBarView(
+                      physics: const NeverScrollableScrollPhysics(),
                       children: List.generate(state.spaces.length,
                           (id) => levelTableswidget(state.spaces[id].id)),
                     ),
@@ -339,6 +353,12 @@ class _StepperScreenState extends State<StepperScreen> {
                 ],
               ),
             ));
+  }
+
+  Future<void> _refresh(int id) async {
+    // Simulate a delay
+    await Future.delayed(const Duration(seconds: 1));
+    tableBloc.add(FetchLeveltable(selectedTime ?? "", id));
   }
 
   Iterable<TimeOfDay> getTimes(

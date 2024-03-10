@@ -22,29 +22,6 @@ class BillpaymentBloc extends Bloc<BillpaymentEvent, BillpaymentState> {
         emit(ServiceError());
         throw ("error");
       }
-      try {
-        final contacts = await BillRepo().discounts();
-
-        emit(DiscountDone(contacts));
-      } catch (e) {
-        emit(DiscountError());
-      }
-      try {
-        final contacts = await BillRepo().payments();
-
-        emit(PaymentsDone(contacts));
-      } catch (e) {
-        emit(PaymentsError());
-        throw ("error");
-      }
-      try {
-        final contacts = await BillRepo().billDetail(event.id);
-
-        emit(BillDone(contacts));
-      } catch (e) {
-        emit(BillError());
-        throw ("error");
-      }
     });
 
     on<FetchDiscount>((event, emit) async {

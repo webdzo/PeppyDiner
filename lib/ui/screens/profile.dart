@@ -4,7 +4,6 @@ import 'package:hotelpro_mobile/route_generator.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/widgets/button.dart';
 import 'package:hotelpro_mobile/ui/widgets/text_widget.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyProfile extends StatefulWidget {

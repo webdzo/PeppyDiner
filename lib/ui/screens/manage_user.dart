@@ -8,6 +8,7 @@ import 'package:hotelpro_mobile/bloc/addReservation/add_reservation_event.dart';
 import 'package:hotelpro_mobile/bloc/addReservation/add_reservation_state.dart';
 import 'package:hotelpro_mobile/route_generator.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
+import 'package:hotelpro_mobile/ui/screens/details.dart';
 import 'package:hotelpro_mobile/ui/screens/drawer_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/applogo_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/button.dart';
@@ -121,7 +122,7 @@ class _ManageUserState extends State<ManageUser> {
                                     fontweight: FontWeight.bold,
                                   ),
                                   TextWidget(
-                                    state.users[index].roleName,
+                                    state.users[index].roleName.capitalize(),
                                     fontweight: FontWeight.bold,
                                   ),
                                 ],

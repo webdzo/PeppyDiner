@@ -259,19 +259,25 @@ class _StepperScreenState extends State<StepperScreen> {
               return Wrap(
                 alignment: WrapAlignment.center,
                 children: List.generate(state.tables.bookedTables.length, (i) {
-                  return Container(
-                    width: 100.w,
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.all(10.w),
-                    padding: EdgeInsets.all(20.w),
-                    decoration: BoxDecoration(
-                        color: state.tables.bookedTables[i].status != "AL"
-                            ? HexColor("#d4ac2c")
-                            : Colors.red.shade900,
-                        shape: BoxShape.circle),
-                    child: TextWidget(
-                      state.tables.bookedTables[i].name,
-                      size: 22.sp,
+                  return SizedBox(
+                    width: 120.w,
+                    height: 120.w,
+                    child: Container(
+                      width: 100.w,
+                      height: 100.w,
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.all(10.w),
+                      padding: EdgeInsets.all(5.w),
+                      decoration: BoxDecoration(
+                          color: state.tables.bookedTables[i].status != "AL"
+                              ? HexColor("#d4ac2c")
+                              : Colors.red.shade900,
+                          shape: BoxShape.circle),
+                      child: TextWidget(
+                        state.tables.bookedTables[i].name,
+                        size: 19.sp,
+                        fontweight: FontWeight.bold,
+                      ),
                     ),
                   );
                 }),

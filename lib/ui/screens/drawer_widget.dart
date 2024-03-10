@@ -73,23 +73,32 @@ class _NavDrawerState extends State<NavDrawer> {
               navigatorKey.currentState!.pushReplacementNamed("/itemconfig");
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Manage User'),
-            onTap: () {
-              // Navigator.of(context).pop();
-              navigatorKey.currentState!.pushReplacementNamed("/userConfig");
-            },
-          ),
           if (role == "ROLE_ADMIN")
             ListTile(
               leading: const Icon(Icons.people),
+              title: const Text('Manage User'),
+              onTap: () {
+                // Navigator.of(context).pop();
+                navigatorKey.currentState!.pushReplacementNamed("/userConfig");
+              },
+            ),
+          if (role == "ROLE_ADMIN")
+            ListTile(
+              leading: const Icon(Icons.bar_chart),
               title: const Text('Reports'),
               onTap: () {
                 // Navigator.of(context).pop();
                 navigatorKey.currentState!.pushReplacementNamed("/reports");
               },
             ),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Porfile'),
+            onTap: () {
+              // Navigator.of(context).pop();
+              navigatorKey.currentState!.pushReplacementNamed("/profile");
+            },
+          ),
         ],
       ),
     );

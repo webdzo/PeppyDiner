@@ -17,6 +17,7 @@ import 'package:hotelpro_mobile/models/paymentmode_model.dart';
 import 'package:hotelpro_mobile/models/payments_model.dart';
 import 'package:hotelpro_mobile/models/updatemode_request.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
+import 'package:hotelpro_mobile/ui/screens/add_reservation.dart';
 import 'package:hotelpro_mobile/ui/widgets/dropdown.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -60,6 +61,10 @@ class _ViewResercationsState extends State<ViewResercations> {
   BillupdateRequest billupdateRequest = BillupdateRequest(data: BillData());
   List<PaymentmodeModel> paymodes = [];
   List<UpdatemodeRequest> modeReq = [];
+
+  TextEditingController startDate = TextEditingController();
+
+  TextEditingController endDate = TextEditingController();
 
   String role = "";
   getRole() async {
@@ -136,6 +141,8 @@ class _ViewResercationsState extends State<ViewResercations> {
           EasyLoading.showError('Failed with Error');
         }
         if (event is MarkDone) {
+          startDate.clear();
+          endDate.clear();
           EasyLoading.showSuccess('Success!');
           Future.delayed(const Duration(seconds: 2), () {
             reservationBloc.add(ReservationDetailsEvent(widget.id["rId"]));
@@ -988,6 +995,190 @@ class _ViewResercationsState extends State<ViewResercations> {
         color: Colors.black,
         fontweight: FontWeight.w700,
         size: 22.sp,
+      ),
+      actions: [
+        GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const TextWidget(
+                      "Backdate reservation",
+                      fontweight: FontWeight.bold,
+                    ),
+                    content: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const TextWidget(
+                            "Your reservation will backdate to the date chosen"),
+                        SizedBox(
+                          height: 10.w,
+                        ),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
+                          child: TextFormField(
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18.sp,
+                            ),
+                            decoration: calendarDecoration(),
+                            readOnly: true,
+                            autofocus: false,
+                            validator: (value) {
+                              if ((value ?? "").isEmpty) {
+                                return "Select date";
+                              }
+                              return null;
+                            },
+                            focusNode: null,
+                            controller: startDate,
+                            onTap: () async {
+                              DateTime? pickedDate = await showDatePicker(
+                                context: context,
+
+                                builder: (BuildContext context, Widget? child) {
+                                  return Theme(
+                                    data: ThemeData(
+                                      colorScheme: ColorScheme.light(
+                                        primary: HexColor("#d4ac2c"),
+                                      ),
+                                      dialogBackgroundColor: Colors.white,
+                                    ),
+                                    child: child ?? const Text(""),
+                                  );
+                                },
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now(),
+                                //DateTime.now() - not to allow to choose before today.
+                                lastDate: DateTime(2100),
+                              );
+
+                              if (pickedDate != null) {
+                                String formattedDate =
+                                    DateFormat('yyyy-MM-dd').format(pickedDate);
+
+                                setState(() {
+                                  startDate.text = formattedDate;
+                                });
+                              } else {}
+                            },
+                          ),
+                        ),
+                        Icon(
+                          Icons.swap_vert,
+                          color: Colors.grey.shade800,
+                        ),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          child: TextFormField(
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18.sp,
+                            ),
+                            validator: (value) {
+                              if ((value ?? "").isEmpty) {
+                                return "Select date";
+                              }
+                              return null;
+                            },
+                            decoration: calendarDecoration(timer: true),
+                            controller: endDate,
+                            readOnly: true,
+                            autofocus: false,
+                            focusNode: null,
+                            onTap: () async {
+                              final TimeOfDay? result = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now(),
+                                  builder: (context, childWidget) {
+                                    return MediaQuery(
+                                        data: MediaQuery.of(context).copyWith(
+                                            // Using 24-Hour format
+                                            alwaysUse24HourFormat: true),
+                                        // If you want 12-Hour format, just change alwaysUse24HourFormat to false or remove all the builder argument
+                                        child: childWidget!);
+                                  });
+
+                              if (result != null) {
+                                String formattedDate = result.to24hours();
+
+                                setState(() {
+                                  endDate.text = formattedDate;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15.w,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            button("Cancel", () {
+                              startDate.clear();
+                              endDate.clear();
+                            }, Colors.red.shade900),
+                            SizedBox(
+                              width: 10.w,
+                            ),
+                            button("Submit", () {
+                              reservationBloc.add(BackdateEvent(
+                                  "${startDate.text}T${endDate.text}:00Z"));
+                              navigatorKey.currentState?.pop();
+                            }, Colors.green.shade900)
+                          ],
+                        )
+                      ],
+                    ),
+                  );
+                },
+              ).then((value) {
+                setState(() {});
+              });
+            },
+            child: Padding(
+              padding: EdgeInsets.only(right: 15.w),
+              child: const Icon(
+                Icons.calendar_month,
+                color: Colors.black,
+              ),
+            ))
+      ],
+    );
+  }
+
+  InputDecoration calendarDecoration({bool timer = false}) {
+    return InputDecoration(
+      suffixIcon: Icon(
+        timer ? Icons.access_time : Icons.calendar_month,
+        color: Colors.grey.shade800,
+      ),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+      fillColor: Colors.red,
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(0),
+        borderSide: const BorderSide(color: Colors.black, width: 0.5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(0),
+        borderSide: const BorderSide(color: Colors.black, width: 0.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(0),
+        borderSide: const BorderSide(color: Colors.black, width: 0.5),
       ),
     );
   }

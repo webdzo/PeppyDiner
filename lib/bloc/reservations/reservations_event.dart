@@ -78,3 +78,9 @@ class SwapEvent extends ReservationsEvent {
 
   SwapEvent(this.id, this.oldid, this.newid);
 }
+
+class BackdateEvent extends ReservationsEvent {
+  final String date;
+
+  BackdateEvent(this.date);
+}

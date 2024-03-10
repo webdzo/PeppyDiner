@@ -22,7 +22,8 @@ class BillpaymentModel {
     taxGst = int.tryParse(json['tax_gst'].toString())?.toInt() ?? 0;
     flatDiscount = json['flat_discount'] ?? 0;
     flatDiscountType = json['flat_discount_type'];
-    totalAmount = json['total_amount'] ?? 0;
+    totalAmount =
+        double.tryParse(json['total_amount'].toString())?.toInt() ?? 0;
     paymentMode = json['payment_mode'].isNotEmpty
         ? (json['payment_mode'].first ?? "")
         : "";

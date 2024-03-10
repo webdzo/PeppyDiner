@@ -197,4 +197,13 @@ class AddReservationRepository {
 
     return response;
   }
+
+  Future<Response> backdate(String date) async {
+    var response = await ApiBaseHelper().putMethod(
+      "/reservations/7/back-date",
+      jsonEncode({"backdatetime": "2024-03-12T19:19:43Z"}),
+    );
+
+    return response;
+  }
 }

@@ -165,5 +165,17 @@ class ReservationsBloc extends Bloc<ReservationsEvent, ReservationsState> {
         throw ("error");
       }
     });
+
+    on<BackdateEvent>((event, emit) async {
+      emit(MarkLoad());
+      try {
+        final response = await AddReservationRepository().backdate(event.date);
+
+        emit(MarkDone());
+      } catch (e) {
+        emit(MarkError());
+        throw ("error");
+      }
+    });
   }
 }

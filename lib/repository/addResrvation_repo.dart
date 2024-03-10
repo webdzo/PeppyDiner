@@ -198,11 +198,25 @@ class AddReservationRepository {
     return response;
   }
 
-  
   Future<Response> backdate(String date) async {
     var response = await ApiBaseHelper().putMethod(
       "/reservations/7/back-date",
       jsonEncode({"backdatetime": "2024-03-12T19:19:43Z"}),
+    );
+
+    return response;
+  }
+
+  Future<Response> delete(String mail,
+      {bool block = false, bool change = false, String pwd = ""}) async {
+    var response = await ApiBaseHelper().putMethod(
+      change
+          ? "/auth/change-password"
+          : block
+              ? "/users/block"
+              : "/users/delete",
+      jsonEncode(
+          change ? {"password": pwd, "useremail": mail} : {"useremail": mail}),
     );
 
     return response;

@@ -39,7 +39,7 @@ class AddResevationBloc extends Bloc<AddreservationEvent, AddReservationState> {
       }
     });
 
-     on<UpdateGuestcount>((event, emit) async {
+    on<UpdateGuestcount>((event, emit) async {
       emit(AddReservationLoad());
       try {
         final response = await AddReservationRepository()
@@ -111,6 +111,19 @@ class AddResevationBloc extends Bloc<AddreservationEvent, AddReservationState> {
         emit(UsersDone(resp));
       } catch (e) {
         emit(UsersError());
+        throw ("error");
+      }
+    });
+
+    on<DeleteusersEvent>((event, emit) async {
+      emit(UpdateUsersLoad());
+      try {
+        var resp = await AddReservationRepository().delete(event.mail,
+            block: event.block, change: event.change, pwd: event.pwd);
+
+        emit(UpdateUsersDone());
+      } catch (e) {
+        emit(UpdateUsersError());
         throw ("error");
       }
     });

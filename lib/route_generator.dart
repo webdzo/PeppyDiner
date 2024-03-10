@@ -14,6 +14,7 @@ import 'package:hotelpro_mobile/ui/screens/item_config.dart';
 import 'package:hotelpro_mobile/ui/screens/items.dart';
 import 'package:hotelpro_mobile/ui/screens/kds.dart';
 import 'package:hotelpro_mobile/ui/screens/login_page.dart';
+import 'package:hotelpro_mobile/ui/screens/manage_user.dart';
 import 'package:hotelpro_mobile/ui/screens/profile.dart';
 import 'package:hotelpro_mobile/ui/screens/reserv_details.dart';
 import 'package:hotelpro_mobile/ui/screens/view_reservation.dart';
@@ -66,6 +67,13 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           builder: (_) => BlocProvider(
                 create: (context) => ItemsBloc(),
                 child: const ItemConfig(),
+              ));
+
+    case "/userConfig":
+      return MaterialPageRoute(
+          builder: (_) => BlocProvider(
+                create: (context) => AddResevationBloc(),
+                child: const ManageUser(),
               ));
 
     case "/profile":

@@ -268,7 +268,10 @@ class _StepperScreenState extends State<StepperScreen> {
                             ? HexColor("#d4ac2c")
                             : Colors.red.shade900,
                         shape: BoxShape.circle),
-                    child: TextWidget(state.tables.bookedTables[i].name),
+                    child: TextWidget(
+                      state.tables.bookedTables[i].name,
+                      size: 22.sp,
+                    ),
                   );
                 }),
               );

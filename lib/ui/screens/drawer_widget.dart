@@ -50,6 +50,14 @@ class NavDrawer extends StatelessWidget {
               navigatorKey.currentState!.pushReplacementNamed("/itemconfig");
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.people),
+            title: const Text('Manage User'),
+            onTap: () {
+              // Navigator.of(context).pop();
+              navigatorKey.currentState!.pushReplacementNamed("/userConfig");
+            },
+          ),
         ],
       ),
     );

@@ -45,3 +45,13 @@ class UpdateGuestcount extends AddreservationEvent {
   final int id;
   UpdateGuestcount(this.count, this.id);
 }
+
+class DeleteusersEvent extends AddreservationEvent {
+  final String mail;
+  final bool block;
+  final bool change;
+  final String pwd;
+
+  DeleteusersEvent(this.mail,
+      {this.block = false, this.change = false, this.pwd = ""});
+}

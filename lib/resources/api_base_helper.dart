@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hotelpro_mobile/route_generator.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -75,6 +77,14 @@ class ApiBaseHelper {
 
       if (response.statusCode == 204) {
         throw response.statusCode.toString();
+      } else if (response.statusCode == 403) {
+        Fluttertoast.showToast(msg: "Not Authorized");
+        navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          "/",
+          (route) {
+            return false;
+          },
+        );
       } else {
         log(json.decode(response.body)["message"]);
         throw json.decode(response.body)["message"];

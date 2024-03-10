@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:hotelpro_mobile/bloc/table/table_bloc.dart';
 import 'package:hotelpro_mobile/main_qa.dart';
-import 'package:hotelpro_mobile/route_generator.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/screens/details.dart';
 import 'package:hotelpro_mobile/ui/screens/drawer_widget.dart';
@@ -45,13 +44,14 @@ class _MyTablesState extends State<MyTables> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-         drawer: const NavDrawer(),
+        drawer: const NavDrawer(),
         appBar: AppBar(
           backgroundColor: HexColor("#d4ac2c"),
           elevation: 0,
-           leading: const ApplogoButton(),
+          iconTheme: const IconThemeData(color: Colors.black),
+          actions: const [ApplogoButton()],
           title: TextWidget(
-            "Hi ${username != "" ? username.capitalize() : username},",
+            "Hi ${username != "" ? username.capitalize() : username}",
             style: GoogleFonts.belleza(
               color: Colors.black,
               fontWeight: FontWeight.bold,
@@ -61,20 +61,6 @@ class _MyTablesState extends State<MyTables> {
             
              */
           ),
-          actions: [
-            Padding(
-              padding: EdgeInsets.only(right: 10.w),
-              child: GestureDetector(
-                onTap: () {
-                  navigatorKey.currentState!.pushNamed("/profile");
-                },
-                child: const Icon(
-                  Icons.settings,
-                  color: Colors.black,
-                ),
-              ),
-            )
-          ],
         ),
         body: DefaultTabController(
             length: 3,

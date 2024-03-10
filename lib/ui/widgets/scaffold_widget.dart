@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:hotelpro_mobile/bloc/finance/finance_bloc.dart';
 import 'package:hotelpro_mobile/bloc/orders/orders_bloc.dart';
 import 'package:hotelpro_mobile/main_qa.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
-import 'package:hotelpro_mobile/ui/screens/finance.dart';
 import 'package:hotelpro_mobile/ui/screens/kds.dart';
 import 'package:hotelpro_mobile/ui/screens/my_tables.dart';
 import 'package:hotelpro_mobile/ui/screens/non_dining.dart';
@@ -67,11 +65,6 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
         create: (context) => OrdersBloc(),
         child: const KdsScreen(),
       ),
-      if (role == "ROLE_ADMIN")
-        BlocProvider(
-          create: (context) => FinanceBloc(),
-          child: const FinanceScreen(),
-        ),
     ];
   }
 
@@ -126,8 +119,8 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
         activeColorPrimary: CupertinoColors.black,
         inactiveColorPrimary: CupertinoColors.white,
       ),
-      if (role == "ROLE_ADMIN")
-        PersistentBottomNavBarItem(
+      // if (role == "ROLE_ADMIN")
+      /*   PersistentBottomNavBarItem(
           icon: const Icon(
             Icons.attach_money_sharp,
             //color: Colors.white,
@@ -136,7 +129,7 @@ class _ScaffoldWidgetState extends State<ScaffoldWidget> {
           textStyle: const TextStyle(fontWeight: FontWeight.bold),
           activeColorPrimary: CupertinoColors.black,
           inactiveColorPrimary: CupertinoColors.white,
-        ),
+        ), */
     ];
   }
 

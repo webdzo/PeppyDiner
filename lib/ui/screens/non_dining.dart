@@ -53,29 +53,16 @@ class _NondiningState extends State<Nondining> {
         appBar: AppBar(
           backgroundColor: HexColor("#d4ac2c"),
           elevation: 0,
-          leading: const ApplogoButton(),
+          iconTheme: const IconThemeData(color: Colors.black),
+          actions: const [ApplogoButton()],
           title: TextWidget(
-            "Hi ${username != "" ? username.capitalize() : username},",
+            "Hi ${username != "" ? username.capitalize() : username}",
             style: GoogleFonts.belleza(
               color: Colors.black,
               fontWeight: FontWeight.bold,
               fontSize: 33.w,
             ),
           ),
-          actions: [
-            Padding(
-              padding: EdgeInsets.only(right: 10.w),
-              child: GestureDetector(
-                onTap: () {
-                  navigatorKey.currentState!.pushNamed("/profile");
-                },
-                child: const Icon(
-                  Icons.settings,
-                  color: Colors.black,
-                ),
-              ),
-            )
-          ],
         ),
         body: Column(
           mainAxisSize: MainAxisSize.min,

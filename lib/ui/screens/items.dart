@@ -420,7 +420,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
       backgroundColor: HexColor("#d4ac2c"),
       elevation: 1,
       title: TextWidget(
-        "Hi ${username != "" ? username.capitalize() : username},",
+        "Hi ${username != "" ? username.capitalize() : username}",
         style: GoogleFonts.belleza(
           color: Colors.black,
           fontWeight: FontWeight.bold,

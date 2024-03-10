@@ -7,6 +7,8 @@ import 'package:hotelpro_mobile/bloc/orders/orders_bloc.dart';
 import 'package:hotelpro_mobile/route_generator.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/screens/details.dart';
+import 'package:hotelpro_mobile/ui/screens/drawer_widget.dart';
+import 'package:hotelpro_mobile/ui/widgets/applogo_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/button.dart';
 import 'package:hotelpro_mobile/ui/widgets/expand_card.dart';
 import 'package:hotelpro_mobile/ui/widgets/text_widget.dart';
@@ -65,6 +67,7 @@ class _KdsScreenState extends State<KdsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: role != "ROLE_CHEF" ? const NavDrawer() : null,
       appBar: AppBar(
         backgroundColor: HexColor("#d4ac2c"),
         elevation: 0,
@@ -86,7 +89,7 @@ class _KdsScreenState extends State<KdsScreen> {
              */
         ),
         actions: [
-          GestureDetector(
+          /*  GestureDetector(
               onTap: () {
                 _refresh();
               },
@@ -96,7 +99,7 @@ class _KdsScreenState extends State<KdsScreen> {
                   Icons.replay_outlined,
                   color: Colors.black,
                 ),
-              )),
+              )), */
           if (role == "ROLE_CHEF")
             GestureDetector(
               onTap: () {
@@ -157,7 +160,8 @@ class _KdsScreenState extends State<KdsScreen> {
                 padding: EdgeInsets.all(8.0),
                 child: Icon(Icons.logout),
               ),
-            )
+            ),
+          const ApplogoButton(),
         ],
       ),
       body: DefaultTabController(

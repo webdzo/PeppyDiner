@@ -11,6 +11,7 @@ class AddReservRequest {
       this.flatDiscount,
       this.commission,
       this.balanceAmount,
+      this.paymentmode,
       this.cake,
       this.quantity,
       this.occasion,
@@ -37,6 +38,7 @@ class AddReservRequest {
   String? totalHeads;
   int? agentId;
   String? startDate;
+  String? paymentmode;
 
   AddReservRequest.fromJson(Map<String, dynamic> json) {
     user = User.fromJson(json['user']);
@@ -59,6 +61,7 @@ class AddReservRequest {
     totalHeads = json['total_heads'];
     agentId = json['agent_id'];
     startDate = json['start_date'];
+    package = json['paymentmode'];
   }
 
   Map<String, dynamic> toJson() {
@@ -81,6 +84,8 @@ class AddReservRequest {
     datas['total_heads'] = totalHeads;
     datas['agent_id'] = agentId;
     datas['start_date'] = startDate;
+
+    datas['paymentmode'] = paymentmode;
     return datas;
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hotelpro_mobile/bloc/bloc/billpayment_bloc.dart';
 import 'package:hotelpro_mobile/bloc/checkout/checkout_bloc.dart';
+import 'package:hotelpro_mobile/bloc/finance/finance_bloc.dart';
 import 'package:hotelpro_mobile/bloc/items/items_bloc.dart';
 import 'package:hotelpro_mobile/bloc/login/login_bloc.dart';
 import 'package:hotelpro_mobile/models/itemconfig_model.dart';
@@ -10,6 +11,7 @@ import 'package:hotelpro_mobile/ui/screens/category.dart';
 import 'package:hotelpro_mobile/ui/screens/config.dart';
 import 'package:hotelpro_mobile/ui/screens/details.dart';
 import 'package:hotelpro_mobile/ui/screens/edit_itemconfig.dart';
+import 'package:hotelpro_mobile/ui/screens/finance.dart';
 import 'package:hotelpro_mobile/ui/screens/item_config.dart';
 import 'package:hotelpro_mobile/ui/screens/items.dart';
 import 'package:hotelpro_mobile/ui/screens/kds.dart';
@@ -75,6 +77,14 @@ Route<dynamic> generateRoute(RouteSettings settings) {
                 create: (context) => AddResevationBloc(),
                 child: const ManageUser(),
               ));
+
+    case "/reports":
+      return MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (context) => FinanceBloc(),
+          child: const FinanceScreen(),
+        ),
+      );
 
     case "/profile":
       return MaterialPageRoute(
@@ -155,8 +165,15 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case '/reservDetails':
       return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-                create: (context) => AddResevationBloc(),
+          builder: (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (context) => AddResevationBloc(),
+                  ),
+                  BlocProvider(
+                    create: (context) => BillpaymentBloc(),
+                  ),
+                ],
                 child: ReservationDetails(
                   addReservRequest: args as AddReservRequest,
                 ),

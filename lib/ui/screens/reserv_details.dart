@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:hotelpro_mobile/bloc/bloc/billpayment_bloc.dart';
 import 'package:hotelpro_mobile/models/cakes_model.dart';
 import 'package:hotelpro_mobile/models/occasion_model.dart';
 import 'package:hotelpro_mobile/models/packages_model.dart';
+import 'package:hotelpro_mobile/models/paymentmode_model.dart';
 import 'package:hotelpro_mobile/models/user_model.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 
@@ -33,11 +35,24 @@ class _ReservationDetailsState extends State<ReservationDetails> {
   bool cake = false;
   List<CakesModel> cakeList = [];
   double cakePrice = 0;
+  List<PaymentmodeModel> paymodes = [];
+  BillpaymentBloc billpaymentBloc = BillpaymentBloc();
+  String payMode = "";
   @override
   void initState() {
     //totalPrice = 50000;
     adultFocus.addListener(_onadultFocusChange);
     kidsFocus.addListener(_onkidsFocusChange);
+    billpaymentBloc = BlocProvider.of<BillpaymentBloc>(context)
+      ..stream.listen((event) {
+        if (event is PaymodeDone) {
+          print("akshaya");
+          print(event.modes);
+          setState(() {
+            paymodes = event.modes;
+          });
+        }
+      });
     addResevationBloc = BlocProvider.of<AddResevationBloc>(context)
       ..stream.listen((event) {
         if (event is CakesDone) {
@@ -62,6 +77,7 @@ class _ReservationDetailsState extends State<ReservationDetails> {
     addResevationBloc.add(GetpackagesEvent());
     addReservRequest = widget.addReservRequest;
     addReservRequest.user = User();
+    billpaymentBloc.add(FetchPayModes());
     // addReservRequest.commissionagent ??= "N/A";
     //  adultController.text = (addReservRequest.adults)?.toString() ?? "";
     //  kidsController.text = (addReservRequest.kids)?.toString() ?? "";
@@ -137,6 +153,7 @@ class _ReservationDetailsState extends State<ReservationDetails> {
                     padding: EdgeInsets.symmetric(horizontal: 20.w)),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
+                    addReservRequest.paymentmode = payMode;
                     addReservRequest.balanceAmount =
                         ((addReservRequest.totalPayment ?? 0) -
                             (addReservRequest.flatDiscount ?? 0) -
@@ -277,6 +294,7 @@ class _ReservationDetailsState extends State<ReservationDetails> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
+                          paymodeDropdown(context, paymodes),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.4,
                             child: TextFormField(
@@ -1031,6 +1049,67 @@ class _ReservationDetailsState extends State<ReservationDetails> {
               );
             }).toList(),
           )),
+    );
+  }
+
+  Container paymodeDropdown(
+      BuildContext context, List<PaymentmodeModel> items) {
+    print("-------------------");
+    print(items);
+    return Container(
+      alignment: Alignment.center,
+      height: 70.w,
+      // width: MediaQuery.of(context).size.width * 0.45,
+      margin: EdgeInsets.symmetric(horizontal: 5.w),
+
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.grey,
+          width: 0.7,
+        ),
+        borderRadius: BorderRadius.circular(5.w),
+      ),
+      child: CustomDropdownButton(
+          value: (payMode != "")
+              ? items
+                  .where((element) => element.paymentName == payMode)
+                  .toList()
+                  .first
+              : null,
+          hint: TextWidget(
+            "Select Mode",
+            color: Colors.black54,
+            size: 20.sp,
+          ),
+          width: MediaQuery.of(context).size.width * 0.3,
+          underline: Container(),
+          icon: const Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Icon(
+                Icons.arrow_drop_down,
+                color: Colors.black,
+              ),
+            ],
+          ),
+          dropdownColor: Colors.black,
+          iconEnabledColor: Colors.black,
+          iconDisabledColor: Colors.black,
+          style: const TextStyle(color: Colors.black),
+          onChanged: (value) {
+            payMode = value.paymentName.toString();
+            setState(() {});
+          },
+          items: items.toList().map((item) {
+            return DropdownMenuItem(
+              value: item,
+              child: Text(
+                item.paymentName,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w400, color: Colors.black),
+              ),
+            );
+          }).toList()),
     );
   }
 

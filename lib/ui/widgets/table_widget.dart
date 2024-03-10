@@ -437,9 +437,7 @@ class _TableWidgetState extends State<TableWidget> {
               top: ((!widget.nonDiner) &&
                       isTimeDifferenceGreaterThan5Minutes(
                           DateTime.parse(widget.tableList[index].actualTime)) &&
-                      (widget.type == "past" ||
-                          widget.type == "current" ||
-                          widget.type == "upcoming"))
+                      (widget.type == "current"))
                   ? 10.w
                   : 0),
           child: GestureDetector(
@@ -488,18 +486,13 @@ class _TableWidgetState extends State<TableWidget> {
         ),
         if ((!widget.nonDiner) &&
             isTimeDifferenceGreaterThan5Minutes(
-                DateTime.parse(widget.tableList[index].actualTime)))
-          if ((!widget.nonDiner) &&
-              isTimeDifferenceGreaterThan5Minutes(
-                  DateTime.parse(widget.tableList[index].actualTime)) &&
-              (widget.type == "past" ||
-                  widget.type == "current" ||
-                  widget.type == "upcoming"))
-            const Positioned(
-                child: Icon(
-              Icons.warning,
-              color: Colors.red,
-            )),
+                DateTime.parse(widget.tableList[index].actualTime)) &&
+            (widget.type == "current"))
+          const Positioned(
+              child: Icon(
+            Icons.warning,
+            color: Colors.red,
+          )),
       ],
     );
   }

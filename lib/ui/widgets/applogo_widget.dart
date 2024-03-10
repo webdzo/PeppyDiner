@@ -12,7 +12,7 @@ class ApplogoButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Scaffold.of(context).openDrawer();
+        // Scaffold.of(context).openDrawer();
         // (keys ?? drawerKey1).currentState?.openDrawer();
       },
       child: Padding(

@@ -132,7 +132,7 @@ class _StepperScreenState extends State<StepperScreen> {
     return Scaffold(
       drawer: const NavDrawer(),
       appBar: AppBar(
-        actions: [
+        /*  actions: [
           GestureDetector(
               onTap: () {
                 _refresh(selectedSpace);
@@ -144,10 +144,11 @@ class _StepperScreenState extends State<StepperScreen> {
                   color: Colors.black,
                 ),
               ))
-        ],
+        ], */
         backgroundColor: HexColor("#d4ac2c"),
         elevation: 0,
-        leading: const ApplogoButton(),
+        iconTheme: const IconThemeData(color: Colors.black),
+        actions: const [ApplogoButton()],
         title: TextWidget(
           "Dining",
           style: GoogleFonts.belleza(

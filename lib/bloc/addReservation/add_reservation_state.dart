@@ -62,7 +62,11 @@ class UsersDone extends AddReservationState {
   UsersDone(this.users);
 }
 
-class UsersError extends AddReservationState {}
+class UsersError extends AddReservationState {
+  final String erroMsg;
+
+  UsersError(this.erroMsg);
+}
 
 class UpdateUsersDone extends AddReservationState {
   UpdateUsersDone();

@@ -333,7 +333,10 @@ class _ManageUserState extends State<ManageUser> {
                   ),
                 );
               }
-              return Container();
+              if (state is UsersError) {
+                return TextWidget(state.erroMsg);
+              }
+              return const TextWidget("Something went wrong");
             },
           ),
         ),

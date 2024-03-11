@@ -85,6 +85,8 @@ class ApiBaseHelper {
             return false;
           },
         );
+      } else if (response.statusCode == 400 || response.statusCode == 500) {
+        throw "Service unavailable";
       } else {
         log(json.decode(response.body)["message"]);
         throw json.decode(response.body)["message"];

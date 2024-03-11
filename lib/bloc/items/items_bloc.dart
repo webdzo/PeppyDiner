@@ -29,8 +29,7 @@ class ItemsBloc extends Bloc<ItemsEvent, ItemsState> {
             ..filterItemsList = items);
         }
       } catch (e) {
-        emit(ItemsError());
-        throw ("error");
+        emit(ItemsError(e.toString()));
       }
     });
 
@@ -49,8 +48,7 @@ class ItemsBloc extends Bloc<ItemsEvent, ItemsState> {
 
         emit(itemsDone..filterItemsList = itemsList);
       } catch (e) {
-        emit(ItemsError());
-        throw ("error");
+        emit(ItemsError(e.toString()));
       }
     });
 
@@ -61,8 +59,7 @@ class ItemsBloc extends Bloc<ItemsEvent, ItemsState> {
 
         emit(ItemconfigDone(contacts));
       } catch (e) {
-        emit(ItemsError());
-        throw ("error");
+        emit(ItemsError(e.toString()));
       }
     });
 
@@ -86,8 +83,7 @@ class ItemsBloc extends Bloc<ItemsEvent, ItemsState> {
 
         emit(EditItemsconfigDone());
       } catch (e) {
-        emit(ItemsError());
-        throw ("error");
+        emit(ItemsError(e.toString()));
       }
     });
 

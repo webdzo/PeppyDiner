@@ -516,6 +516,9 @@ class _ItemConfigState extends State<ItemConfig> {
               if (state is ItemsLoad) {
                 return const Center(child: CircularProgressIndicator());
               }
+              if(state is ItemsError){
+                return      TextWidget(state.errorMsg);
+              }
               return const TextWidget("error");
             },
           ),

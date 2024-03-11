@@ -1000,7 +1000,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
                 return const CircularProgressIndicator();
               }
               if (state is ItemstatsError) {
-                return const TextWidget("Error");
+                return  TextWidget(state.error);
               }
 
               return Padding(

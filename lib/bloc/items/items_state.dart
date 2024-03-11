@@ -7,18 +7,22 @@ class ItemsInitial extends ItemsState {}
 class ItemsLoad extends ItemsState {}
 
 class ItemsDone extends ItemsState {
-   List<ItemsModel> items = [];
+  List<ItemsModel> items = [];
 
   List<ItemsModel> filterItemsList = [];
-   List<ItemsModel> allItems = [];
+  List<ItemsModel> allItems = [];
 
-   String searchText = "";
-
+  String searchText = "";
 
   ItemsDone();
 }
 
-class ItemsError extends ItemsState {}
+class ItemsError extends ItemsState {
+  final String errorMsg;
+
+  ItemsError( this.errorMsg);
+
+}
 
 class ItemconfigDone extends ItemsState {
   final List<ItemConfigModel> items;
@@ -31,4 +35,5 @@ class EnableItemsLoad extends ItemsState {}
 class EnableItemsDone extends ItemsState {}
 
 class EnableItemsError extends ItemsState {}
+
 class EditItemsconfigDone extends ItemsState {}

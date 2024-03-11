@@ -57,7 +57,6 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
         emit(AddExpenseDone());
       } catch (e) {
         emit(AddExpenseError());
-        throw ("error");
       }
     });
 
@@ -70,10 +69,9 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
         emit(ItemstatsDone(incomeData));
       } catch (e) {
         if (e == "204") {
-          emit(ItemstatsError());
+          emit(ItemstatsError(e.toString()));
         } else {
-          emit(ItemstatsError());
-          throw ("error");
+          emit(ItemstatsError(e.toString()));
         }
       }
     });

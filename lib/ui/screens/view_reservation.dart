@@ -1691,6 +1691,9 @@ class _ViewResercationsState extends State<ViewResercations> {
           balanceAmount = state.reservationList.reservation.balanceAmount;
           return userDetailswidget(state, context);
         }
+        if (state is ReservationsError) {
+          return Text(state.errorMsg);
+        }
         return const Text("Something went wrong");
       },
     );
@@ -2141,7 +2144,10 @@ class _ViewResercationsState extends State<ViewResercations> {
             color: HexColor("#d4ac2c"),
           );
         }
-        return const TextWidget("error");
+        if (state is ServiceError) {
+          return TextWidget(state.msg);
+        }
+        return const TextWidget("Something went wrong");
       },
     );
   }
@@ -2247,7 +2253,7 @@ class _ViewResercationsState extends State<ViewResercations> {
             ],
           ),
         ),
-        BlocBuilder<ReservationsBloc, ReservationsState>(
+        /*  BlocBuilder<ReservationsBloc, ReservationsState>(
           buildWhen: (previous, current) {
             return current is ReservationsLoad ||
                 current is ReservationNodata ||
@@ -2269,234 +2275,11 @@ class _ViewResercationsState extends State<ViewResercations> {
             }
             if (state is ReservationDetailsDone) {
               return Container();
-              /*    return Column(
-                children:
-                    List.generate(state.reservationList.guests.length, (index) {
-                  return IgnorePointer(
-                    ignoring:
-                        editGuest.where((element) => element == true).isEmpty
-                            ? false
-                            : !editGuest[index],
-                    child: Container(
-                      margin: EdgeInsets.symmetric(
-                          horizontal: 10.w, vertical: 10.w),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 10.w, vertical: 10.w),
-                      color: Colors.grey.shade200,
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextWidget("Guest $index"),
-                              TextButton(
-                                  style: TextButton.styleFrom(
-                                      backgroundColor: (editGuest[index] ||
-                                              editGuest
-                                                  .where((element) =>
-                                                      element == true)
-                                                  .toList()
-                                                  .isEmpty)
-                                          ? HexColor("#d4ac2c")
-                                          : Colors.grey),
-                                  onPressed: () {
-                                    if (editGuest
-                                        .where((element) => element == true)
-                                        .toList()
-                                        .isEmpty) {
-                                      editGuest[index] = true;
-                                      /*  addrequest = AddReservRequest(
-                                          guestfirstname: state.reservationList
-                                              .guests[index].firstname,
-                                          guestlastname: state.reservationList
-                                              .guests[index].lastname,
-                                          guestdob: state.reservationList
-                                              .guests[index].dob,
-                                          guestemail: state.reservationList
-                                              .guests[index].email,
-                                          guestgender: state.reservationList
-                                              .guests[index].gender
-                                              .toString(),
-                                          guestphone: state.reservationList
-                                              .guests[index].phone); */
-                                    }
-                                    setState(() {});
-                                  },
-                                  child: const TextWidget(
-                                    "Edit",
-                                    color: Colors.black,
-                                  ))
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  width: 250.w,
-                                  child: TextFormField(
-                                    onChanged: (value) {
-                                      // addrequest.guestfirstname = value;
-                                    },
-                                    initialValue: state.reservationList
-                                        .guests[index].firstname,
-                                    readOnly: !editGuest[index],
-                                    decoration: textfieldDecor("First Name"),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 250.w,
-                                  child: TextFormField(
-                                    onChanged: (value) {
-                                      //addrequest.guestlastname = value;
-                                    },
-                                    readOnly: !editGuest[index],
-                                    initialValue: state
-                                        .reservationList.guests[index].lastname,
-                                    decoration: textfieldDecor("Last Name"),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  width: 250.w,
-                                  child: TextFormField(
-                                      onChanged: (value) {
-                                        // addrequest.guestdob = value;
-                                      },
-                                      readOnly: !editGuest[index],
-                                      initialValue: (state.reservationList
-                                                  .guests[index].dob
-                                                  .toString()
-                                                  .contains("T") ??
-                                              false)
-                                          ? DateFormat("yyyy-MM-dd").format(
-                                              DateTime.parse(state
-                                                      .reservationList
-                                                      .guests[index]
-                                                      .dob ??
-                                                  ""))
-                                          : state
-                                              .reservationList.guests.first.dob,
-                                      decoration: textfieldDecor("DOB")),
-                                ),
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.45,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(left: 20.w),
-                                        child: const TextWidget("Gender"),
-                                      ),
-                                      const Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          /*   addRadioButton(0, 'Male', (value) {},
-                                              value: state.reservationList
-                                                  .guests[index].gender),
-                                          addRadioButton(
-                                              1, 'Female', (value) {},
-                                              value: state.reservationList
-                                                  .guests[index].gender), */
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: TextFormField(
-                              onChanged: (value) {
-                                // addrequest.guestemail = value;
-                              },
-                              readOnly: !editGuest[index],
-                              initialValue:
-                                  state.reservationList.guests[index].email,
-                              decoration: textfieldDecor("E-Mail"),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    onChanged: (value) {
-                                      // addrequest.guestphone = value;
-                                    },
-                                    readOnly: !editGuest[index],
-                                    initialValue: state
-                                        .reservationList.guests[index].phone,
-                                    decoration: textfieldDecor("Phone"),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10.w,
-                          ),
-                          if (editGuest[index])
-                            Padding(
-                              padding: EdgeInsets.only(top: 10.w),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  button(
-                                    "Save",
-                                    () {
-                                      editGuest[index] = false;
-                                      addResevationBloc.add(Addreservation(
-                                          addrequest,
-                                          edit: true,
-                                          id: widget.id.toString(),
-                                          guestId: state
-                                              .reservationList.guests[index].id
-                                              .toString()));
-                                      setState(() {});
-                                    },
-                                    Colors.green,
-                                  ),
-                                  SizedBox(
-                                    width: 10.w,
-                                  ),
-                                  button(
-                                    "Cancel",
-                                    () {
-                                      editGuest[index] = false;
-                                      setState(() {});
-                                    },
-                                    Colors.red,
-                                  ),
-                                ],
-                              ),
-                            )
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ); */
             }
 
             return const TextWidget("Something went wrong");
           },
-        ),
+        ), */
       ],
     );
   }

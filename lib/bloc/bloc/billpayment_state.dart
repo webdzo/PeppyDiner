@@ -12,7 +12,11 @@ class ServiceDone extends BillpaymentState {
   ServiceDone(this.charges);
 }
 
-class ServiceError extends BillpaymentState {}
+class ServiceError extends BillpaymentState {
+  final String msg;
+
+  ServiceError( this.msg);
+}
 
 class DiscountLoad extends BillpaymentState {}
 
@@ -49,8 +53,6 @@ class UpdateLoad extends BillpaymentState {}
 class UpdateDone extends BillpaymentState {}
 
 class UpdateError extends BillpaymentState {}
-
-
 
 class PaymodeLoad extends BillpaymentState {}
 

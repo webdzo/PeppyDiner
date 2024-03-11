@@ -55,7 +55,11 @@ class ItemstatsDone extends FinanceState {
   ItemstatsDone(this.itemStats);
 }
 
-class ItemstatsError extends FinanceState {}
+class ItemstatsError extends FinanceState {
+  final String error;
+
+  ItemstatsError(this.error);
+}
 
 class TimestatsLoad extends FinanceState {}
 

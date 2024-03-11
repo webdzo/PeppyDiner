@@ -110,7 +110,7 @@ class AddResevationBloc extends Bloc<AddreservationEvent, AddReservationState> {
 
         emit(UsersDone(resp));
       } catch (e) {
-        emit(UsersError());
+        emit(UsersError(e.toString()));
         throw ("error");
       }
     });

@@ -19,8 +19,7 @@ class BillpaymentBloc extends Bloc<BillpaymentEvent, BillpaymentState> {
 
         emit(ServiceDone(contacts));
       } catch (e) {
-        emit(ServiceError());
-        throw ("error");
+        emit(ServiceError(e.toString()));
       }
     });
 

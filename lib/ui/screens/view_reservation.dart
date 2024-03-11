@@ -1152,12 +1152,14 @@ class _ViewResercationsState extends State<ViewResercations> {
                             button("Cancel", () {
                               startDate.clear();
                               endDate.clear();
+                              Navigator.pop(context);
                             }, Colors.red.shade900),
                             SizedBox(
                               width: 10.w,
                             ),
                             button("Submit", () {
                               reservationBloc.add(BackdateEvent(
+                                  reservId.toString(),
                                   "${startDate.text}T${endDate.text}:00Z"));
                               navigatorKey.currentState?.pop();
                             }, Colors.green.shade900)

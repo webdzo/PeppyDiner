@@ -147,18 +147,14 @@ class _ManageUserState extends State<ManageUser> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
-                                      button("Block", () {
-                                        if (state.users[index].blocked ==
-                                            false) {
-                                          addResevationBloc.add(
-                                              DeleteusersEvent(
-                                                  state.users[index].email,
-                                                  block: true));
-                                        }
-                                      },
+                                      button(
                                           state.users[index].blocked
-                                              ? Colors.grey
-                                              : Colors.red.shade900),
+                                              ? "Unblock"
+                                              : "Block", () {
+                                        addResevationBloc.add(DeleteusersEvent(
+                                            state.users[index].email,
+                                            block: true));
+                                      }, Colors.red.shade900),
                                       button("Delete", () {
                                         if (state.users[index].deleted ==
                                             false) {

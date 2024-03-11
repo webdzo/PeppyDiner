@@ -81,7 +81,6 @@ class SwapEvent extends ReservationsEvent {
 
 class BackdateEvent extends ReservationsEvent {
   final String date;
-
-  BackdateEvent(this.date);
+  final String id;
+  BackdateEvent(this.id, this.date);
 }
-

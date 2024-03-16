@@ -561,8 +561,8 @@ class _DetailScreenState extends State<DetailScreen> {
               Row(
                 children: [
                   Container(
-                    constraints: const BoxConstraints(
-                      maxWidth: 200.0, // Set the maximum width here
+                    constraints: BoxConstraints(
+                      maxWidth: 200.w, // Set the maximum width here
                     ),
                     margin: EdgeInsets.only(top: 20.w),
                     decoration: BoxDecoration(
@@ -574,6 +574,7 @@ class _DetailScreenState extends State<DetailScreen> {
                     child: TextWidget(
                       state.orders.first.itemOrders[index].subcategoryName,
                       size: 17.sp,
+                      textalign: TextAlign.left,
                     ),
                   ),
                   Container(

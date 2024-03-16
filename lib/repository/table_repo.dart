@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:hotelpro_mobile/models/availableTables_model.dart';
 import 'package:hotelpro_mobile/models/leveltable_model.dart';
 import 'package:hotelpro_mobile/models/space_model.dart';
 import 'package:hotelpro_mobile/models/table_model.dart';
@@ -83,6 +84,15 @@ class TablesRepository {
 
     List<SpaceModel> res = List.from(
         json.decode(response.body).map((e) => SpaceModel.fromJson(e)));
+
+    return res;
+  }
+
+  Future<List<TablesList>> getTables() async {
+    var response = await ApiBaseHelper().getMethod("/tables");
+
+    List<TablesList> res = List.from(
+        json.decode(response.body).map((e) => TablesList.fromJson(e)));
 
     return res;
   }

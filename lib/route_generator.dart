@@ -16,6 +16,7 @@ import 'package:hotelpro_mobile/ui/screens/item_config.dart';
 import 'package:hotelpro_mobile/ui/screens/items.dart';
 import 'package:hotelpro_mobile/ui/screens/kds.dart';
 import 'package:hotelpro_mobile/ui/screens/login_page.dart';
+import 'package:hotelpro_mobile/ui/screens/manage_table.dart';
 import 'package:hotelpro_mobile/ui/screens/manage_user.dart';
 import 'package:hotelpro_mobile/ui/screens/profile.dart';
 import 'package:hotelpro_mobile/ui/screens/reserv_details.dart';
@@ -83,6 +84,14 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         builder: (_) => BlocProvider(
           create: (context) => FinanceBloc(),
           child: const FinanceScreen(),
+        ),
+      );
+
+    case "/tableslist":
+      return MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (context) => TableBloc(),
+          child: const ManageTable(),
         ),
       );
 

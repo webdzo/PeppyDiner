@@ -54,3 +54,7 @@ class FetchLeveltable extends TableEvent {
 class FetchSpaces extends TableEvent {
   FetchSpaces();
 }
+
+class GetTables extends TableEvent {
+  GetTables();
+}

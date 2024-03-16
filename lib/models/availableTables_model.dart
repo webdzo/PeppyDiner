@@ -1,16 +1,13 @@
 class AvailableTablesModel {
   AvailableTablesModel({
     required this.tablesList,
-
   });
   late final List<TablesList> tablesList;
-
 
   AvailableTablesModel.fromJson(Map<String, dynamic> json) {
     tablesList = List.from(json['tablesList'])
         .map((e) => TablesList.fromJson(e))
         .toList();
-  
   }
 
   Map<String, dynamic> toJson() {

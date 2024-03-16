@@ -60,3 +60,8 @@ class SpaceError extends TableState {
   final String errorMessage;
   SpaceError(this.errorMessage);
 }
+
+class GetTablesDone extends TableState {
+  final List<TablesList> tables;
+  GetTablesDone(this.tables);
+}

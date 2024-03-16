@@ -84,6 +84,15 @@ class _NavDrawerState extends State<NavDrawer> {
             ),
           if (role == "ROLE_ADMIN")
             ListTile(
+              leading: const Icon(Icons.table_bar),
+              title: const Text('Manage Table'),
+              onTap: () {
+                // Navigator.of(context).pop();
+                navigatorKey.currentState!.pushReplacementNamed("/tableslist");
+              },
+            ),
+          if (role == "ROLE_ADMIN")
+            ListTile(
               leading: const Icon(Icons.bar_chart),
               title: const Text('Reports'),
               onTap: () {

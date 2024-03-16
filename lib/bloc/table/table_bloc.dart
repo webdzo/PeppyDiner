@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hotelpro_mobile/models/availableTables_model.dart';
 import 'package:hotelpro_mobile/models/leveltable_model.dart';
 import 'package:hotelpro_mobile/models/space_model.dart';
 import 'package:hotelpro_mobile/repository/table_repo.dart';
@@ -229,6 +230,18 @@ class TableBloc extends Bloc<TableEvent, TableState> {
         emit(tableDone..filterTables = issueList);
       } catch (e) {
         emit(TableError());
+      }
+    });
+
+    on<GetTables>((event, emit) async {
+      emit(TableLoad());
+      try {
+        final response = await TablesRepository().getTables();
+
+        emit(GetTablesDone(response));
+      } catch (e) {
+        emit(TableError());
+        throw ("error");
       }
     });
   }

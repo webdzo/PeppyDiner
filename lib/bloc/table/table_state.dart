@@ -65,3 +65,11 @@ class GetTablesDone extends TableState {
   final List<TablesList> tables;
   GetTablesDone(this.tables);
 }
+
+class CreatedDone extends TableState {
+  CreatedDone();
+}
+
+class CreateLoad extends TableState {}
+
+class CreateError extends TableState {}

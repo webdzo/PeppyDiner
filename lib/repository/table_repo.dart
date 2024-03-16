@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:core';
+import 'dart:developer';
 
 import 'package:hotelpro_mobile/models/availableTables_model.dart';
+import 'package:hotelpro_mobile/models/edittable_request.dart';
 import 'package:hotelpro_mobile/models/leveltable_model.dart';
 import 'package:hotelpro_mobile/models/space_model.dart';
 import 'package:hotelpro_mobile/models/table_model.dart';
@@ -95,5 +97,18 @@ class TablesRepository {
         json.decode(response.body).map((e) => TablesList.fromJson(e)));
 
     return res;
+  }
+
+  Future<Response> create(EdittableRequest req, {int? id}) async {
+    log(jsonEncode(req.toJson()).toString());
+    if (id != null) {
+      var response = await ApiBaseHelper()
+          .putMethod("/tables/$id", jsonEncode({"data": req.toJson()}));
+      return response;
+    } else {
+      var response = await ApiBaseHelper()
+          .postMethod("/tables", jsonEncode({"data": req.toJson()}));
+      return response;
+    }
   }
 }

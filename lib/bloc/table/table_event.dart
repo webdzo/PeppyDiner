@@ -58,3 +58,9 @@ class FetchSpaces extends TableEvent {
 class GetTables extends TableEvent {
   GetTables();
 }
+
+class CreateTables extends TableEvent {
+  int? id;
+  final EdittableRequest request;
+  CreateTables(this.request, {this.id});
+}

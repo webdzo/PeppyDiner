@@ -127,5 +127,17 @@ class AddResevationBloc extends Bloc<AddreservationEvent, AddReservationState> {
         throw ("error");
       }
     });
+
+      on<CreateusersEvent>((event, emit) async {
+      emit(CreateUsersLoad());
+      try {
+        var resp = await AddReservationRepository().createUser(event.req);
+
+        emit(CreateUsersDone());
+      } catch (e) {
+        emit(CreateUsersError());
+        throw ("error");
+      }
+    });
   }
 }

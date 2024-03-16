@@ -6,7 +6,9 @@ import 'package:hotelpro_mobile/models/bycat_model.dart';
 import 'package:hotelpro_mobile/models/bywaiter_model.dart';
 import 'package:hotelpro_mobile/models/cancelorder_model.dart';
 import 'package:hotelpro_mobile/models/deleted_item_model.dart';
+import 'package:hotelpro_mobile/models/item_history_model.dart';
 import 'package:hotelpro_mobile/models/itemstats_model.dart';
+import 'package:hotelpro_mobile/models/salepayment_model.dart';
 import 'package:hotelpro_mobile/models/timestats_model.dart';
 import 'package:http/http.dart';
 
@@ -121,6 +123,32 @@ class FinanceRepository {
     List<BywaiterModel> statResponse =
         List.from(json.decode(response.body)["query_data"]) //
             .map((e) => BywaiterModel.fromJson(e))
+            .toList();
+
+    return statResponse;
+  }
+
+   Future<List<ItemhistoryModel>> fetchHistory(
+   ) async {
+    var response = await ApiBaseHelper().getMethod(
+        "/reports/items-history");
+
+    List<ItemhistoryModel> statResponse =
+        List.from(json.decode(response.body)["data"]) //
+            .map((e) => ItemhistoryModel.fromJson(e))
+            .toList();
+
+    return statResponse;
+  }
+
+   Future<List<SalepaymentModel>> sales(
+      String startDate, String endDate) async {
+    var response = await ApiBaseHelper().getMethod(
+        "/reports/multiple?category=salesbypayment&startDate=${startDate}&endDate=${endDate}");
+
+    List<SalepaymentModel> statResponse =
+        List.from(json.decode(response.body)["query_data"]) //
+            .map((e) => SalepaymentModel.fromJson(e))
             .toList();
 
     return statResponse;

@@ -93,7 +93,7 @@ class _NavDrawerState extends State<NavDrawer> {
             ),
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Porfile'),
+            title: const Text('Profile'),
             onTap: () {
               // Navigator.of(context).pop();
               navigatorKey.currentState!.pushReplacementNamed("/profile");

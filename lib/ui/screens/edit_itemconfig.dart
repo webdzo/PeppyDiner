@@ -45,7 +45,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
     categoryBloc.add(FetchCategory());
 
     editItemconfigRequest = EditItemconfigRequest(
-        subcategory: widget.items?.subcategoryId,
+        subcategory: widget.items?.subcategoryName,
         description: widget.items?.description,
         enabled: widget.items?.enabled,
         itemname: widget.items?.name,
@@ -54,6 +54,9 @@ class _EditItemconfigState extends State<EditItemconfig> {
         expectedTime: widget.items?.expectedTime);
     super.initState();
   }
+
+  int? catId;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +67,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             button("Submit", () {
+             
               itemsBloc.add(EditItemconfigEvent(
                   editItemconfigRequest, widget.items?.id ?? 0));
             }, HexColor("#d4ac2c"), textcolor: Colors.black, size: 20.sp),
@@ -76,6 +80,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
           ],
         ),
       ),
+  
       appBar: AppBar(
         backgroundColor: HexColor("#d4ac2c"),
         elevation: 0,
@@ -240,16 +245,22 @@ class _EditItemconfigState extends State<EditItemconfig> {
                   listener: (context, state) {
                     if (state is CategoryDone) {
                       if (widget.items != null) {
-                        editItemconfigRequest.category = state.category
+                        catId=state.category
                             .where((element) =>
                                 element.name == widget.items?.categoryName)
                             .toList()
                             .first
                             .id;
+                        editItemconfigRequest.category = state.category
+                            .where((element) =>
+                                element.name == widget.items?.categoryName)
+                            .toList()
+                            .first
+                            .name;
                       }
                       if (editItemconfigRequest.subcategory != null) {
                         categoryBloc.add(FetchSubCategory(
-                            editItemconfigRequest.category ?? 0));
+                         catId ?? 0));
                       }
                     }
                   },
@@ -366,7 +377,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
               ? null
               : itemList
                   .where(
-                      (element) => element.id == editItemconfigRequest.category)
+                      (element) => element.name == editItemconfigRequest.category)
                   .toList()
                   .first,
           underline: const Divider(
@@ -403,7 +414,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
                       ),
                     ),
           onChanged: (value) {
-            editItemconfigRequest.category = value.id;
+            editItemconfigRequest.category = value.name;
             categoryBloc.add(FetchSubCategory(value.id));
             setState(() {});
           },
@@ -442,7 +453,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
               ? null
               : itemList
                   .where((element) =>
-                      element.id == editItemconfigRequest.subcategory)
+                      element.name == editItemconfigRequest.subcategory)
                   .toList()
                   .first,
           icon: error
@@ -472,7 +483,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
                       ),
                     ),
           onChanged: (value) {
-            editItemconfigRequest.subcategory = value.id;
+            editItemconfigRequest.subcategory = value.name;
             setState(() {});
           },
           items: itemList.toList().map((item) {

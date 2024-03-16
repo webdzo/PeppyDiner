@@ -130,6 +130,13 @@ class _FinanceScreenState extends State<FinanceScreen> {
       if (selected == "Waiter") {
         financeBloc.add(FetchbyWaiter(orderstartDate.text, orderendDate.text));
       }
+      if (selected == "itemHistory") {
+        financeBloc.add(FetchItemhistory());
+      }
+      if (selected == "Salepayment") {
+        financeBloc
+            .add(FetchsalePayment(orderstartDate.text, orderendDate.text));
+      }
     }
   }
 
@@ -525,14 +532,84 @@ class _FinanceScreenState extends State<FinanceScreen> {
                                                   borderRadius:
                                                       BorderRadius.only(
                                                           topRight:
-                                                              Radius.circular(10
+                                                              Radius.circular(0
                                                                   .w),
                                                           bottomRight: Radius
-                                                              .circular(10.w))),
+                                                              .circular(0.w))),
                                               child: TextWidget(
                                                 "Orders By Waiters",
                                                 fontweight: FontWeight.bold,
                                                 color: selected == "Waiter"
+                                                    ? Colors.black
+                                                    : HexColor("#d4ac2c"),
+                                              )),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            selected = "Salepayment";
+                                            financeBloc.add(FetchsalePayment(
+                                                orderstartDate.text,
+                                                orderendDate.text));
+                                            setState(() {});
+                                          },
+                                          child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 8,
+                                                      horizontal: 10),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: Colors.black,
+                                                      width: 0.5),
+                                                  color: selected ==
+                                                          "Salepayment"
+                                                      ? HexColor("#d4ac2c")
+                                                      : Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  0.w),
+                                                          bottomRight: Radius
+                                                              .circular(0.w))),
+                                              child: TextWidget(
+                                                "SalesBy Payment",
+                                                fontweight: FontWeight.bold,
+                                                color: selected == "Salepayment"
+                                                    ? Colors.black
+                                                    : HexColor("#d4ac2c"),
+                                              )),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            selected = "itemHistory";
+                                            financeBloc.add(FetchItemhistory());
+                                            setState(() {});
+                                          },
+                                          child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 8,
+                                                      horizontal: 10),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: Colors.black,
+                                                      width: 0.5),
+                                                  color: selected ==
+                                                          "itemHistory"
+                                                      ? HexColor("#d4ac2c")
+                                                      : Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  10.w),
+                                                          bottomRight: Radius
+                                                              .circular(10.w))),
+                                              child: TextWidget(
+                                                "ItemDetail History",
+                                                fontweight: FontWeight.bold,
+                                                color: selected == "itemHistory"
                                                     ? Colors.black
                                                     : HexColor("#d4ac2c"),
                                               )),
@@ -623,6 +700,46 @@ class _FinanceScreenState extends State<FinanceScreen> {
                                       );
                               }
 
+                              if (state is SalepaymentDone) {
+                                return state.orders.isEmpty
+                                    ? const Center(
+                                        child: TextWidget("No data found"))
+                                    : ListView.builder(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 10.w),
+                                        itemCount: state.orders.length,
+                                        itemBuilder: (context, index) {
+                                          return Container(
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 10.w,
+                                                vertical: 5.w),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 10.w,
+                                                vertical: 10.w),
+                                            decoration: BoxDecoration(
+                                                color: Colors.grey.shade200),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                TextWidget(
+                                                  state.orders[index]
+                                                      .paymentMode,
+                                                  fontweight: FontWeight.bold,
+                                                ),
+                                                TextWidget(
+                                                  state.orders[index]
+                                                      .totalAmount,
+                                                  fontweight: FontWeight.bold,
+                                                )
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                              }
+
                               if (state is BycatDone) {
                                 return state.orders.isEmpty
                                     ? const Center(
@@ -695,6 +812,140 @@ class _FinanceScreenState extends State<FinanceScreen> {
                                                       .orders[index].ordersCount
                                                       .toString(),
                                                   fontweight: FontWeight.bold,
+                                                )
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                              }
+
+                              if (state is HistoryDone) {
+                                return state.orders.isEmpty
+                                    ? const Center(
+                                        child: TextWidget("No data found"))
+                                    : ListView.builder(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 10.w),
+                                        itemCount: state.orders.length,
+                                        itemBuilder: (context, index) {
+                                          return Container(
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 10.w,
+                                                vertical: 5.w),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 10.w,
+                                                vertical: 10.w),
+                                            decoration: BoxDecoration(
+                                                color: Colors.grey.shade200),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    TextWidget(
+                                                        "Reservartion No. "),
+                                                    TextWidget(
+                                                      state
+                                                          .orders[index].rsName,
+                                                      fontweight:
+                                                          FontWeight.bold,
+                                                    )
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 10.w,
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    TextWidget("Order No. "),
+                                                    TextWidget(
+                                                      state.orders[index]
+                                                          .orderNo,
+                                                      fontweight:
+                                                          FontWeight.bold,
+                                                    )
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 15.w,
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    TextWidget(
+                                                      state.orders[index]
+                                                          .itemName,
+                                                      fontweight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 10.w,
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          margin:
+                                                              EdgeInsets.only(
+                                                                  top: 10.w,
+                                                                  bottom: 10.w,
+                                                                  right: 10.w),
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      10.w),
+                                                          decoration: BoxDecoration(
+                                                              color: HexColor(
+                                                                      "#d4ac2c")
+                                                                  .withOpacity(
+                                                                      0.5)),
+                                                          child: TextWidget(state
+                                                              .orders[index]
+                                                              .diningType
+                                                              .capitalize()),
+                                                        ),
+                                                        Container(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      10.w),
+                                                          decoration: BoxDecoration(
+                                                              color: HexColor(
+                                                                      "#d4ac2c")
+                                                                  .withOpacity(
+                                                                      0.5)),
+                                                          child: TextWidget(
+                                                              state
+                                                                  .orders[index]
+                                                                  .tableName
+                                                                  .toString()),
+                                                        ),
+                                                        SizedBox(
+                                                          width: 10.w,
+                                                        ),
+                                                        TextWidget("Qty :" +
+                                                            state.orders[index]
+                                                                .itemQuantity
+                                                                .toString()),
+                                                      ],
+                                                    ),
+                                                    TextWidget(
+                                                      "₹" +
+                                                          state.orders[index]
+                                                              .itemPrice
+                                                              .toString(),
+                                                      fontweight:
+                                                          FontWeight.bold,
+                                                    )
+                                                  ],
                                                 )
                                               ],
                                             ),
@@ -1000,7 +1251,7 @@ class _FinanceScreenState extends State<FinanceScreen> {
                 return const CircularProgressIndicator();
               }
               if (state is ItemstatsError) {
-                return  TextWidget(state.error);
+                return TextWidget(state.error);
               }
 
               return Padding(

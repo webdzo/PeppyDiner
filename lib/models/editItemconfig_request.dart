@@ -11,8 +11,8 @@ class EditItemconfigRequest {
   });
   String? itemname;
   String? description;
-  int? category;
-  int? subcategory;
+  String? category;
+  String? subcategory;
   int? price;
   String? type;
   int? enabled;

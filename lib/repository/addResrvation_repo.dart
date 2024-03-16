@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:developer';
 
+import 'package:hotelpro_mobile/models/createuser_model.dart';
 import 'package:hotelpro_mobile/models/occasion_model.dart';
 import 'package:hotelpro_mobile/models/updatemode_request.dart';
 import 'package:hotelpro_mobile/models/user_model.dart';
@@ -198,10 +199,10 @@ class AddReservationRepository {
     return response;
   }
 
-  Future<Response> backdate(String date) async {
+  Future<Response> backdate(String id, String date) async {
     var response = await ApiBaseHelper().putMethod(
-      "/reservations/7/back-date",
-      jsonEncode({"backdatetime": "2024-03-12T19:19:43Z"}),
+      "/reservations/$id/back-date",
+      jsonEncode({"backdatetime": date}),
     );
 
     return response;
@@ -217,6 +218,15 @@ class AddReservationRepository {
               : "/users/delete",
       jsonEncode(
           change ? {"password": pwd, "useremail": mail} : {"useremail": mail}),
+    );
+
+    return response;
+  }
+
+  Future<Response> createUser(CreateuserReq req) async {
+    var response = await ApiBaseHelper().postMethod(
+      "/users/create-user",
+      jsonEncode(req.toJson()),
     );
 
     return response;

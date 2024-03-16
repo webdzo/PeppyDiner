@@ -1,3 +1,5 @@
+import 'package:hotelpro_mobile/models/createuser_model.dart';
+
 import '../../models/addReserv_request.dart';
 
 abstract class AddreservationEvent {}
@@ -54,4 +56,12 @@ class DeleteusersEvent extends AddreservationEvent {
 
   DeleteusersEvent(this.mail,
       {this.block = false, this.change = false, this.pwd = ""});
+}
+
+class CreateusersEvent extends AddreservationEvent {
+  final CreateuserReq req;
+
+
+  CreateusersEvent(this.req,
+     );
 }

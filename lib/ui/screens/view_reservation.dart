@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -71,6 +72,25 @@ class _ViewResercationsState extends State<ViewResercations> {
     SharedPreferences pref = await SharedPreferences.getInstance();
     role = pref.getString("role") ?? "";
     print(role);
+  }
+
+  bool isCardPresent(String current) {
+    for (var payment in modeReq) {
+      if (payment.mode == current) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool isSumGreaterThanTotal(int totalAmount, int enteredAmount) {
+    int sum = 0;
+    for (var payment in modeReq) {
+      sum += double.tryParse(payment.value.toString())?.toInt() ?? 0;
+    }
+
+    print("${sum + enteredAmount} --- $totalAmount");
+    return sum + enteredAmount > totalAmount;
   }
 
   AvailableRoomsBloc availableRooms = AvailableRoomsBloc();
@@ -262,23 +282,6 @@ class _ViewResercationsState extends State<ViewResercations> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 detailsWidget(),
-                                SizedBox(
-                                  height: 20.w,
-                                ),
-                                Center(
-                                  child: TextWidget(
-                                    "Bill Summary",
-                                    size: 22.sp,
-                                    fontweight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 20.w,
-                                ),
-                                billsummaryWidget(),
-                                SizedBox(
-                                  height: 20.w,
-                                ),
                               ],
                             )
                           : ordersWidget();
@@ -644,6 +647,7 @@ class _ViewResercationsState extends State<ViewResercations> {
           iconDisabledColor: Colors.black,
           style: const TextStyle(color: Colors.black),
           onChanged: (value) {
+            for (var data in modeReq) log(data.toJson().toString());
             payMode = value.paymentName.toString();
             setState(() {});
           },
@@ -804,28 +808,70 @@ class _ViewResercationsState extends State<ViewResercations> {
                                                   MainAxisAlignment.end,
                                               children: [
                                                 button("Add", () {
-                                                  if (payMode.isNotEmpty &&
-                                                      payController
-                                                          .text.isNotEmpty) {
-                                                    modeReq.add(
-                                                        UpdatemodeRequest(
-                                                            mode: payMode,
-                                                            value: payController
-                                                                .text));
-
-                                                    payMode = "";
-                                                    payController.clear();
-                                                    tempBal = modeReq
-                                                        .fold(
+                                                  if (!isCardPresent(payMode)) {
+                                                    if (!isSumGreaterThanTotal(
+                                                        double.tryParse(balanceAmount
+                                                                    .toString())
+                                                                ?.toInt() ??
                                                             0,
-                                                            (previousValue,
-                                                                    element) =>
-                                                                previousValue +
-                                                                (int.tryParse(
-                                                                        element
-                                                                            .value) ??
-                                                                    0))
-                                                        .toString();
+                                                        double.tryParse(
+                                                                    payController
+                                                                        .text)
+                                                                ?.toInt() ??
+                                                            0)) {
+                                                      if (payMode.isNotEmpty &&
+                                                          payController.text
+                                                              .isNotEmpty) {
+                                                        modeReq.add(
+                                                            UpdatemodeRequest(
+                                                                mode: payMode,
+                                                                value:
+                                                                    payController
+                                                                        .text));
+
+                                                        payMode = "";
+                                                        payController.clear();
+                                                        tempBal = modeReq
+                                                            .fold(
+                                                                0,
+                                                                (previousValue,
+                                                                        element) =>
+                                                                    previousValue +
+                                                                    (int.tryParse(
+                                                                            element.value) ??
+                                                                        0))
+                                                            .toString();
+                                                        setstate(() {});
+                                                      }
+                                                    } else {
+                                                      Fluttertoast.showToast(
+                                                          msg:
+                                                              "Entered amount is higher than the balance amount",
+                                                          toastLength: Toast
+                                                              .LENGTH_SHORT,
+                                                          gravity: ToastGravity
+                                                              .CENTER,
+                                                          timeInSecForIosWeb: 1,
+                                                          backgroundColor:
+                                                              Colors.red,
+                                                          textColor:
+                                                              Colors.white,
+                                                          fontSize: 16.0);
+                                                    }
+                                                  } else {
+                                                    Fluttertoast.showToast(
+                                                        msg:
+                                                            "Please select some other payment mode",
+                                                        toastLength:
+                                                            Toast.LENGTH_SHORT,
+                                                        gravity:
+                                                            ToastGravity.CENTER,
+                                                        timeInSecForIosWeb: 1,
+                                                        backgroundColor:
+                                                            Colors.red,
+                                                        textColor: Colors.white,
+                                                        fontSize: 16.0);
+                                                    payMode = "";
                                                     setstate(() {});
                                                   }
                                                 }, HexColor("#d4ac2c"),
@@ -875,6 +921,13 @@ class _ViewResercationsState extends State<ViewResercations> {
                                                                   modeReq
                                                                       .removeAt(
                                                                           index);
+                                                                  tempBal = modeReq
+                                                                      .fold(
+                                                                          0,
+                                                                          (previousValue, element) =>
+                                                                              previousValue +
+                                                                              (int.tryParse(element.value) ?? 0))
+                                                                      .toString();
                                                                   setstate(
                                                                       () {});
                                                                 },
@@ -1152,12 +1205,14 @@ class _ViewResercationsState extends State<ViewResercations> {
                             button("Cancel", () {
                               startDate.clear();
                               endDate.clear();
+                              Navigator.pop(context);
                             }, Colors.red.shade900),
                             SizedBox(
                               width: 10.w,
                             ),
                             button("Submit", () {
                               reservationBloc.add(BackdateEvent(
+                                  reservId.toString(),
                                   "${startDate.text}T${endDate.text}:00Z"));
                               navigatorKey.currentState?.pop();
                             }, Colors.green.shade900)
@@ -1664,101 +1719,143 @@ class _ViewResercationsState extends State<ViewResercations> {
 
   File createFileFromBytes(Uint8List bytes) => File.fromRawPath(bytes);
 
-  BlocBuilder<ReservationsBloc, ReservationsState> detailsWidget() {
-    return BlocBuilder<ReservationsBloc, ReservationsState>(
-      buildWhen: (previous, current) {
-        return current is ReservationsLoad ||
-            current is ReservationNodata ||
-            current is ReservationDetailsDone ||
-            current is ReservationsError;
-      },
-      builder: (context, state) {
-        if (state is ReservationNodata) {
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: 100.w),
-            child: const TextWidget("No Data"),
-          );
-        }
-        if (state is ReservationsLoad) {
-          return const Center(
-            child: SizedBox(
-                height: 60, width: 60, child: CircularProgressIndicator()),
-          );
-        }
-        if (state is ReservationDetailsDone) {
-          reservId = state.reservationList.reservation.id.toString();
+  detailsWidget() {
+    return Column(
+      children: [
+        BlocBuilder<ReservationsBloc, ReservationsState>(
+            buildWhen: (previous, current) {
+          return current is ReservationsLoad ||
+              current is ReservationNodata ||
+              current is ReservationDetailsDone ||
+              current is ReservationsError;
+        }, builder: (context, state) {
+          if (state is ReservationNodata) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 100.w),
+              child: const TextWidget("No Data"),
+            );
+          }
+          if (state is ReservationsLoad) {
+            return const Center(
+              child: SizedBox(
+                  height: 60, width: 60, child: CircularProgressIndicator()),
+            );
+          }
+          if (state is ReservationDetailsDone) {
+            return Column(
+              children: [
+                paymentContainer(
+                    "Total Amount",
+                    " ₹ ${state.reservationList.reservation.totalPayment}",
+                    Colors.pink),
+                paymentContainer(
+                    "Amount Paid",
+                    "₹ ${state.reservationList.reservation.advancePaid}",
+                    Colors.blue),
+                dividerWidget(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    button("Mark as No cost", () {
+                      DialogWidget().dialogWidget(context, "Are you sure?", () {
+                        Navigator.pop(context);
+                      }, () {
+                        Navigator.pop(context);
+                        reservationBloc
+                            .add(MarkUpdate(reservId.toString(), "NS"));
+                      },
+                          notefield: const TextWidget(
+                              "Are you sure you want to mark this Reservation as No Cost? "));
 
-          balanceAmount = state.reservationList.reservation.balanceAmount;
-          return userDetailswidget(state, context);
-        }
-        if (state is ReservationsError) {
-          return Text(state.errorMsg);
-        }
-        return const Text("Something went wrong");
-      },
+                      //akshaya
+                      // reservationBloc.add(MarkUpdate(reservId.toString(), "NS"));
+                    }, HexColor("#d4ac2c"), textcolor: Colors.black),
+                    if (state.reservationList.reservation.status != "OP")
+                      SizedBox(
+                        width: 15.w,
+                      ),
+                    if (state.reservationList.reservation.status == "")
+                      button("Mark as No show", () {
+                        DialogWidget().dialogWidget(
+                          context,
+                          "Sure to confirm?",
+                          () {
+                            Navigator.pop(context);
+                          },
+                          () {
+                            print(state.reservationList.reservation.status);
+                            Navigator.pop(context);
+                            reservationBloc
+                                .add(MarkUpdate(reservId.toString(), "noshow"));
+                          },
+                        );
+                      }, HexColor("#d4ac2c"), textcolor: Colors.black),
+                  ],
+                ),
+                dividerWidget(),
+              ],
+            );
+          } else {
+            return TextWidget("Something went wrong");
+          }
+        }),
+        SizedBox(
+          height: 20.w,
+        ),
+        Center(
+          child: TextWidget(
+            "Bill Summary",
+            size: 22.sp,
+            fontweight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(
+          height: 20.w,
+        ),
+        billsummaryWidget(),
+        SizedBox(
+          height: 20.w,
+        ),
+        BlocBuilder<ReservationsBloc, ReservationsState>(
+          buildWhen: (previous, current) {
+            return current is ReservationsLoad ||
+                current is ReservationNodata ||
+                current is ReservationDetailsDone ||
+                current is ReservationsError;
+          },
+          builder: (context, state) {
+            if (state is ReservationNodata) {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 100.w),
+                child: const TextWidget("No Data"),
+              );
+            }
+            if (state is ReservationsLoad) {
+              return const Center(
+                child: SizedBox(
+                    height: 60, width: 60, child: CircularProgressIndicator()),
+              );
+            }
+            if (state is ReservationDetailsDone) {
+              reservId = state.reservationList.reservation.id.toString();
+
+              balanceAmount = state.reservationList.reservation.balanceAmount;
+              return userDetailswidget(state, context);
+            }
+            if (state is ReservationsError) {
+              return Text(state.errorMsg);
+            }
+            return const Text("Something went wrong");
+          },
+        ),
+      ],
     );
   }
 
   Column userDetailswidget(ReservationDetailsDone state, BuildContext context) {
     return Column(
       children: [
-        paymentContainer(
-            "Total Amount",
-            " ₹ ${state.reservationList.reservation.totalPayment}",
-            Colors.pink),
-        paymentContainer("Amount Paid",
-            "₹ ${state.reservationList.reservation.advancePaid}", Colors.blue),
         dividerWidget(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            button("Mark as No cost", () {
-              DialogWidget().dialogWidget(context, "Are you sure?", () {
-                Navigator.pop(context);
-              }, () {
-                Navigator.pop(context);
-                reservationBloc.add(MarkUpdate(reservId.toString(), "NS"));
-              },
-                  notefield: const TextWidget(
-                      "Are you sure you want to mark this Reservation as No Cost? "));
-
-              //akshaya
-              // reservationBloc.add(MarkUpdate(reservId.toString(), "NS"));
-            }, HexColor("#d4ac2c"), textcolor: Colors.black),
-            if (state.reservationList.reservation.status != "OP")
-              SizedBox(
-                width: 15.w,
-              ),
-            if (state.reservationList.reservation.status == "")
-              button("Mark as No show", () {
-                DialogWidget().dialogWidget(
-                  context,
-                  "Sure to confirm?",
-                  () {
-                    Navigator.pop(context);
-                  },
-                  () {
-                    print(state.reservationList.reservation.status);
-                    Navigator.pop(context);
-                    reservationBloc
-                        .add(MarkUpdate(reservId.toString(), "noshow"));
-                  },
-                );
-              }, HexColor("#d4ac2c"), textcolor: Colors.black),
-          ],
-        ),
-        dividerWidget(),
-        guestWidget(state),
-        dividerWidget(),
-        userDataWidget(context, state),
-        button("Submit", () {
-          addResevationBloc.add(
-              UpdateGuest(guestData, state.reservationList.reservation.id));
-        }, HexColor("#d4ac2c"), textcolor: Colors.black, size: 20.sp),
-        dividerWidget(),
-        SizedBox(
-          height: 10.w,
-        ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 15.w),
           child: Row(
@@ -1845,6 +1942,16 @@ class _ViewResercationsState extends State<ViewResercations> {
                           child: roomListwidget(state, index)))),
         ),
         dividerWidget(),
+        guestWidget(state),
+        userDataWidget(context, state),
+        button("Submit", () {
+          addResevationBloc.add(
+              UpdateGuest(guestData, state.reservationList.reservation.id));
+        }, HexColor("#d4ac2c"), textcolor: Colors.black, size: 20.sp),
+        dividerWidget(),
+        SizedBox(
+          height: 10.w,
+        ),
         SizedBox(
           height: 10.w,
         ),

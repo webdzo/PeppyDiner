@@ -638,6 +638,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                       side: const BorderSide(color: Colors.black54, width: 0.7),
                       backgroundColor: Colors.grey.shade300.withOpacity(0.8)),
                   onPressed: () {
+                    print( items[index].toJson());
                     checkoutBloc.checkoutDone.cartItems.add(CartItems(
                         category: "Food",
                         eta: "00:30",
@@ -645,7 +646,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                         name: items[index].name,
                         price: items[index].price,
                         quantity: 1,
-                        subCategory: items[index].itemCategoryId.toString(),
+                        subCategory: items[index].categoryName,
                         split: false,
                         modifiedEta: "2023-06-30T06:28:10.758Z",
                         key: items[index].name));

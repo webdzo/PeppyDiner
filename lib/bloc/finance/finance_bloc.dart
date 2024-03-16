@@ -3,6 +3,8 @@ import 'package:hotelpro_mobile/models/bycat_model.dart';
 import 'package:hotelpro_mobile/models/bywaiter_model.dart';
 import 'package:hotelpro_mobile/models/cancelorder_model.dart';
 import 'package:hotelpro_mobile/models/deleted_item_model.dart';
+import 'package:hotelpro_mobile/models/item_history_model.dart';
+import 'package:hotelpro_mobile/models/salepayment_model.dart';
 
 import '../../models/add_exp_request.dart';
 import '../../models/expense_cat_model.dart';
@@ -152,6 +154,40 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
             .fetchbywaiter(event.startDate, event.endDate);
 
         emit(BywaiterDone(response));
+      } catch (e) {
+        if (e == "204") {
+          emit(NoOrder());
+        } else {
+          emit(OrderError());
+          throw ("error");
+        }
+      }
+    });
+
+     on<FetchItemhistory>((event, emit) async {
+      emit(OrderLoad());
+      try {
+        final response = await FinanceRepository()
+            .fetchHistory();
+
+        emit(HistoryDone(response));
+      } catch (e) {
+        if (e == "204") {
+          emit(NoOrder());
+        } else {
+          emit(OrderError());
+          throw ("error");
+        }
+      }
+    });
+
+       on<FetchsalePayment>((event, emit) async {
+      emit(OrderLoad());
+      try {
+        final response = await FinanceRepository()
+            .sales(event.startDate, event.endDate);
+
+        emit(SalepaymentDone(response));
       } catch (e) {
         if (e == "204") {
           emit(NoOrder());

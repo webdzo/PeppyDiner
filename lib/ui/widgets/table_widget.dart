@@ -433,13 +433,7 @@ class _TableWidgetState extends State<TableWidget> {
       alignment: Alignment.topCenter,
       children: [
         Padding(
-          padding: EdgeInsets.only(
-              top: ((!widget.nonDiner) &&
-                      isTimeDifferenceGreaterThan5Minutes(
-                          DateTime.parse(widget.tableList[index].actualTime)) &&
-                      (widget.type == "current"))
-                  ? 10.w
-                  : 0),
+          padding: EdgeInsets.only(top: 0),
           child: GestureDetector(
             onTap: () {
               if (widget.type == "past" ||
@@ -461,7 +455,10 @@ class _TableWidgetState extends State<TableWidget> {
             },
             child: Container(
                 decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                    color:  ((!widget.nonDiner) &&
+            isTimeDifferenceGreaterThan5Minutes(
+                DateTime.parse(widget.tableList[index].actualTime)) &&
+            (widget.type == "current") &&widget.tableList[index].status == "")?Colors.red.shade100: Colors.grey.shade200,
                     border: Border.all(color: Colors.grey, width: 0.5),
                     borderRadius: BorderRadius.circular(10)),
                 margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.w),
@@ -484,15 +481,6 @@ class _TableWidgetState extends State<TableWidget> {
                 )),
           ),
         ),
-        if ((!widget.nonDiner) &&
-            isTimeDifferenceGreaterThan5Minutes(
-                DateTime.parse(widget.tableList[index].actualTime)) &&
-            (widget.type == "current"))
-          const Positioned(
-              child: Icon(
-            Icons.warning,
-            color: Colors.red,
-          )),
       ],
     );
   }

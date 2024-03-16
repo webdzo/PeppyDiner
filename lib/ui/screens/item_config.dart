@@ -342,7 +342,7 @@ class _ItemConfigState extends State<ItemConfig> {
                             },
                             child: Container(
                                 margin: EdgeInsets.symmetric(
-                                    horizontal: 10.w, vertical: 8.w),
+                                    horizontal: 5.w, vertical: 8.w),
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 10.w, vertical: 15.w),
                                 decoration: BoxDecoration(
@@ -381,7 +381,7 @@ class _ItemConfigState extends State<ItemConfig> {
                                                   width: MediaQuery.of(context)
                                                           .size
                                                           .width *
-                                                      0.6,
+                                                      0.5,
                                                   child: TextWidget(
                                                     items[index].name,
                                                     fontweight: FontWeight.bold,

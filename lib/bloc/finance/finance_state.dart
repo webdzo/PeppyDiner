@@ -101,3 +101,15 @@ class BywaiterDone extends FinanceState {
 
   BywaiterDone(this.orders);
 }
+
+class HistoryDone extends FinanceState {
+  final List<ItemhistoryModel> orders;
+
+  HistoryDone(this.orders);
+}
+
+class SalepaymentDone extends FinanceState {
+  final List<SalepaymentModel> orders;
+
+  SalepaymentDone(this.orders);
+}

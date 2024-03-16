@@ -79,3 +79,15 @@ class UpdateUsersLoad extends AddReservationState {
 class UpdateUsersError extends AddReservationState {
   UpdateUsersError();
 }
+
+class CreateUsersDone extends AddReservationState {
+  CreateUsersDone();
+}
+
+class CreateUsersLoad extends AddReservationState {
+  CreateUsersLoad();
+}
+
+class CreateUsersError extends AddReservationState {
+  CreateUsersError();
+}

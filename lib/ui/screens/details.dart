@@ -559,6 +559,9 @@ class _DetailScreenState extends State<DetailScreen> {
               Row(
                 children: [
                   Container(
+                    constraints: const BoxConstraints(
+                      maxWidth: 200.0, // Set the maximum width here
+                    ),
                     margin: EdgeInsets.only(top: 20.w),
                     decoration: BoxDecoration(
                         color: HexColor("#d4ac2c").withOpacity(0.4),

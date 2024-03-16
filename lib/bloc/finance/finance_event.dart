@@ -59,3 +59,17 @@ class FetchbyWaiter extends FinanceEvent {
   FetchbyWaiter(this.startDate, this.endDate);
 }
 
+class FetchItemhistory extends FinanceEvent {
+
+
+  FetchItemhistory();
+}
+
+class FetchsalePayment extends FinanceEvent {
+  final String startDate;
+  final String endDate;
+
+  FetchsalePayment(this.startDate, this.endDate);
+}
+
+

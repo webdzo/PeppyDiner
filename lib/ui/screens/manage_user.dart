@@ -36,7 +36,7 @@ class _ManageUserState extends State<ManageUser> {
     addResevationBloc = BlocProvider.of(context)
       ..stream.listen((event) {
         if (event is CreateUsersDone) {
-          retype="";
+          retype = "";
           createuserReq = CreateuserReq();
           EasyLoading.showSuccess('Success!');
           Future.delayed(const Duration(seconds: 2), () {
@@ -71,6 +71,7 @@ class _ManageUserState extends State<ManageUser> {
   }
 
   String retype = "";
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -115,228 +116,248 @@ class _ManageUserState extends State<ManageUser> {
                           builder: (context) {
                             return StatefulBuilder(
                                 builder: (context, setstate) {
-                              return AlertDialog(
-                                title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    TextWidget(
-                                      "Create User",
-                                      fontweight: FontWeight.bold,
-                                    )
-                                  ],
-                                ),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      height: 15.w,
-                                    ),
-                                    TextFormField(
-                                      controller:
-                                          TextEditingController.fromValue(
-                                              TextEditingValue(
-                                        text: createuserReq.name?.toString() ??
-                                            "",
-                                        selection: TextSelection.fromPosition(
-                                          TextPosition(
-                                              offset: createuserReq.name
-                                                      ?.toString()
-                                                      .length ??
-                                                  0),
-                                        ),
-                                      )),
-                                      onChanged: (value) {
-                                        createuserReq.name = value;
-                                        setstate(() {});
-                                      },
-                                      autovalidateMode:
-                                          AutovalidateMode.onUserInteraction,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return "Cannot be empty";
-                                        }
-                                        return null;
-                                      },
-                                      decoration: InputDecoration(
-                                        labelText: "Name",
-                                        fillColor: Colors.white,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                vertical: 0, horizontal: 5),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(5.0),
-                                          borderSide: BorderSide(
-                                            color: HexColor("#d4ac2c"),
-                                          ),
-                                        ),
-                                        //fillColor: Colors.green
+                              return Form(
+                                key: _formKey,
+                                child: AlertDialog(
+                                  title: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      TextWidget(
+                                        "Create User",
+                                        fontweight: FontWeight.bold,
+                                      )
+                                    ],
+                                  ),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        height: 15.w,
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: 15.w,
-                                    ),
-                                    TextFormField(
-                                      controller:
-                                          TextEditingController.fromValue(
-                                              TextEditingValue(
-                                        text: createuserReq.useremail
-                                                ?.toString() ??
-                                            "",
-                                        selection: TextSelection.fromPosition(
-                                          TextPosition(
-                                              offset: createuserReq.useremail
-                                                      ?.toString()
-                                                      .length ??
-                                                  0),
-                                        ),
-                                      )),
-                                      onChanged: (value) {
-                                        createuserReq.useremail = value;
-                                        setstate(() {});
-                                      },
-                                      autovalidateMode:
-                                          AutovalidateMode.onUserInteraction,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return "Cannot be empty";
-                                        }
-                                        return null;
-                                      },
-                                      decoration: InputDecoration(
-                                        labelText: "Email",
-                                        fillColor: Colors.white,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                vertical: 0, horizontal: 5),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(5.0),
-                                          borderSide: BorderSide(
-                                            color: HexColor("#d4ac2c"),
+                                      TextFormField(
+                                        controller:
+                                            TextEditingController.fromValue(
+                                                TextEditingValue(
+                                          text:
+                                              createuserReq.name?.toString() ??
+                                                  "",
+                                          selection: TextSelection.fromPosition(
+                                            TextPosition(
+                                                offset: createuserReq.name
+                                                        ?.toString()
+                                                        .length ??
+                                                    0),
                                           ),
-                                        ),
-                                        //fillColor: Colors.green
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 15.w,
-                                    ),
-                                    TextFormField(
-                                      controller:
-                                          TextEditingController.fromValue(
-                                              TextEditingValue(
-                                        text: createuserReq.password
-                                                ?.toString() ??
-                                            "",
-                                        selection: TextSelection.fromPosition(
-                                          TextPosition(
-                                              offset: createuserReq.password
-                                                      ?.toString()
-                                                      .length ??
-                                                  0),
-                                        ),
-                                      )),
-                                      onChanged: (value) {
-                                        createuserReq.password = value;
-                                        setstate(() {});
-                                      },
-                                      autovalidateMode:
-                                          AutovalidateMode.onUserInteraction,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return "Cannot be empty";
-                                        }
-                                        return null;
-                                      },
-                                      decoration: InputDecoration(
-                                        labelText: "Password",
-                                        fillColor: Colors.white,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                vertical: 0, horizontal: 5),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(5.0),
-                                          borderSide: BorderSide(
-                                            color: HexColor("#d4ac2c"),
+                                        )),
+                                        onChanged: (value) {
+                                          createuserReq.name = value;
+                                          setstate(() {});
+                                        },
+                                        autovalidateMode:
+                                            AutovalidateMode.onUserInteraction,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return "Cannot be empty";
+                                          }
+                                          return null;
+                                        },
+                                        decoration: InputDecoration(
+                                          labelText: "Name",
+                                          fillColor: Colors.white,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 0, horizontal: 5),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0),
+                                            borderSide: BorderSide(
+                                              color: HexColor("#d4ac2c"),
+                                            ),
                                           ),
+                                          //fillColor: Colors.green
                                         ),
-                                        //fillColor: Colors.green
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: 15.w,
-                                    ),
-                                    TextFormField(
-                                      controller:
-                                          TextEditingController.fromValue(
-                                              TextEditingValue(
-                                        text: retype?.toString() ?? "",
-                                        selection: TextSelection.fromPosition(
-                                          TextPosition(
-                                              offset:
-                                                  retype?.toString().length ??
-                                                      0),
-                                        ),
-                                      )),
-                                      onChanged: (value) {
-                                        retype = value;
-                                        setstate(() {});
-                                      },
-                                      autovalidateMode:
-                                          AutovalidateMode.onUserInteraction,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return "Cannot be empty";
-                                        }
-                                        return null;
-                                      },
-                                      decoration: InputDecoration(
-                                        labelText: "Re-type Password",
-                                        fillColor: Colors.white,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                vertical: 0, horizontal: 5),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(5.0),
-                                          borderSide: BorderSide(
-                                            color: HexColor("#d4ac2c"),
+                                      SizedBox(
+                                        height: 15.w,
+                                      ),
+                                      TextFormField(
+                                        controller:
+                                            TextEditingController.fromValue(
+                                                TextEditingValue(
+                                          text: createuserReq.useremail
+                                                  ?.toString() ??
+                                              "",
+                                          selection: TextSelection.fromPosition(
+                                            TextPosition(
+                                                offset: createuserReq.useremail
+                                                        ?.toString()
+                                                        .length ??
+                                                    0),
                                           ),
+                                        )),
+                                        onChanged: (value) {
+                                          createuserReq.useremail = value;
+                                          setstate(() {});
+                                        },
+                                        autovalidateMode:
+                                            AutovalidateMode.onUserInteraction,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return "Cannot be empty";
+                                          }
+                                          return null;
+                                        },
+                                        decoration: InputDecoration(
+                                          labelText: "Email",
+                                          fillColor: Colors.white,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 0, horizontal: 5),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0),
+                                            borderSide: BorderSide(
+                                              color: HexColor("#d4ac2c"),
+                                            ),
+                                          ),
+                                          //fillColor: Colors.green
                                         ),
-                                        //fillColor: Colors.green
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: 10.w,
-                                    ),
-                                    typesDropdown(context, accessTypeOptions)
-                                  ],
-                                ),
-                                actionsAlignment: MainAxisAlignment.center,
-                                actions: [
-                                  button("Cancel", () {
-                                    createuserReq=CreateuserReq();
-                                    navigatorKey.currentState?.pop();
-                                  }, Colors.red.shade900),
-                                  button("Create", () {
-                                    if (createuserReq.password == retype) {
-                                      addResevationBloc
-                                          .add(CreateusersEvent(createuserReq));
+                                      SizedBox(
+                                        height: 15.w,
+                                      ),
+                                      TextFormField(
+                                        controller:
+                                            TextEditingController.fromValue(
+                                                TextEditingValue(
+                                          text: createuserReq.password
+                                                  ?.toString() ??
+                                              "",
+                                          selection: TextSelection.fromPosition(
+                                            TextPosition(
+                                                offset: createuserReq.password
+                                                        ?.toString()
+                                                        .length ??
+                                                    0),
+                                          ),
+                                        )),
+                                        onChanged: (value) {
+                                          createuserReq.password = value;
+                                          setstate(() {});
+                                        },
+                                        autovalidateMode:
+                                            AutovalidateMode.onUserInteraction,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return "Cannot be empty";
+                                          }
+                                          return null;
+                                        },
+                                        decoration: InputDecoration(
+                                          labelText: "Password",
+                                          fillColor: Colors.white,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 0, horizontal: 5),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0),
+                                            borderSide: BorderSide(
+                                              color: HexColor("#d4ac2c"),
+                                            ),
+                                          ),
+                                          //fillColor: Colors.green
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 15.w,
+                                      ),
+                                      TextFormField(
+                                        controller:
+                                            TextEditingController.fromValue(
+                                                TextEditingValue(
+                                          text: retype.toString() ?? "",
+                                          selection: TextSelection.fromPosition(
+                                            TextPosition(
+                                                offset:
+                                                    retype.toString().length ??
+                                                        0),
+                                          ),
+                                        )),
+                                        onChanged: (value) {
+                                          retype = value;
+                                          setstate(() {});
+                                        },
+                                        autovalidateMode:
+                                            AutovalidateMode.onUserInteraction,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return "Cannot be empty";
+                                          }
+                                          return null;
+                                        },
+                                        decoration: InputDecoration(
+                                          labelText: "Re-type Password",
+                                          fillColor: Colors.white,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 0, horizontal: 5),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0),
+                                            borderSide: BorderSide(
+                                              color: HexColor("#d4ac2c"),
+                                            ),
+                                          ),
+                                          //fillColor: Colors.green
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 10.w,
+                                      ),
+                                      typesDropdown(context, accessTypeOptions)
+                                    ],
+                                  ),
+                                  actionsAlignment: MainAxisAlignment.center,
+                                  actions: [
+                                    button("Cancel", () {
+                                      createuserReq = CreateuserReq();
+                                      retype = "";
                                       navigatorKey.currentState?.pop();
-                                    } else {
-                                      Fluttertoast.showToast(
-                                          msg: "Password doesnt match",
-                                          toastLength: Toast.LENGTH_SHORT,
-                                          gravity: ToastGravity.CENTER,
-                                          timeInSecForIosWeb: 1,
-                                          backgroundColor: Colors.red,
-                                          textColor: Colors.white,
-                                          fontSize: 16.0);
-                                    }
-                                  }, Colors.green.shade900)
-                                ],
+                                    }, Colors.red.shade900),
+                                    button("Create", () {
+                                      if (_formKey.currentState!.validate()) {
+                                        if (createuserReq.type != null) {
+                                          if (createuserReq.password ==
+                                              retype) {
+                                            addResevationBloc.add(
+                                                CreateusersEvent(
+                                                    createuserReq));
+                                            navigatorKey.currentState?.pop();
+                                          } else {
+                                            Fluttertoast.showToast(
+                                                msg: "Password doesnt match",
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.CENTER,
+                                                timeInSecForIosWeb: 1,
+                                                backgroundColor: Colors.red,
+                                                textColor: Colors.white,
+                                                fontSize: 16.0);
+                                          }
+                                        } else {
+                                          Fluttertoast.showToast(
+                                              msg: "Please select access type",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.CENTER,
+                                              timeInSecForIosWeb: 1,
+                                              backgroundColor: Colors.red,
+                                              textColor: Colors.white,
+                                              fontSize: 16.0);
+                                        }
+                                      }
+                                    }, Colors.green.shade900)
+                                  ],
+                                ),
                               );
                             });
                           },
@@ -638,7 +659,7 @@ class _ManageUserState extends State<ManageUser> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 12.w),
+          padding: EdgeInsets.only(left: 5.w),
           child: const TextWidget(
             "Access Type",
             fontweight: FontWeight.w500,
@@ -651,8 +672,8 @@ class _ManageUserState extends State<ManageUser> {
           alignment: Alignment.center,
           height: 70.w,
           // width: MediaQuery.of(context).size.width * 0.45,
-          margin: EdgeInsets.symmetric(horizontal: 15.w),
-          padding: const EdgeInsets.symmetric(horizontal: 7),
+          margin: EdgeInsets.symmetric(horizontal: 0.w),
+          padding: const EdgeInsets.symmetric(horizontal: 0),
           decoration: BoxDecoration(
             border: Border.all(
               color: Colors.grey,

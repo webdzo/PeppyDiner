@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:core';
+import 'dart:developer';
 
 import 'package:hotelpro_mobile/models/editItemconfig_request.dart';
 import 'package:hotelpro_mobile/models/itemconfig_model.dart';
@@ -35,9 +36,16 @@ class ItemsRepository {
   }
 
   Future<Response> edit(EditItemconfigRequest request, int id) async {
-    var response = await ApiBaseHelper()
-        .putMethod("/items/$id", json.encode({"data": request.toJson()}));
-    return response;
+    log(request.toJson().toString());
+    if (id == 0) {
+      var response = await ApiBaseHelper()
+          .postMethod("/items", json.encode({"data": request.toJson()}));
+      return response;
+    } else {
+      var response = await ApiBaseHelper()
+          .putMethod("/items/$id", json.encode({"data": request.toJson()}));
+      return response;
+    }
   }
 
   Future<Response> delete(int id) async {

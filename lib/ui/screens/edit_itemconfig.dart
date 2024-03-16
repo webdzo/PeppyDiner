@@ -28,6 +28,10 @@ class _EditItemconfigState extends State<EditItemconfig> {
   EditItemconfigRequest editItemconfigRequest = EditItemconfigRequest();
   @override
   void initState() {
+    if (widget.items == null) {
+      editItemconfigRequest.enabled = 1;
+      editItemconfigRequest.type = "nonveg";
+    }
     itemsBloc = BlocProvider.of(context)
       ..stream.listen((event) {
         if (event is ItemsLoad) {
@@ -44,19 +48,20 @@ class _EditItemconfigState extends State<EditItemconfig> {
     categoryBloc = BlocProvider.of(context);
     categoryBloc.add(FetchCategory());
 
-    editItemconfigRequest = EditItemconfigRequest(
-        subcategory: widget.items?.subcategoryName,
-        description: widget.items?.description,
-        enabled: widget.items?.enabled,
-        itemname: widget.items?.name,
-        price: double.tryParse(widget.items?.price ?? "")?.toInt(),
-        type: widget.items?.type,
-        expectedTime: widget.items?.expectedTime);
+    if (widget.items != null) {
+      editItemconfigRequest = EditItemconfigRequest(
+          subcategory: widget.items?.subcategoryName,
+          description: widget.items?.description,
+          enabled: widget.items?.enabled,
+          itemname: widget.items?.name,
+          price: double.tryParse(widget.items?.price ?? "")?.toInt(),
+          type: widget.items?.type,
+          expectedTime: widget.items?.expectedTime);
+    }
     super.initState();
   }
 
   int? catId;
-  
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +72,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             button("Submit", () {
-             
+              print(editItemconfigRequest.toJson());
               itemsBloc.add(EditItemconfigEvent(
                   editItemconfigRequest, widget.items?.id ?? 0));
             }, HexColor("#d4ac2c"), textcolor: Colors.black, size: 20.sp),
@@ -80,7 +85,6 @@ class _EditItemconfigState extends State<EditItemconfig> {
           ],
         ),
       ),
-  
       appBar: AppBar(
         backgroundColor: HexColor("#d4ac2c"),
         elevation: 0,
@@ -90,7 +94,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
           child: Image.asset("assets/appLogo.png"),
         ), */
         title: TextWidget(
-          "Edit Item",
+          widget.items == null ? "Add Item" : "Edit Item",
           style: GoogleFonts.belleza(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -156,7 +160,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
                 maxLines: 4,
                 decoration: InputDecoration(
                   contentPadding:
-                      const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                   labelText: "Item Description",
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
@@ -245,7 +249,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
                   listener: (context, state) {
                     if (state is CategoryDone) {
                       if (widget.items != null) {
-                        catId=state.category
+                        catId = state.category
                             .where((element) =>
                                 element.name == widget.items?.categoryName)
                             .toList()
@@ -259,8 +263,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
                             .name;
                       }
                       if (editItemconfigRequest.subcategory != null) {
-                        categoryBloc.add(FetchSubCategory(
-                         catId ?? 0));
+                        categoryBloc.add(FetchSubCategory(catId ?? 0));
                       }
                     }
                   },
@@ -376,8 +379,8 @@ class _EditItemconfigState extends State<EditItemconfig> {
                   editItemconfigRequest.category == null)
               ? null
               : itemList
-                  .where(
-                      (element) => element.name == editItemconfigRequest.category)
+                  .where((element) =>
+                      element.name == editItemconfigRequest.category)
                   .toList()
                   .first,
           underline: const Divider(

@@ -188,7 +188,6 @@ class _DetailScreenState extends State<DetailScreen> {
                     current is OrdersError;
               },
               builder: (context, state) {
-                print("akshaya $state");
                 return state is OrdersDone
                     ? (state.orders.isNotEmpty &&
                             state.orders.first.completed == false)
@@ -196,7 +195,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             onPressed: () {
                               DialogWidget().dialogWidget(
                                 context,
-                                "Sure to confirm?",
+                                "Are you sure you want to complete this order?",
                                 () {
                                   Navigator.pop(context);
                                 },
@@ -255,7 +254,8 @@ class _DetailScreenState extends State<DetailScreen> {
                         children: [
                           if (widget.data["waiter"].toString() !=
                                   userId.toString() &&
-                              role != "ROLE_ADMIN")
+                              role != "ROLE_ADMIN" &&
+                              role != "ROLE_MANAGER")
                             Padding(
                               padding: EdgeInsets.symmetric(horizontal: 10.w),
                               child: Row(
@@ -302,7 +302,8 @@ class _DetailScreenState extends State<DetailScreen> {
                             ),
                           if (widget.data["waiter"].toString() ==
                                   userId.toString() ||
-                              role == "ROLE_ADMIN")
+                              role == "ROLE_ADMIN" ||
+                              role == "ROLE_MANAGER")
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -369,7 +370,8 @@ class _DetailScreenState extends State<DetailScreen> {
                                           "waiter": (widget.data["waiter"]
                                                           .toString() !=
                                                       userId.toString() &&
-                                                  role == "ROLE_ADMIN")
+                                                  (role == "ROLE_ADMIN" ||
+                                                      role == "ROLE_MANAGER"))
                                               ? roleId
                                               : widget.data["waiter"],
                                           "fromtable": widget.data["fromtable"]
@@ -608,99 +610,109 @@ class _DetailScreenState extends State<DetailScreen> {
                 Row(
                   children: [
                     GestureDetector(
-                        onTap: (widget.data["waiter"].toString() !=
-                                    userId.toString() &&
-                                role != "ROLE_ADMIN" &&
-                                role != "ROLE_MANAGER")
-                            ? null
-                            : editList[index]
-                                ? () {
-                                    DialogWidget().dialogWidget(
-                                      context,
-                                      "Sure to save?",
-                                      () {
-                                        Navigator.pop(context);
+                        onTap:
+                            (/* widget.data["waiter"].toString() !=
+                                    userId.toString() && */
+                                    role != "ROLE_ADMIN" &&
+                                        role != "ROLE_MANAGER")
+                                ? null
+                                : editList[index]
+                                    ? () {
+                                        DialogWidget().dialogWidget(
+                                          context,
+                                          "Sure to save?",
+                                          () {
+                                            Navigator.pop(context);
 
-                                        editList[index] = false;
-                                        ordersBloc.add(FetchOrders(
-                                            widget.data["rId"],
-                                            widget.data["tId"]));
+                                            editList[index] = false;
+                                            ordersBloc.add(FetchOrders(
+                                                widget.data["rId"],
+                                                widget.data["tId"]));
 
-                                        setState(() {});
-                                      },
-                                      () {
-                                        Navigator.pop(context);
-                                        ordersBloc.add(EditOrders(
-                                            state.orders.first.id.toString(),
-                                            state.orders.first.itemOrders[index]
-                                                .id
-                                                .toString(),
-                                            state.orders.first.itemOrders[index]
-                                                .itemQuantity
-                                                .toString(),
-                                            notesController.text));
-                                        editList[index] = false;
-                                        setState(() {});
-                                      },
-                                      notefield: Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 10.w, vertical: 5.w),
-                                        child: Card(
-                                          elevation: 1,
-                                          child: TextFormField(
-                                            minLines: 3,
-                                            maxLines: null,
-                                            controller: notesController,
-                                            keyboardType:
-                                                TextInputType.multiline,
-                                            decoration: InputDecoration(
-                                              alignLabelWithHint: true,
-                                              labelStyle: const TextStyle(
-                                                  color: Colors.black),
-                                              focusedBorder: OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color:
-                                                          Colors.grey.shade500,
-                                                      width: 0.4)),
-                                              border: OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color:
-                                                          Colors.grey.shade200,
-                                                      width: 0.009)),
-                                              labelText:
-                                                  'Enter any additional information about your order.',
+                                            setState(() {});
+                                          },
+                                          () {
+                                            Navigator.pop(context);
+                                            ordersBloc.add(EditOrders(
+                                                state.orders.first.id
+                                                    .toString(),
+                                                state.orders.first
+                                                    .itemOrders[index].id
+                                                    .toString(),
+                                                state
+                                                    .orders
+                                                    .first
+                                                    .itemOrders[index]
+                                                    .itemQuantity
+                                                    .toString(),
+                                                notesController.text));
+                                            editList[index] = false;
+                                            setState(() {});
+                                          },
+                                          notefield: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 10.w,
+                                                vertical: 5.w),
+                                            child: Card(
+                                              elevation: 1,
+                                              child: TextFormField(
+                                                minLines: 3,
+                                                maxLines: null,
+                                                controller: notesController,
+                                                keyboardType:
+                                                    TextInputType.multiline,
+                                                decoration: InputDecoration(
+                                                  alignLabelWithHint: true,
+                                                  labelStyle: const TextStyle(
+                                                      color: Colors.black),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(
+                                                                  color: Colors
+                                                                      .grey
+                                                                      .shade500,
+                                                                  width: 0.4)),
+                                                  border: OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Colors
+                                                              .grey.shade200,
+                                                          width: 0.009)),
+                                                  labelText:
+                                                      'Enter any additional information about your order.',
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                : editList
-                                        .where((element) => element == true)
-                                        .toList()
-                                        .isEmpty
-                                    ? () {
-                                        editList[index] = true;
-                                        setState(() {});
+                                        );
                                       }
-                                    : null,
+                                    : editList
+                                            .where((element) => element == true)
+                                            .toList()
+                                            .isEmpty
+                                        ? () {
+                                            editList[index] = true;
+                                            setState(() {});
+                                          }
+                                        : null,
                         child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(7.w),
-                              color: (widget.data["waiter"].toString() !=
-                                          userId.toString() &&
-                                      role != "ROLE_ADMIN" &&
-                                      role != "ROLE_MANAGER")
-                                  ? Colors.grey
-                                  : editList[index]
-                                      ? Colors.green
-                                      : editList
-                                              .where(
-                                                  (element) => element == true)
-                                              .toList()
-                                              .isEmpty
-                                          ? HexColor("#d4ac2c")
-                                          : Colors.grey,
+                              color:
+                                  (/* widget.data["waiter"].toString() !=
+                                          userId.toString() && */
+                                          role != "ROLE_ADMIN" &&
+                                              role != "ROLE_MANAGER")
+                                      ? Colors.grey
+                                      : editList[index]
+                                          ? Colors.green
+                                          : editList
+                                                  .where((element) =>
+                                                      element == true)
+                                                  .toList()
+                                                  .isEmpty
+                                              ? HexColor("#d4ac2c")
+                                              : Colors.grey,
                             ),
                             padding: EdgeInsets.symmetric(
                                 vertical: 5.w, horizontal: 15.w),
@@ -713,112 +725,119 @@ class _DetailScreenState extends State<DetailScreen> {
                       width: 5.w,
                     ),
                     GestureDetector(
-                      onTap: (widget.data["waiter"].toString() !=
-                                  userId.toString() &&
-                              role != "ROLE_ADMIN" &&
-                              role != "ROLE_MANAGER")
-                          ? null
-                          : () {
-                              if (editList[index]) {
-                                DialogWidget().dialogWidget(
-                                  context,
-                                  "Sure to cancel?",
-                                  () {
-                                    Navigator.pop(context);
-                                  },
-                                  () {
-                                    Navigator.pop(context);
-                                    editList[index] = false;
-                                    ordersBloc.add(FetchOrders(
-                                        widget.data["rId"],
-                                        widget.data["tId"]));
-                                    /*  items = widget.order.itemOrders
+                      onTap:
+                          (/* widget.data["waiter"].toString() !=
+                                  userId.toString() && */
+                                  role != "ROLE_ADMIN" &&
+                                      role != "ROLE_MANAGER")
+                              ? null
+                              : () {
+                                  if (editList[index]) {
+                                    DialogWidget().dialogWidget(
+                                      context,
+                                      "Sure to cancel?",
+                                      () {
+                                        Navigator.pop(context);
+                                      },
+                                      () {
+                                        Navigator.pop(context);
+                                        editList[index] = false;
+                                        ordersBloc.add(FetchOrders(
+                                            widget.data["rId"],
+                                            widget.data["tId"]));
+                                        /*  items = widget.order.itemOrders
                               .map((e) => ItemOrders.fromJson(e.toJson()))
                               .toList(); */
-                                    setState(() {});
-                                  },
-                                );
-                              } else if (editList
-                                  .where((element) => element == true)
-                                  .toList()
-                                  .isEmpty) {
-                                DialogWidget().dialogWidget(
-                                  context,
-                                  "Confirm Delete Item from Order?",
-                                  () {
-                                    deletereasonController.clear();
-                                    Navigator.pop(context);
-                                  },
-                                  () {
-                                    if (_deletedialogKey.currentState!
-                                        .validate()) {
-                                      Navigator.pop(context);
-                                      ordersBloc.add(DeleteItem(
-                                          state.orders.first.id.toString(),
-                                          state
-                                              .orders.first.itemOrders[index].id
-                                              .toString(),
-                                          deletereasonController.text));
-                                    }
-                                  },
-                                  notefield: Form(
-                                    key: _deletedialogKey,
-                                    child: Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 5.w),
-                                      child: Card(
-                                        elevation: 1,
-                                        child: TextFormField(
-                                          minLines: 3,
-                                          maxLines: null,
-                                          autovalidateMode: AutovalidateMode
-                                              .onUserInteraction,
-                                          validator: (value) {
-                                            if (value?.isEmpty ?? true) {
-                                              return "Please enter valid reason";
-                                            }
-                                            return null;
-                                          },
-                                          controller: deletereasonController,
-                                          keyboardType: TextInputType.multiline,
-                                          decoration: InputDecoration(
-                                            alignLabelWithHint: true,
-                                            labelStyle: const TextStyle(
-                                                color: Colors.black),
-                                            focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.grey.shade500,
-                                                    width: 0.4)),
-                                            border: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                    color: Colors.grey.shade200,
-                                                    width: 0.009)),
-                                            labelText:
-                                                'Enter valid reason to delete',
+                                        setState(() {});
+                                      },
+                                    );
+                                  } else if (editList
+                                      .where((element) => element == true)
+                                      .toList()
+                                      .isEmpty) {
+                                    DialogWidget().dialogWidget(
+                                      context,
+                                      "Confirm Delete Item from Order?",
+                                      () {
+                                        deletereasonController.clear();
+                                        Navigator.pop(context);
+                                      },
+                                      () {
+                                        if (_deletedialogKey.currentState!
+                                            .validate()) {
+                                          Navigator.pop(context);
+                                          ordersBloc.add(DeleteItem(
+                                              state.orders.first.id.toString(),
+                                              state.orders.first
+                                                  .itemOrders[index].id
+                                                  .toString(),
+                                              deletereasonController.text));
+                                        }
+                                      },
+                                      notefield: Form(
+                                        key: _deletedialogKey,
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 5.w),
+                                          child: Card(
+                                            elevation: 1,
+                                            child: TextFormField(
+                                              minLines: 3,
+                                              maxLines: null,
+                                              autovalidateMode: AutovalidateMode
+                                                  .onUserInteraction,
+                                              validator: (value) {
+                                                if (value?.isEmpty ?? true) {
+                                                  return "Please enter valid reason";
+                                                }
+                                                return null;
+                                              },
+                                              controller:
+                                                  deletereasonController,
+                                              keyboardType:
+                                                  TextInputType.multiline,
+                                              decoration: InputDecoration(
+                                                alignLabelWithHint: true,
+                                                labelStyle: const TextStyle(
+                                                    color: Colors.black),
+                                                focusedBorder:
+                                                    OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                            color: Colors
+                                                                .grey.shade500,
+                                                            width: 0.4)),
+                                                border: OutlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                        color: Colors
+                                                            .grey.shade200,
+                                                        width: 0.009)),
+                                                labelText:
+                                                    'Enter valid reason to delete',
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
+                                    );
+                                  }
+                                },
                       child: Container(
                           decoration: BoxDecoration(
-                              color: (widget.data["waiter"].toString() !=
-                                          userId.toString() &&
-                                      role != "ROLE_ADMIN" &&
-                                      role != "ROLE_MANAGER")
-                                  ? Colors.grey
-                                  : editList[index]
-                                      ? Colors.red.shade900
-                                      : editList
-                                              .where(
-                                                  (element) => element == true)
-                                              .toList()
-                                              .isEmpty
+                              color:
+                                  (/* widget.data["waiter"].toString() !=
+                                          userId.toString() && */
+                                          role != "ROLE_ADMIN" &&
+                                              role != "ROLE_MANAGER")
+                                      ? Colors.grey
+                                      : editList[index]
                                           ? Colors.red.shade900
-                                          : Colors.grey,
+                                          : editList
+                                                  .where((element) =>
+                                                      element == true)
+                                                  .toList()
+                                                  .isEmpty
+                                              ? Colors.red.shade900
+                                              : Colors.grey,
                               borderRadius: BorderRadius.circular(7.w)),
                           padding: EdgeInsets.symmetric(
                               vertical: 5.w, horizontal: 15.w),

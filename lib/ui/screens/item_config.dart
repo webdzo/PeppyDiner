@@ -11,6 +11,7 @@ import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/screens/drawer_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/applogo_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/button.dart';
+import 'package:hotelpro_mobile/ui/widgets/search_bar.dart';
 import 'package:hotelpro_mobile/ui/widgets/text_widget.dart';
 
 import '../../main_qa.dart';
@@ -26,7 +27,7 @@ class _ItemConfigState extends State<ItemConfig> {
   ItemsBloc itemsBloc = ItemsBloc();
   List<int> selectedItems = [];
   List<ItemConfigModel> items = [];
-  List<ItemConfigModel> initialItems = [];
+  // List<ItemConfigModel> initialItems = [];
   String selectedFilter = "";
 
   @override
@@ -55,6 +56,8 @@ class _ItemConfigState extends State<ItemConfig> {
     await Future.delayed(const Duration(seconds: 1));
     itemsBloc.add(FetchItemConfig());
   }
+
+  TextEditingController controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -97,430 +100,480 @@ class _ItemConfigState extends State<ItemConfig> {
         ),
         body: RefreshIndicator(
           onRefresh: _refresh,
-          child: BlocBuilder<ItemsBloc, ItemsState>(
-            buildWhen: (previous, current) {
-              return current is ItemsLoad ||
-                  current is ItemconfigDone ||
-                  current is ItemsError;
-            },
-            builder: (context, state) {
-              if (state is ItemconfigDone) {
-                initialItems = state.items;
-                if (selectedFilter == "") {
-                  items = state.items;
-                } else if (selectedFilter == "enabled") {
-                  items = state.items
-                      .where((element) => element.enabled == 1)
-                      .toList();
-                } else if (selectedFilter == "disabled") {
-                  items = state.items
-                      .where((element) => element.enabled == 0)
-                      .toList();
-                } else if (selectedFilter == "veg") {
-                  items = state.items
-                      .where((element) => element.type == "veg")
-                      .toList();
-                } else if (selectedFilter == "nv") {
-                  items = state.items
-                      .where((element) => element.type == "nonveg")
-                      .toList();
-                }
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.w),
+                child: searchBox(controller, "Search here", "", () {
+                  setState(() {});
+                }),
+              ),
+              Expanded(
+                child: BlocBuilder<ItemsBloc, ItemsState>(
+                  buildWhen: (previous, current) {
+                    return current is ItemsLoad ||
+                        current is ItemconfigDone ||
+                        current is ItemsError;
+                  },
+                  builder: (context, state) {
+                    if (state is ItemconfigDone) {
+                      // initialItems = state.items;
+                      if (selectedFilter == "") {
+                        items = state.items;
+                      } else if (selectedFilter == "enabled") {
+                        items = state.items
+                            .where((element) => element.enabled == 1)
+                            .toList();
+                      } else if (selectedFilter == "disabled") {
+                        items = state.items
+                            .where((element) => element.enabled == 0)
+                            .toList();
+                      } else if (selectedFilter == "veg") {
+                        items = state.items
+                            .where((element) => element.type == "veg")
+                            .toList();
+                      } else if (selectedFilter == "nv") {
+                        items = state.items
+                            .where((element) => element.type == "nonveg")
+                            .toList();
+                      }
+                      if (controller.text.isNotEmpty) {
+                        items = items
+                            .where((element) => element.name
+                                .toLowerCase()
+                                .contains(controller.text.toLowerCase()))
+                            .toList();
+                      }
 
-                return Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: 10.w),
-                          child: GestureDetector(
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) {
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(
-                                        height: 20.w,
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(left: 20.w),
-                                        child: TextWidget(
-                                          "Filter By",
-                                          size: 22.sp,
-                                          fontweight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 20.w,
-                                      ),
-                                      ListTile(
-                                        onTap: () {
-                                          selectedFilter = "";
-                                          items = initialItems;
-                                          setState(() {});
-                                          Navigator.pop(context);
-                                        },
-                                        titleTextStyle:
-                                            TextStyle(fontSize: 18.sp),
-                                        title: const TextWidget(
-                                          "All",
-                                        ),
-                                        trailing: selectedFilter == ""
-                                            ? const Icon(
-                                                Icons.check,
-                                                color: Colors.black,
-                                              )
-                                            : null,
-                                      ),
-                                      ListTile(
-                                        onTap: () {
-                                          selectedFilter = "enabled";
-                                          items = state.items
-                                              .where((element) =>
-                                                  element.enabled == 1)
-                                              .toList();
-                                          setState(() {});
-                                          Navigator.pop(context);
-                                        },
-                                        titleTextStyle:
-                                            TextStyle(fontSize: 18.sp),
-                                        title: const TextWidget(
-                                          "Enabled",
-                                        ),
-                                        trailing: selectedFilter == "enabled"
-                                            ? const Icon(
-                                                Icons.check,
-                                                color: Colors.black,
-                                              )
-                                            : null,
-                                      ),
-                                      ListTile(
-                                        onTap: () {
-                                          selectedFilter = "disabled";
-                                          items = state.items
-                                              .where((element) =>
-                                                  element.enabled == 0)
-                                              .toList();
-
-                                          setState(() {});
-                                          Navigator.pop(context);
-                                        },
-                                        titleTextStyle:
-                                            TextStyle(fontSize: 18.sp),
-                                        title: const TextWidget("Disabled"),
-                                        trailing: selectedFilter == "disabled"
-                                            ? const Icon(
-                                                Icons.check,
-                                                color: Colors.black,
-                                              )
-                                            : null,
-                                      ),
-                                      ListTile(
-                                        onTap: () {
-                                          selectedFilter = "nv";
-                                          items = state.items
-                                              .where((element) =>
-                                                  element.type == "nonveg")
-                                              .toList();
-
-                                          setState(() {});
-                                          Navigator.pop(context);
-                                        },
-                                        titleTextStyle:
-                                            TextStyle(fontSize: 18.sp),
-                                        title: const TextWidget("Nonveg"),
-                                        trailing: selectedFilter == "nv"
-                                            ? const Icon(
-                                                Icons.check,
-                                                color: Colors.black,
-                                              )
-                                            : null,
-                                      ),
-                                      ListTile(
-                                        onTap: () {
-                                          selectedFilter = "veg";
-                                          items = state.items
-                                              .where((element) =>
-                                                  element.type == "veg")
-                                              .toList();
-
-                                          setState(() {});
-                                          Navigator.pop(context);
-                                        },
-                                        titleTextStyle:
-                                            TextStyle(fontSize: 18.sp),
-                                        title: const TextWidget("Veg"),
-                                        trailing: selectedFilter == "veg"
-                                            ? const Icon(
-                                                Icons.check,
-                                                color: Colors.black,
-                                              )
-                                            : null,
-                                      )
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(left: 10.w),
-                              padding: EdgeInsets.all(5.w),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5.w),
-                                  border: Border.all(color: Colors.black)),
-                              child: const Icon(
-                                Icons.filter_alt,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            button("Enable", () {
-                              if (selectedItems.isNotEmpty) {
-                                itemsBloc.add(EnableItems(selectedItems, true));
-                              } else {
-                                Fluttertoast.showToast(
-                                    msg: "Please select items",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 1,
-                                    backgroundColor: Colors.red,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0);
-                              }
-                            },
-                                selectedItems.isNotEmpty
-                                    ? HexColor("#d4ac2c")
-                                    : Colors.grey.shade500,
-                                textcolor: Colors.black),
-                            SizedBox(
-                              width: 10.w,
-                            ),
-                            button("Disable", () {
-                              if (selectedItems.isNotEmpty) {
-                                itemsBloc
-                                    .add(EnableItems(selectedItems, false));
-                              } else {
-                                Fluttertoast.showToast(
-                                    msg: "Please select items",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 1,
-                                    backgroundColor: Colors.red,
-                                    textColor: Colors.white,
-                                    fontSize: 16.0);
-                              }
-                            },
-                                selectedItems.isNotEmpty
-                                    ? HexColor("#d4ac2c")
-                                    : Colors.grey.shade500,
-                                textcolor: Colors.black),
-                            SizedBox(
-                              width: 10.w,
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              navigatorKey.currentState!
-                                  .pushNamed("/edititemconfig",
-                                      arguments: items[index])
-                                  .then((value) =>
-                                      itemsBloc.add(FetchItemConfig()));
-                            },
-                            child: Container(
-                                margin: EdgeInsets.symmetric(
-                                    horizontal: 5.w, vertical: 8.w),
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w, vertical: 15.w),
-                                decoration: BoxDecoration(
-                                    color: Colors.grey.shade200,
-                                    border: Border.all(color: Colors.black38),
-                                    borderRadius: BorderRadius.circular(20.w)),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Checkbox(
-                                            activeColor: HexColor("#d4ac2c"),
-                                            value: selectedItems
-                                                .contains(items[index].id),
-                                            onChanged: (bool? value) {
-                                              if ((value ?? false) &&
-                                                  !(selectedItems.contains(
-                                                      items[index].id))) {
-                                                selectedItems
-                                                    .add(items[index].id);
-                                              } else {
-                                                selectedItems
-                                                    .remove(items[index].id);
-                                              }
-                                              setState(() {});
-                                            }),
-                                        Column(
+                      return Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 10.w),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      builder: (context) {
+                                        return Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Row(
-                                              children: [
-                                                SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.5,
-                                                  child: TextWidget(
-                                                    items[index].name,
-                                                    fontweight: FontWeight.bold,
-                                                    size: 19.sp,
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: 5.w,
-                                                ),
-                                                Icon(
-                                                  Icons.verified,
-                                                  color:
-                                                      items[index].enabled == 1
-                                                          ? Colors.green
-                                                          : Colors.grey,
-                                                  size: 20.sp,
-                                                )
-                                              ],
+                                            SizedBox(
+                                              height: 20.w,
                                             ),
                                             Padding(
                                               padding:
-                                                  EdgeInsets.only(top: 10.w),
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  items[index].type == "veg"
-                                                      ? Image.asset(
-                                                          "assets/vegLogo.png",
-                                                          width: 20.w)
-                                                      : Image.asset(
-                                                          "assets/nonveg.png",
-                                                          width: 25.w),
-                                                  SizedBox(
-                                                    width: 10.w,
-                                                  ),
-                                                  Container(
-                                                    margin: EdgeInsets.only(
-                                                        top: 0.w),
-                                                    decoration: BoxDecoration(
-                                                        color: HexColor(
-                                                                "#d4ac2c")
-                                                            .withOpacity(0.4),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(3),
-                                                        border: Border.all(
-                                                            color: HexColor(
-                                                                "#d4ac2c"))),
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            horizontal: 5.w,
-                                                            vertical: 3.w),
-                                                    child: TextWidget(
-                                                      items[index].categoryName,
-                                                      size: 17.sp,
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 10.w,
-                                                  ),
-                                                  Container(
-                                                    margin: EdgeInsets.only(
-                                                        top: 0.w),
-                                                    decoration: BoxDecoration(
-                                                        color: HexColor(
-                                                                "#d4ac2c")
-                                                            .withOpacity(0.4),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(3),
-                                                        border: Border.all(
-                                                            color: HexColor(
-                                                                "#d4ac2c"))),
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            horizontal: 5.w,
-                                                            vertical: 3.w),
-                                                    child: TextWidget(
-                                                      items[index]
-                                                          .subcategoryName,
-                                                      size: 17.sp,
-                                                    ),
-                                                  ),
-                                                ],
+                                                  EdgeInsets.only(left: 20.w),
+                                              child: TextWidget(
+                                                "Filter By",
+                                                size: 22.sp,
+                                                fontweight: FontWeight.bold,
                                               ),
+                                            ),
+                                            SizedBox(
+                                              height: 20.w,
+                                            ),
+                                            ListTile(
+                                              onTap: () {
+                                                selectedFilter = "";
+                                                // items = initialItems;
+                                                setState(() {});
+                                                Navigator.pop(context);
+                                              },
+                                              titleTextStyle:
+                                                  TextStyle(fontSize: 18.sp),
+                                              title: const TextWidget(
+                                                "All",
+                                              ),
+                                              trailing: selectedFilter == ""
+                                                  ? const Icon(
+                                                      Icons.check,
+                                                      color: Colors.black,
+                                                    )
+                                                  : null,
+                                            ),
+                                            ListTile(
+                                              onTap: () {
+                                                selectedFilter = "enabled";
+                                                items = state.items
+                                                    .where((element) =>
+                                                        element.enabled == 1)
+                                                    .toList();
+                                                setState(() {});
+                                                Navigator.pop(context);
+                                              },
+                                              titleTextStyle:
+                                                  TextStyle(fontSize: 18.sp),
+                                              title: const TextWidget(
+                                                "Enabled",
+                                              ),
+                                              trailing:
+                                                  selectedFilter == "enabled"
+                                                      ? const Icon(
+                                                          Icons.check,
+                                                          color: Colors.black,
+                                                        )
+                                                      : null,
+                                            ),
+                                            ListTile(
+                                              onTap: () {
+                                                selectedFilter = "disabled";
+                                                items = state.items
+                                                    .where((element) =>
+                                                        element.enabled == 0)
+                                                    .toList();
+
+                                                setState(() {});
+                                                Navigator.pop(context);
+                                              },
+                                              titleTextStyle:
+                                                  TextStyle(fontSize: 18.sp),
+                                              title:
+                                                  const TextWidget("Disabled"),
+                                              trailing:
+                                                  selectedFilter == "disabled"
+                                                      ? const Icon(
+                                                          Icons.check,
+                                                          color: Colors.black,
+                                                        )
+                                                      : null,
+                                            ),
+                                            ListTile(
+                                              onTap: () {
+                                                selectedFilter = "nv";
+                                                items = state.items
+                                                    .where((element) =>
+                                                        element.type ==
+                                                        "nonveg")
+                                                    .toList();
+
+                                                setState(() {});
+                                                Navigator.pop(context);
+                                              },
+                                              titleTextStyle:
+                                                  TextStyle(fontSize: 18.sp),
+                                              title: const TextWidget("Nonveg"),
+                                              trailing: selectedFilter == "nv"
+                                                  ? const Icon(
+                                                      Icons.check,
+                                                      color: Colors.black,
+                                                    )
+                                                  : null,
+                                            ),
+                                            ListTile(
+                                              onTap: () {
+                                                selectedFilter = "veg";
+                                                items = state.items
+                                                    .where((element) =>
+                                                        element.type == "veg")
+                                                    .toList();
+
+                                                setState(() {});
+                                                Navigator.pop(context);
+                                              },
+                                              titleTextStyle:
+                                                  TextStyle(fontSize: 18.sp),
+                                              title: const TextWidget("Veg"),
+                                              trailing: selectedFilter == "veg"
+                                                  ? const Icon(
+                                                      Icons.check,
+                                                      color: Colors.black,
+                                                    )
+                                                  : null,
                                             )
                                           ],
-                                        ),
-                                      ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.only(left: 10.w),
+                                    padding: EdgeInsets.all(5.w),
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(5.w),
+                                        border:
+                                            Border.all(color: Colors.black)),
+                                    child: const Icon(
+                                      Icons.filter_alt,
+                                      color: Colors.black,
                                     ),
-                                    Column(
-                                      children: [
-                                        TextWidget(
-                                          "₹ ${items[index].price}",
-                                          fontweight: FontWeight.bold,
-                                        ),
-                                        SizedBox(
-                                          height: 5.w,
-                                        ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            itemsBloc.add(
-                                                DeleteItems(items[index].id));
-                                          },
-                                          child: Container(
-                                              decoration: BoxDecoration(
-                                                  color: Colors.red.shade900,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          5.w)),
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 10.w,
-                                                  vertical: 7.w),
-                                              child: TextWidget(
-                                                "Delete",
-                                                color: Colors.white,
-                                                size: 15.sp,
-                                              )),
-                                        )
-                                      ],
-                                    )
-                                  ],
-                                )),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              }
-              if (state is ItemsLoad) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if(state is ItemsError){
-                return      TextWidget(state.errorMsg);
-              }
-              return const TextWidget("error");
-            },
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  button("Enable", () {
+                                    if (selectedItems.isNotEmpty) {
+                                      itemsBloc.add(
+                                          EnableItems(selectedItems, true));
+                                    } else {
+                                      Fluttertoast.showToast(
+                                          msg: "Please select items",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.CENTER,
+                                          timeInSecForIosWeb: 1,
+                                          backgroundColor: Colors.red,
+                                          textColor: Colors.white,
+                                          fontSize: 16.0);
+                                    }
+                                  },
+                                      selectedItems.isNotEmpty
+                                          ? HexColor("#d4ac2c")
+                                          : Colors.grey.shade500,
+                                      textcolor: Colors.black),
+                                  SizedBox(
+                                    width: 10.w,
+                                  ),
+                                  button("Disable", () {
+                                    if (selectedItems.isNotEmpty) {
+                                      itemsBloc.add(
+                                          EnableItems(selectedItems, false));
+                                    } else {
+                                      Fluttertoast.showToast(
+                                          msg: "Please select items",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.CENTER,
+                                          timeInSecForIosWeb: 1,
+                                          backgroundColor: Colors.red,
+                                          textColor: Colors.white,
+                                          fontSize: 16.0);
+                                    }
+                                  },
+                                      selectedItems.isNotEmpty
+                                          ? HexColor("#d4ac2c")
+                                          : Colors.grey.shade500,
+                                      textcolor: Colors.black),
+                                  SizedBox(
+                                    width: 10.w,
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: items.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    navigatorKey.currentState!
+                                        .pushNamed("/edititemconfig",
+                                            arguments: items[index])
+                                        .then((value) =>
+                                            itemsBloc.add(FetchItemConfig()));
+                                  },
+                                  child: Container(
+                                      margin: EdgeInsets.symmetric(
+                                          horizontal: 5.w, vertical: 8.w),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10.w, vertical: 15.w),
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey.shade200,
+                                          border:
+                                              Border.all(color: Colors.black38),
+                                          borderRadius:
+                                              BorderRadius.circular(20.w)),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Checkbox(
+                                                  activeColor:
+                                                      HexColor("#d4ac2c"),
+                                                  value: selectedItems.contains(
+                                                      items[index].id),
+                                                  onChanged: (bool? value) {
+                                                    if ((value ?? false) &&
+                                                        !(selectedItems
+                                                            .contains(
+                                                                items[index]
+                                                                    .id))) {
+                                                      selectedItems
+                                                          .add(items[index].id);
+                                                    } else {
+                                                      selectedItems.remove(
+                                                          items[index].id);
+                                                    }
+                                                    setState(() {});
+                                                  }),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.5,
+                                                        child: TextWidget(
+                                                          items[index].name,
+                                                          fontweight:
+                                                              FontWeight.bold,
+                                                          size: 19.sp,
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        width: 5.w,
+                                                      ),
+                                                      Icon(
+                                                        Icons.verified,
+                                                        color: items[index]
+                                                                    .enabled ==
+                                                                1
+                                                            ? Colors.green
+                                                            : Colors.grey,
+                                                        size: 20.sp,
+                                                      )
+                                                    ],
+                                                  ),
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        top: 10.w),
+                                                    child: Row(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        items[index].type ==
+                                                                "veg"
+                                                            ? Image.asset(
+                                                                "assets/vegLogo.png",
+                                                                width: 20.w)
+                                                            : Image.asset(
+                                                                "assets/nonveg.png",
+                                                                width: 25.w),
+                                                        SizedBox(
+                                                          width: 10.w,
+                                                        ),
+                                                        Container(
+                                                          margin:
+                                                              EdgeInsets.only(
+                                                                  top: 0.w),
+                                                          decoration: BoxDecoration(
+                                                              color: HexColor(
+                                                                      "#d4ac2c")
+                                                                  .withOpacity(
+                                                                      0.4),
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          3),
+                                                              border: Border.all(
+                                                                  color: HexColor(
+                                                                      "#d4ac2c"))),
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      5.w,
+                                                                  vertical:
+                                                                      3.w),
+                                                          child: TextWidget(
+                                                            items[index]
+                                                                .categoryName,
+                                                            size: 17.sp,
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          width: 10.w,
+                                                        ),
+                                                        Container(
+                                                          margin:
+                                                              EdgeInsets.only(
+                                                                  top: 0.w),
+                                                          decoration: BoxDecoration(
+                                                              color: HexColor(
+                                                                      "#d4ac2c")
+                                                                  .withOpacity(
+                                                                      0.4),
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          3),
+                                                              border: Border.all(
+                                                                  color: HexColor(
+                                                                      "#d4ac2c"))),
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      5.w,
+                                                                  vertical:
+                                                                      3.w),
+                                                          child: TextWidget(
+                                                            items[index]
+                                                                .subcategoryName,
+                                                            size: 17.sp,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              TextWidget(
+                                                "₹ ${items[index].price}",
+                                                fontweight: FontWeight.bold,
+                                              ),
+                                              SizedBox(
+                                                height: 5.w,
+                                              ),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  itemsBloc.add(DeleteItems(
+                                                      items[index].id));
+                                                },
+                                                child: Container(
+                                                    decoration: BoxDecoration(
+                                                        color:
+                                                            Colors.red.shade900,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(5.w)),
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 10.w,
+                                                            vertical: 7.w),
+                                                    child: TextWidget(
+                                                      "Delete",
+                                                      color: Colors.white,
+                                                      size: 15.sp,
+                                                    )),
+                                              )
+                                            ],
+                                          )
+                                        ],
+                                      )),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    if (state is ItemsLoad) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (state is ItemsError) {
+                      return TextWidget(state.errorMsg);
+                    }
+                    return const TextWidget("error");
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),

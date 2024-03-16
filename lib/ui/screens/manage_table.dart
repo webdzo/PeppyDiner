@@ -12,6 +12,7 @@ import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
 import 'package:hotelpro_mobile/ui/screens/drawer_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/applogo_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/button.dart';
+import 'package:hotelpro_mobile/ui/widgets/dialog_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/dropdown.dart';
 import 'package:hotelpro_mobile/ui/widgets/text_widget.dart';
 
@@ -258,18 +259,36 @@ class _ManageTableState extends State<ManageTable> {
                                             SizedBox(
                                               width: 10.w,
                                             ),
-                                            Container(
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            30.w),
-                                                    color: Colors.red.shade900),
-                                                height: 50.w,
-                                                width: 50.w,
-                                                child: const Icon(
-                                                  Icons.delete,
-                                                  color: Colors.white,
-                                                )),
+                                            GestureDetector(
+                                              onTap: () {
+                                                DialogWidget().dialogWidget(
+                                                  context,
+                                                  "Are you sure you want to delete?",
+                                                  () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  () {
+                                                    Navigator.pop(context);
+                                                    tableBloc.add(DeleteTables(
+                                                        state
+                                                            .tables[index].id));
+                                                  },
+                                                );
+                                              },
+                                              child: Container(
+                                                  decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              30.w),
+                                                      color:
+                                                          Colors.red.shade900),
+                                                  height: 50.w,
+                                                  width: 50.w,
+                                                  child: const Icon(
+                                                    Icons.delete,
+                                                    color: Colors.white,
+                                                  )),
+                                            ),
                                           ],
                                         )
                                       ],
@@ -397,9 +416,9 @@ class _ManageTableState extends State<ManageTable> {
                   ),
                 ],
               ),
-              title: const Center(
+              title: Center(
                 child: TextWidget(
-                  "Add Table",
+                  id == null ? "Add Table" : "Edit Table",
                   fontweight: FontWeight.bold,
                 ),
               ),

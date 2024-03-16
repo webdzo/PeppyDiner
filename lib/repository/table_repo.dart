@@ -111,4 +111,11 @@ class TablesRepository {
       return response;
     }
   }
+
+  Future<Response> delete(int id) async {
+    var response =
+        await ApiBaseHelper().deleteMethod("/tables/$id", json.encode({}));
+
+    return response;
+  }
 }

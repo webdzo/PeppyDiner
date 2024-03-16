@@ -64,3 +64,9 @@ class CreateTables extends TableEvent {
   final EdittableRequest request;
   CreateTables(this.request, {this.id});
 }
+
+class DeleteTables extends TableEvent {
+  final int id;
+
+  DeleteTables(this.id);
+}

@@ -256,6 +256,17 @@ class TableBloc extends Bloc<TableEvent, TableState> {
         emit(CreateError());
       }
     });
+
+    on<DeleteTables>((event, emit) async {
+      emit(CreateLoad());
+      try {
+        final response = await TablesRepository().delete(event.id);
+
+        emit(CreatedDone());
+      } catch (e) {
+        emit(CreateError());
+      }
+    });
   }
 
   DateTime parseDateTime(String dateTimeString) {

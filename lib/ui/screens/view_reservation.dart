@@ -2021,7 +2021,7 @@ class _ViewResercationsState extends State<ViewResercations> {
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 0, horizontal: 5),
-                      labelText: "No. of guests",
+                      labelText: "Phone No.",
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5.0),

@@ -647,7 +647,9 @@ class _ViewResercationsState extends State<ViewResercations> {
           iconDisabledColor: Colors.black,
           style: const TextStyle(color: Colors.black),
           onChanged: (value) {
-            for (var data in modeReq) log(data.toJson().toString());
+            for (var data in modeReq) {
+              log(data.toJson().toString());
+            }
             payMode = value.paymentName.toString();
             setState(() {});
           },
@@ -1796,7 +1798,7 @@ class _ViewResercationsState extends State<ViewResercations> {
               ],
             );
           } else {
-            return TextWidget("Something went wrong");
+            return const TextWidget("Something went wrong");
           }
         }),
         SizedBox(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:hotelpro_mobile/bloc/reservations/reservations_bloc.dart';
 import 'package:hotelpro_mobile/bloc/table/table_bloc.dart';
 import 'package:hotelpro_mobile/main_qa.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
@@ -106,8 +107,15 @@ class _ReservationListState extends State<ReservationList> {
                     body: TabBarView(
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
-                        BlocProvider(
-                          create: (context) => TableBloc(),
+                        MultiBlocProvider(
+                          providers: [
+                            BlocProvider(
+                              create: (context) => TableBloc(),
+                            ),
+                            BlocProvider(
+                              create: (context) => ReservationsBloc(),
+                            ),
+                          ],
                           child: TableWidget(
                             myTable: true,
                             tableList: const [],
@@ -115,8 +123,15 @@ class _ReservationListState extends State<ReservationList> {
                             userId: userId,
                           ),
                         ),
-                        BlocProvider(
-                          create: (context) => TableBloc(),
+                        MultiBlocProvider(
+                          providers: [
+                            BlocProvider(
+                              create: (context) => TableBloc(),
+                            ),
+                            BlocProvider(
+                              create: (context) => ReservationsBloc(),
+                            ),
+                          ],
                           child: TableWidget(
                             myTable: true,
                             tableList: const [],
@@ -124,8 +139,15 @@ class _ReservationListState extends State<ReservationList> {
                             userId: userId,
                           ),
                         ),
-                        BlocProvider(
-                          create: (context) => TableBloc(),
+                        MultiBlocProvider(
+                          providers: [
+                            BlocProvider(
+                              create: (context) => TableBloc(),
+                            ),
+                            BlocProvider(
+                              create: (context) => ReservationsBloc(),
+                            ),
+                          ],
                           child: TableWidget(
                             myTable: true,
                             tableList: const [],

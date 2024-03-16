@@ -4,11 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:hotelpro_mobile/bloc/reservations/reservations_bloc.dart';
 import 'package:hotelpro_mobile/bloc/table/table_bloc.dart';
 import 'package:hotelpro_mobile/main_qa.dart';
 import 'package:hotelpro_mobile/models/table_model.dart';
 import 'package:hotelpro_mobile/route_generator.dart';
 import 'package:hotelpro_mobile/screen_util/flutter_screenutil.dart';
+import 'package:hotelpro_mobile/ui/screens/add_reservation.dart';
 import 'package:hotelpro_mobile/ui/screens/details.dart';
 import 'package:hotelpro_mobile/ui/widgets/dialog_widget.dart';
 import 'package:hotelpro_mobile/ui/widgets/search_bar.dart';
@@ -40,6 +42,7 @@ class TableWidget extends StatefulWidget {
 class _TableWidgetState extends State<TableWidget> {
   List<int> selectedTable = [];
   TableBloc tableBloc = TableBloc();
+  ReservationsBloc reservationBloc = ReservationsBloc();
   String role = "";
   getRole() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -107,9 +110,25 @@ class _TableWidgetState extends State<TableWidget> {
     }
   }
 
+  TextEditingController startDate = TextEditingController();
+
+  TextEditingController endDate = TextEditingController();
+
   @override
   void initState() {
     getRole();
+    reservationBloc = BlocProvider.of<ReservationsBloc>(context)
+      ..stream.listen((event) {
+        if (event is MarkDone) {
+          EasyLoading.dismiss();
+        }
+        if (event is MarkLoad) {
+          EasyLoading.show(status: 'loading...');
+        }
+        if (event is MarkError) {
+          EasyLoading.showError('Failed with Error');
+        }
+      });
     tableBloc = BlocProvider.of<TableBloc>(context)
       ..stream.listen((event) {
         if (event is AssignDone) {
@@ -203,7 +222,7 @@ class _TableWidgetState extends State<TableWidget> {
                                   color: Colors.black,
                                   fontSize: 18.sp,
                                 ),
-                                decoration: calendarDecoration("From Date"),
+                                decoration: calendarDecoration(),
                                 readOnly: true,
                                 autofocus: false,
                                 validator: (value) {
@@ -261,9 +280,7 @@ class _TableWidgetState extends State<TableWidget> {
                                         color: Colors.black,
                                         fontSize: 18.sp,
                                       ),
-                                      decoration: calendarDecoration(
-                                          "From Time",
-                                          calendar: false),
+                                      decoration: calendarDecoration(),
                                       readOnly: true,
                                       autofocus: false,
                                       validator: (value) {
@@ -290,8 +307,7 @@ class _TableWidgetState extends State<TableWidget> {
                                         color: Colors.black,
                                         fontSize: 18.sp,
                                       ),
-                                      decoration: calendarDecoration("To Time",
-                                          calendar: false),
+                                      decoration: calendarDecoration(),
                                       readOnly: true,
                                       autofocus: false,
                                       validator: (value) {
@@ -433,7 +449,7 @@ class _TableWidgetState extends State<TableWidget> {
       alignment: Alignment.topCenter,
       children: [
         Padding(
-          padding: EdgeInsets.only(top: 0),
+          padding: const EdgeInsets.only(top: 0),
           child: GestureDetector(
             onTap: () {
               if (widget.type == "past" ||
@@ -455,10 +471,13 @@ class _TableWidgetState extends State<TableWidget> {
             },
             child: Container(
                 decoration: BoxDecoration(
-                    color:  ((!widget.nonDiner) &&
-            isTimeDifferenceGreaterThan5Minutes(
-                DateTime.parse(widget.tableList[index].actualTime)) &&
-            (widget.type == "current") &&widget.tableList[index].status == "")?Colors.red.shade100: Colors.grey.shade200,
+                    color: ((!widget.nonDiner) &&
+                            isTimeDifferenceGreaterThan5Minutes(DateTime.parse(
+                                widget.tableList[index].actualTime)) &&
+                            (widget.type == "current") &&
+                            widget.tableList[index].status == "")
+                        ? Colors.red.shade100
+                        : Colors.grey.shade200,
                     border: Border.all(color: Colors.grey, width: 0.5),
                     borderRadius: BorderRadius.circular(10)),
                 margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.w),
@@ -933,11 +952,259 @@ class _TableWidgetState extends State<TableWidget> {
                           builder: (context) {
                             return AlertDialog(
                               actionsAlignment: MainAxisAlignment.center,
-                              content: const Column(
+                              content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  TextWidget(
+                                  const TextWidget(
                                       "Are you sure you want to Cancel?"),
+                                  if (role == "ROLE_ADMIN" ||
+                                      role == "ROLE_MANAGER")
+                                    GestureDetector(
+                                        onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                title: const TextWidget(
+                                                  "Backdate reservation",
+                                                  fontweight: FontWeight.bold,
+                                                ),
+                                                content: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    const TextWidget(
+                                                        "Your reservation will backdate to the date chosen"),
+                                                    SizedBox(
+                                                      height: 10.w,
+                                                    ),
+                                                    Container(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.4,
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 10,
+                                                          vertical: 10),
+                                                      child: TextFormField(
+                                                        autovalidateMode:
+                                                            AutovalidateMode
+                                                                .onUserInteraction,
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 18.sp,
+                                                        ),
+                                                        decoration:
+                                                            calendarDecoration(),
+                                                        readOnly: true,
+                                                        autofocus: false,
+                                                        validator: (value) {
+                                                          if ((value ?? "")
+                                                              .isEmpty) {
+                                                            return "Select date";
+                                                          }
+                                                          return null;
+                                                        },
+                                                        focusNode: null,
+                                                        controller: startDate,
+                                                        onTap: () async {
+                                                          DateTime? pickedDate =
+                                                              await showDatePicker(
+                                                            context: context,
+
+                                                            builder:
+                                                                (BuildContext
+                                                                        context,
+                                                                    Widget?
+                                                                        child) {
+                                                              return Theme(
+                                                                data: ThemeData(
+                                                                  colorScheme:
+                                                                      ColorScheme
+                                                                          .light(
+                                                                    primary:
+                                                                        HexColor(
+                                                                            "#d4ac2c"),
+                                                                  ),
+                                                                  dialogBackgroundColor:
+                                                                      Colors
+                                                                          .white,
+                                                                ),
+                                                                child: child ??
+                                                                    const Text(
+                                                                        ""),
+                                                              );
+                                                            },
+                                                            initialDate:
+                                                                DateTime.now(),
+                                                            firstDate:
+                                                                DateTime.now(),
+                                                            //DateTime.now() - not to allow to choose before today.
+                                                            lastDate:
+                                                                DateTime(2100),
+                                                          );
+
+                                                          if (pickedDate !=
+                                                              null) {
+                                                            String
+                                                                formattedDate =
+                                                                DateFormat(
+                                                                        'yyyy-MM-dd')
+                                                                    .format(
+                                                                        pickedDate);
+
+                                                            setState(() {
+                                                              startDate.text =
+                                                                  formattedDate;
+                                                            });
+                                                          } else {}
+                                                        },
+                                                      ),
+                                                    ),
+                                                    Icon(
+                                                      Icons.swap_vert,
+                                                      color:
+                                                          Colors.grey.shade800,
+                                                    ),
+                                                    Container(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.4,
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 12,
+                                                          vertical: 10),
+                                                      child: TextFormField(
+                                                        autovalidateMode:
+                                                            AutovalidateMode
+                                                                .onUserInteraction,
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 18.sp,
+                                                        ),
+                                                        validator: (value) {
+                                                          if ((value ?? "")
+                                                              .isEmpty) {
+                                                            return "Select date";
+                                                          }
+                                                          return null;
+                                                        },
+                                                        decoration:
+                                                            calendarDecoration(
+                                                                timer: true),
+                                                        controller: endDate,
+                                                        readOnly: true,
+                                                        autofocus: false,
+                                                        focusNode: null,
+                                                        onTap: () async {
+                                                          final TimeOfDay?
+                                                              result =
+                                                              await showTimePicker(
+                                                                  context:
+                                                                      context,
+                                                                  initialTime:
+                                                                      TimeOfDay
+                                                                          .now(),
+                                                                  builder: (context,
+                                                                      childWidget) {
+                                                                    return MediaQuery(
+                                                                        data: MediaQuery.of(context).copyWith(
+                                                                            // Using 24-Hour format
+                                                                            alwaysUse24HourFormat: true),
+                                                                        // If you want 12-Hour format, just change alwaysUse24HourFormat to false or remove all the builder argument
+                                                                        child: childWidget!);
+                                                                  });
+
+                                                          if (result != null) {
+                                                            String
+                                                                formattedDate =
+                                                                result
+                                                                    .to24hours();
+
+                                                            setState(() {
+                                                              endDate.text =
+                                                                  formattedDate;
+                                                            });
+                                                          }
+                                                        },
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 15.w,
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        button("Cancel", () {
+                                                          startDate.clear();
+                                                          endDate.clear();
+                                                          Navigator.pop(
+                                                              context);
+                                                        }, Colors.red.shade900),
+                                                        SizedBox(
+                                                          width: 10.w,
+                                                        ),
+                                                        button("Submit", () {
+                                                          reservationBloc.add(
+                                                              BackdateEvent(
+                                                                  widget
+                                                                      .tableList[
+                                                                          index]
+                                                                      .reservationId
+                                                                      .toString(),
+                                                                  "${startDate.text}T${endDate.text}:00Z"));
+                                                          navigatorKey
+                                                              .currentState
+                                                              ?.pop();
+                                                        },
+                                                            Colors
+                                                                .green.shade900)
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          ).then((value) {
+                                            setState(() {});
+                                          });
+                                        },
+                                        child: Container(
+                                          color: Colors.grey.shade200,
+                                          margin: EdgeInsets.only(top: 20.w),
+                                          padding: EdgeInsets.only(
+                                              top: 10.w,
+                                              bottom: 10.w,
+                                              right: 15.w,
+                                              left: 15.w),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              TextWidget(
+                                                "Backdate ",
+                                                size: 15.sp,
+                                                fontweight: FontWeight.w500,
+                                              ),
+                                              Icon(
+                                                Icons.calendar_month,
+                                                size: 18.sp,
+                                                color: Colors.black,
+                                              ),
+                                            ],
+                                          ),
+                                        ))
                                 ],
                               ),
                               actions: [
@@ -1143,11 +1410,10 @@ class _TableWidgetState extends State<TableWidget> {
     );
   }
 
-  InputDecoration calendarDecoration(String text, {bool calendar = true}) {
+  InputDecoration calendarDecoration({bool timer = false}) {
     return InputDecoration(
-      labelText: text,
       suffixIcon: Icon(
-        calendar ? Icons.calendar_month : Icons.access_time_outlined,
+        timer ? Icons.access_time : Icons.calendar_month,
         color: Colors.grey.shade800,
       ),
       isDense: true,

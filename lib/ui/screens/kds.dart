@@ -24,11 +24,12 @@ class KdsScreen extends StatefulWidget {
 class _KdsScreenState extends State<KdsScreen> {
   OrdersBloc ordersBloc = OrdersBloc();
   List<bool>? isExpanded;
-  String role = "";
+
+  ValueNotifier role = ValueNotifier("");
 
   getRole() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    role = pref.getString("role") ?? "";
+    role.value = pref.getString("role") ?? "";
     setState(() {});
   }
 
@@ -66,204 +67,147 @@ class _KdsScreenState extends State<KdsScreen> {
   int selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: role != "ROLE_CHEF" ? const NavDrawer() : null,
-      appBar: AppBar(
-        backgroundColor: HexColor("#d4ac2c"),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-        automaticallyImplyLeading: false,
-        /*  leading: Padding(
-          padding: EdgeInsets.all(5.w),
-          child: Image.asset("assets/appLogo.png"),
-        ), */
-        title: TextWidget(
-          "Kitchen Display System",
-          style: GoogleFonts.belleza(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 33.w,
-          ),
-          /* color: Colors.black,
-            
-             */
-        ),
-        actions: [
-          /*  GestureDetector(
-              onTap: () {
-                _refresh();
-              },
-              child: Padding(
-                padding: EdgeInsets.only(right: 10.w),
-                child: const Icon(
-                  Icons.replay_outlined,
-                  color: Colors.black,
-                ),
-              )), */
-          if (role == "ROLE_CHEF")
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextWidget(
-                            "Logout",
-                            fontweight: FontWeight.bold,
-                            size: 22.sp,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Icon(Icons.close),
-                          )
-                        ],
-                      ),
-                      actionsAlignment: MainAxisAlignment.center,
-                      content: const Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          TextWidget("Are you sure you want to logout?"),
-                        ],
-                      ),
-                      actions: [
-                        button(
-                          "Cancel",
-                          () async {
-                            Navigator.pop(context);
-                          },
-                          Colors.red,
-                        ),
-                        button("Ok", () async {
-                          Navigator.pop(navigatorKey.currentContext!);
-                          SharedPreferences preferences =
-                              await SharedPreferences.getInstance();
-                          preferences.clear();
-                          navigatorKey.currentState?.pushNamedAndRemoveUntil(
-                            "/",
-                            (route) {
-                              return false;
-                            },
-                          );
-                        }, Colors.green)
-                      ],
-                    );
-                  },
-                );
-              },
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(Icons.logout),
-              ),
-            ),
-          const ApplogoButton(),
-        ],
-      ),
-      body: DefaultTabController(
-          length: 2,
-          initialIndex: 0,
-          child: Scaffold(
+    return ValueListenableBuilder(
+        valueListenable: role,
+        builder: (context, snapshot, _) {
+          return Scaffold(
+            drawer: role.value != "ROLE_CHEF" ? const NavDrawer() : null,
             appBar: AppBar(
-              backgroundColor: Colors.white,
-              toolbarHeight: 15,
-              bottom: TabBar(
-                onTap: (value) {
-                  if (value == 1) {
-                    ordersBloc.add(CurrentOrders());
-                  } else {
-                    ordersBloc.add(OngoingOrders());
-                  }
-                  selectedIndex = value;
-                  setState(() {});
-                },
-                automaticIndicatorColorAdjustment: true,
-                indicatorColor: HexColor("#d4ac2c"),
-                indicatorWeight: 5,
-                labelColor: Colors.black,
-                labelStyle: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18.sp),
-                unselectedLabelStyle:
-                    TextStyle(color: Colors.grey, fontSize: 18.sp),
-                tabs: const [
-                  Tab(text: "Ongoing"),
-                  Tab(text: "Current"),
-                ],
-              ),
-            ),
-            body: TabBarView(
-              physics: const NeverScrollableScrollPhysics(),
-              //   clipBehavior: Clip.none,
-              children: [
-                BlocBuilder<OrdersBloc, OrdersState>(
-                  buildWhen: (previous, current) {
-                    return current is OrdersLoad ||
-                        current is OngoingDone ||
-                        current is OrdersError ||
-                        current is OrdersNodata;
-                  },
-                  builder: (context, state) {
-                    print("stateee $state");
-                    if (state is OrdersLoad || state is OrdersInitial) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (state is OrdersNodata) {
-                      return const Center(child: TextWidget("No orders found"));
-                    }
-                    if (state is OngoingDone) {
-                      return state.orders.isEmpty
-                          ? const Center(child: TextWidget("No orders found"))
-                          : ListView.builder(
-                              padding: EdgeInsets.symmetric(vertical: 10.w),
-                              itemCount: state.orders.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10.w),
-                                      color:
-                                          HexColor("#d4ac2c").withOpacity(0.2)),
-                                  margin: EdgeInsets.symmetric(
-                                      vertical: 5.w, horizontal: 10.w),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 15.w, vertical: 15.w),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      TextWidget(
-                                        state.orders[index].itemName,
-                                        fontweight: FontWeight.w500,
-                                      ),
-                                      TextWidget(
-                                          "x${state.orders[index].totalQuantity}")
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-                    }
-                    return const Center(child: TextWidget("error"));
-                  },
+              backgroundColor: HexColor("#d4ac2c"),
+              elevation: 0,
+              iconTheme: const IconThemeData(color: Colors.black),
+              title: TextWidget(
+                "Kitchen Display System",
+                style: GoogleFonts.belleza(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 33.w,
                 ),
-                Column(
-                  children: [
-                    Expanded(
-                      child: BlocBuilder<OrdersBloc, OrdersState>(
+              ),
+              actions: [
+                /*  GestureDetector(
+                  onTap: () {
+                    _refresh();
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 10.w),
+                    child: const Icon(
+                      Icons.replay_outlined,
+                      color: Colors.black,
+                    ),
+                  )), */
+                if (role == "ROLE_CHEF")
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextWidget(
+                                  "Logout",
+                                  fontweight: FontWeight.bold,
+                                  size: 22.sp,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Icon(Icons.close),
+                                )
+                              ],
+                            ),
+                            actionsAlignment: MainAxisAlignment.center,
+                            content: const Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextWidget("Are you sure you want to logout?"),
+                              ],
+                            ),
+                            actions: [
+                              button(
+                                "Cancel",
+                                () async {
+                                  Navigator.pop(context);
+                                },
+                                Colors.red,
+                              ),
+                              button("Ok", () async {
+                                Navigator.pop(navigatorKey.currentContext!);
+                                SharedPreferences preferences =
+                                    await SharedPreferences.getInstance();
+                                preferences.clear();
+                                navigatorKey.currentState
+                                    ?.pushNamedAndRemoveUntil(
+                                  "/",
+                                  (route) {
+                                    return false;
+                                  },
+                                );
+                              }, Colors.green)
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(Icons.logout),
+                    ),
+                  ),
+                const ApplogoButton(),
+              ],
+            ),
+            body: DefaultTabController(
+                length: 2,
+                initialIndex: 0,
+                child: Scaffold(
+                  appBar: AppBar(
+                    backgroundColor: Colors.white,
+                    toolbarHeight: 15,
+                    bottom: TabBar(
+                      onTap: (value) {
+                        if (value == 1) {
+                          ordersBloc.add(CurrentOrders());
+                        } else {
+                          ordersBloc.add(OngoingOrders());
+                        }
+                        selectedIndex = value;
+                        setState(() {});
+                      },
+                      automaticIndicatorColorAdjustment: true,
+                      indicatorColor: HexColor("#d4ac2c"),
+                      indicatorWeight: 5,
+                      labelColor: Colors.black,
+                      labelStyle: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.sp),
+                      unselectedLabelStyle:
+                          TextStyle(color: Colors.grey, fontSize: 18.sp),
+                      tabs: const [
+                        Tab(text: "Ongoing"),
+                        Tab(text: "Current"),
+                      ],
+                    ),
+                  ),
+                  body: TabBarView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    //   clipBehavior: Clip.none,
+                    children: [
+                      BlocBuilder<OrdersBloc, OrdersState>(
                         buildWhen: (previous, current) {
                           return current is OrdersLoad ||
-                              current is OrdersDone ||
+                              current is OngoingDone ||
                               current is OrdersError ||
                               current is OrdersNodata;
                         },
                         builder: (context, state) {
-                          print("akshayaa $state");
-                          if (state is OrdersLoad) {
+                          print("stateee $state");
+                          if (state is OrdersLoad || state is OrdersInitial) {
                             return const Center(
                                 child: CircularProgressIndicator());
                           }
@@ -271,285 +215,320 @@ class _KdsScreenState extends State<KdsScreen> {
                             return const Center(
                                 child: TextWidget("No orders found"));
                           }
-                          if (state is OrdersDone) {
-                            if (isExpanded?.isEmpty ?? true) {
-                              isExpanded = List.generate(
-                                state.orders.length,
-                                (index) => false,
-                              );
-                            }
-                            return ListView.builder(
-                              padding: EdgeInsets.symmetric(vertical: 10.w),
-                              itemCount: state.orders.length,
-                              itemBuilder: (context, index) {
-                                return ExpandCardWidget(
-                                    isExpanded: true,
-                                    onRowClick: () {
-                                      for (int i = 0;
-                                          i < isExpanded!.length;
-                                          i++) {
-                                        if (i == index) {
-                                          isExpanded?[i] =
-                                              !(isExpanded?[i] ?? false);
-                                        } else {
-                                          isExpanded?[i] = false;
-                                        }
-                                      }
-                                      setState(() {});
+                          if (state is OngoingDone) {
+                            return state.orders.isEmpty
+                                ? const Center(
+                                    child: TextWidget("No orders found"))
+                                : ListView.builder(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 10.w),
+                                    itemCount: state.orders.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(10.w),
+                                            color: HexColor("#d4ac2c")
+                                                .withOpacity(0.2)),
+                                        margin: EdgeInsets.symmetric(
+                                            vertical: 5.w, horizontal: 10.w),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 15.w, vertical: 15.w),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            TextWidget(
+                                              state.orders[index].itemName,
+                                              fontweight: FontWeight.w500,
+                                            ),
+                                            TextWidget(
+                                                "x${state.orders[index].totalQuantity}")
+                                          ],
+                                        ),
+                                      );
                                     },
-                                    header: Container(
-                                      margin: EdgeInsets.symmetric(
-                                          horizontal: 15.w),
-                                      alignment: Alignment.centerLeft,
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 10.w, horizontal: 10.w),
-                                      color:
-                                          HexColor("#d4ac2c").withOpacity(0.2),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
+                                  );
+                          }
+                          return const Center(child: TextWidget("error"));
+                        },
+                      ),
+                      Column(
+                        children: [
+                          Expanded(
+                            child: BlocBuilder<OrdersBloc, OrdersState>(
+                              buildWhen: (previous, current) {
+                                return current is OrdersLoad ||
+                                    current is OrdersDone ||
+                                    current is OrdersError ||
+                                    current is OrdersNodata;
+                              },
+                              builder: (context, state) {
+                                print("akshayaa $state");
+                                if (state is OrdersLoad) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
+                                if (state is OrdersNodata) {
+                                  return const Center(
+                                      child: TextWidget("No orders found"));
+                                }
+                                if (state is OrdersDone) {
+                                  if (isExpanded?.isEmpty ?? true) {
+                                    isExpanded = List.generate(
+                                      state.orders.length,
+                                      (index) => false,
+                                    );
+                                  }
+                                  return ListView.builder(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 10.w),
+                                    itemCount: state.orders.length,
+                                    itemBuilder: (context, index) {
+                                      return ExpandCardWidget(
+                                          isExpanded: true,
+                                          onRowClick: () {
+                                            for (int i = 0;
+                                                i < isExpanded!.length;
+                                                i++) {
+                                              if (i == index) {
+                                                isExpanded?[i] =
+                                                    !(isExpanded?[i] ?? false);
+                                              } else {
+                                                isExpanded?[i] = false;
+                                              }
+                                            }
+                                            setState(() {});
+                                          },
+                                          header: Container(
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 15.w),
+                                            alignment: Alignment.centerLeft,
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 10.w,
+                                                horizontal: 10.w),
+                                            color: HexColor("#d4ac2c")
+                                                .withOpacity(0.2),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    TextWidget(
+                                                      state.orders[index]
+                                                          .orderNo,
+                                                      fontweight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10.w,
+                                                    ),
+                                                    Container(
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.w)),
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 10.w,
+                                                              vertical: 5.w),
+                                                      child: TextWidget(
+                                                        state.orders[index]
+                                                            .diningType
+                                                            .capitalize(),
+                                                        fontweight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    if (state.orders[index]
+                                                        .itemOrders
+                                                        .every((item) =>
+                                                            item.completed)) {
+                                                      ordersBloc.add(KotEdit(
+                                                          state.orders[index].id
+                                                              .toString(),
+                                                          close: true));
+                                                    }
+                                                  },
+                                                  child: Container(
+                                                    padding:
+                                                        EdgeInsets.all(5.w),
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20.w),
+                                                        color: state
+                                                                .orders[index]
+                                                                .itemOrders
+                                                                .every((item) =>
+                                                                    item
+                                                                        .completed)
+                                                            ? Colors
+                                                                .red.shade100
+                                                            : Colors
+                                                                .grey.shade100),
+                                                    child: Icon(
+                                                      Icons.close_rounded,
+                                                      color: state.orders[index]
+                                                              .itemOrders
+                                                              .every((item) =>
+                                                                  item.completed)
+                                                          ? Colors.red.shade900
+                                                          : Colors.grey,
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          body: Column(
                                             children: [
-                                              TextWidget(
-                                                state.orders[index].orderNo,
-                                                fontweight: FontWeight.bold,
-                                              ),
-                                              SizedBox(
-                                                width: 10.w,
+                                              Container(
+                                                height: 0.2,
+                                                color: const Color.fromARGB(
+                                                    246, 0, 0, 0),
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 10.w),
+                                                margin: EdgeInsets.symmetric(
+                                                    horizontal: 15.w),
                                               ),
                                               Container(
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.w)),
                                                 padding: EdgeInsets.symmetric(
-                                                    horizontal: 10.w,
-                                                    vertical: 5.w),
-                                                child: TextWidget(
-                                                  state.orders[index].diningType
-                                                      .capitalize(),
-                                                  fontweight: FontWeight.bold,
+                                                    vertical: 10.w),
+                                                margin: EdgeInsets.symmetric(
+                                                    horizontal: 15.w),
+                                                color: HexColor("#d4ac2c")
+                                                    .withOpacity(0.2),
+                                                child: Column(
+                                                  children: List.generate(
+                                                      state.orders[index]
+                                                          .itemOrders.length,
+                                                      (itemIndex) => Padding(
+                                                            padding: EdgeInsets
+                                                                .symmetric(
+                                                                    vertical:
+                                                                        5.w),
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Container(
+                                                                  padding: EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          10.w,
+                                                                      vertical:
+                                                                          15.w),
+                                                                  child: Row(
+                                                                    children: [
+                                                                      Row(
+                                                                        children: [
+                                                                          const TextWidget(
+                                                                              "\u2022 "),
+                                                                          SizedBox(
+                                                                            width:
+                                                                                MediaQuery.of(context).size.width * 0.6,
+                                                                            child:
+                                                                                TextWidget(
+                                                                              "${state.orders[index].itemOrders[itemIndex].itemName}  x${state.orders[index].itemOrders[itemIndex].itemQuantity}",
+                                                                              size: 17.sp,
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Row(
+                                                                  children: [
+                                                                    GestureDetector(
+                                                                        onTap:
+                                                                            () {
+                                                                          if (!state
+                                                                              .orders[index]
+                                                                              .itemOrders[itemIndex]
+                                                                              .completed) {
+                                                                            ordersBloc.add(KotEdit(state.orders[index].id.toString(),
+                                                                                itemId: state.orders[index].itemOrders[itemIndex].id.toString(),
+                                                                                status: "Completed",
+                                                                                reason: ""));
+                                                                          }
+                                                                        },
+                                                                        child:
+                                                                            Container(
+                                                                          padding:
+                                                                              EdgeInsets.all(10.w),
+                                                                          color: state.orders[index].itemOrders[itemIndex].completed
+                                                                              ? Colors.grey
+                                                                              : Colors.green.shade900,
+                                                                          child:
+                                                                              const Icon(
+                                                                            Icons.check,
+                                                                            color:
+                                                                                Colors.white,
+                                                                          ),
+                                                                        )),
+                                                                    SizedBox(
+                                                                      width:
+                                                                          10.w,
+                                                                    ),
+                                                                    GestureDetector(
+                                                                        onTap:
+                                                                            () {
+                                                                          ordersBloc.add(KotEdit(
+                                                                              state.orders[index].id.toString(),
+                                                                              itemId: state.orders[index].itemOrders[itemIndex].id.toString(),
+                                                                              status: "Rejected",
+                                                                              reason: ""));
+                                                                        },
+                                                                        child:
+                                                                            Container(
+                                                                          padding:
+                                                                              EdgeInsets.all(10.w),
+                                                                          color: Colors
+                                                                              .red
+                                                                              .shade900,
+                                                                          child:
+                                                                              const Icon(
+                                                                            Icons.close,
+                                                                            color:
+                                                                                Colors.white,
+                                                                          ),
+                                                                        ))
+                                                                  ],
+                                                                )
+                                                              ],
+                                                            ),
+                                                          )),
                                                 ),
                                               ),
                                             ],
-                                          ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              if (state.orders[index].itemOrders
-                                                  .every((item) =>
-                                                      item.completed)) {
-                                                ordersBloc.add(KotEdit(
-                                                    state.orders[index].id
-                                                        .toString(),
-                                                    close: true));
-                                              }
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.all(5.w),
-                                              decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          20.w),
-                                                  color: state.orders[index]
-                                                          .itemOrders
-                                                          .every((item) =>
-                                                              item.completed)
-                                                      ? Colors.red.shade100
-                                                      : Colors.grey.shade100),
-                                              child: Icon(
-                                                Icons.close_rounded,
-                                                color: state.orders[index]
-                                                        .itemOrders
-                                                        .every((item) =>
-                                                            item.completed)
-                                                    ? Colors.red.shade900
-                                                    : Colors.grey,
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    body: Column(
-                                      children: [
-                                        Container(
-                                          height: 0.2,
-                                          color: const Color.fromARGB(
-                                              246, 0, 0, 0),
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 10.w),
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: 15.w),
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 10.w),
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: 15.w),
-                                          color: HexColor("#d4ac2c")
-                                              .withOpacity(0.2),
-                                          child: Column(
-                                            children: List.generate(
-                                                state.orders[index].itemOrders
-                                                    .length,
-                                                (itemIndex) => Padding(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              vertical: 5.w),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Container(
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    horizontal:
-                                                                        10.w,
-                                                                    vertical:
-                                                                        15.w),
-                                                            child: Row(
-                                                              children: [
-                                                                Row(
-                                                                  children: [
-                                                                    const TextWidget(
-                                                                        "\u2022 "),
-                                                                    SizedBox(
-                                                                      width: MediaQuery.of(context)
-                                                                              .size
-                                                                              .width *
-                                                                          0.6,
-                                                                      child:
-                                                                          TextWidget(
-                                                                        "${state.orders[index].itemOrders[itemIndex].itemName}  x${state.orders[index].itemOrders[itemIndex].itemQuantity}",
-                                                                        size: 17
-                                                                            .sp,
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              GestureDetector(
-                                                                  onTap: () {
-                                                                    if (!state
-                                                                        .orders[
-                                                                            index]
-                                                                        .itemOrders[
-                                                                            itemIndex]
-                                                                        .completed) {
-                                                                      ordersBloc.add(KotEdit(
-                                                                          state
-                                                                              .orders[
-                                                                                  index]
-                                                                              .id
-                                                                              .toString(),
-                                                                          itemId: state
-                                                                              .orders[
-                                                                                  index]
-                                                                              .itemOrders[
-                                                                                  itemIndex]
-                                                                              .id
-                                                                              .toString(),
-                                                                          status:
-                                                                              "Completed",
-                                                                          reason:
-                                                                              ""));
-                                                                    }
-                                                                  },
-                                                                  child:
-                                                                      Container(
-                                                                    padding: EdgeInsets
-                                                                        .all(10
-                                                                            .w),
-                                                                    color: state
-                                                                            .orders[
-                                                                                index]
-                                                                            .itemOrders[
-                                                                                itemIndex]
-                                                                            .completed
-                                                                        ? Colors
-                                                                            .grey
-                                                                        : Colors
-                                                                            .green
-                                                                            .shade900,
-                                                                    child:
-                                                                        const Icon(
-                                                                      Icons
-                                                                          .check,
-                                                                      color: Colors
-                                                                          .white,
-                                                                    ),
-                                                                  )),
-                                                              SizedBox(
-                                                                width: 10.w,
-                                                              ),
-                                                              GestureDetector(
-                                                                  onTap: () {
-                                                                    ordersBloc.add(KotEdit(
-                                                                        state
-                                                                            .orders[
-                                                                                index]
-                                                                            .id
-                                                                            .toString(),
-                                                                        itemId: state
-                                                                            .orders[
-                                                                                index]
-                                                                            .itemOrders[
-                                                                                itemIndex]
-                                                                            .id
-                                                                            .toString(),
-                                                                        status:
-                                                                            "Rejected",
-                                                                        reason:
-                                                                            ""));
-                                                                  },
-                                                                  child:
-                                                                      Container(
-                                                                    padding: EdgeInsets
-                                                                        .all(10
-                                                                            .w),
-                                                                    color: Colors
-                                                                        .red
-                                                                        .shade900,
-                                                                    child:
-                                                                        const Icon(
-                                                                      Icons
-                                                                          .delete,
-                                                                      color: Colors
-                                                                          .white,
-                                                                    ),
-                                                                  ))
-                                                            ],
-                                                          )
-                                                        ],
-                                                      ),
-                                                    )),
-                                          ),
-                                        ),
-                                      ],
-                                    ));
+                                          ));
+                                    },
+                                  );
+                                }
+                                return const Center(
+                                  child: TextWidget("error"),
+                                );
                               },
-                            );
-                          }
-                          return const Center(
-                            child: TextWidget("error"),
-                          );
-                        },
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          )),
-    );
+                    ],
+                  ),
+                )),
+          );
+        });
   }
 }

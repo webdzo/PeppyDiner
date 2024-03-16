@@ -57,9 +57,6 @@ class _MyTablesState extends State<MyTables> {
               fontWeight: FontWeight.bold,
               fontSize: 33.w,
             ),
-            /* color: Colors.black,
-            
-             */
           ),
         ),
         body: DefaultTabController(

@@ -72,7 +72,8 @@ class _ItemConfigState extends State<ItemConfig> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             navigatorKey.currentState!
-                .pushNamed("/edititemconfig", arguments: null);
+                .pushNamed("/edititemconfig", arguments: null)
+                .then((value) => itemsBloc.add(FetchItemConfig()));
           },
           backgroundColor: HexColor("#d4ac2c"),
           child: const Icon(

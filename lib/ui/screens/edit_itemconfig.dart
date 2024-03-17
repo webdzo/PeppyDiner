@@ -38,7 +38,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
           EasyLoading.show(status: 'loading...');
         }
         if (event is ItemsError) {
-          EasyLoading.showError('Failed with Error');
+          EasyLoading.showError(event.errorMsg);
         }
         if (event is EditItemsconfigDone) {
           EasyLoading.showSuccess('Success!');
@@ -50,7 +50,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
 
     if (widget.items != null) {
       editItemconfigRequest = EditItemconfigRequest(
-          subcategory: widget.items?.subcategoryName,
+          subcategory: widget.items?.subcategoryId.toString(),
           description: widget.items?.description,
           enabled: widget.items?.enabled,
           itemname: widget.items?.name,
@@ -260,7 +260,8 @@ class _EditItemconfigState extends State<EditItemconfig> {
                                 element.name == widget.items?.categoryName)
                             .toList()
                             .first
-                            .name;
+                            .id
+                            .toString();
                       }
                       if (editItemconfigRequest.subcategory != null) {
                         categoryBloc.add(FetchSubCategory(catId ?? 0));
@@ -380,7 +381,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
               ? null
               : itemList
                   .where((element) =>
-                      element.name == editItemconfigRequest.category)
+                      element.id.toString() == editItemconfigRequest.category)
                   .toList()
                   .first,
           underline: const Divider(
@@ -417,7 +418,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
                       ),
                     ),
           onChanged: (value) {
-            editItemconfigRequest.category = value.name;
+            editItemconfigRequest.category = value.id.toString();
             categoryBloc.add(FetchSubCategory(value.id));
             setState(() {});
           },
@@ -456,7 +457,8 @@ class _EditItemconfigState extends State<EditItemconfig> {
               ? null
               : itemList
                   .where((element) =>
-                      element.name == editItemconfigRequest.subcategory)
+                      element.id.toString() ==
+                      editItemconfigRequest.subcategory)
                   .toList()
                   .first,
           icon: error
@@ -486,7 +488,7 @@ class _EditItemconfigState extends State<EditItemconfig> {
                       ),
                     ),
           onChanged: (value) {
-            editItemconfigRequest.subcategory = value.name;
+            editItemconfigRequest.subcategory = value.id.toString();
             setState(() {});
           },
           items: itemList.toList().map((item) {

@@ -778,7 +778,7 @@ class _ViewResercationsState extends State<ViewResercations> {
                                 backgroundColor: Colors.green),
                             onPressed: () {
                               payController.clear();
-                              payMode = paymodes.first.paymentName;
+                              payMode = paymodes[2].paymentName;
                               payController.text =
                                   (double.tryParse(balanceAmount.toString()) ??
                                           0)

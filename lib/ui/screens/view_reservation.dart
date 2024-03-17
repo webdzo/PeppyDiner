@@ -610,7 +610,7 @@ class _ViewResercationsState extends State<ViewResercations> {
       alignment: Alignment.center,
       height: 70.w,
       // width: MediaQuery.of(context).size.width * 0.45,
-      margin: EdgeInsets.symmetric(horizontal: 5.w),
+      margin: EdgeInsets.symmetric(horizontal: 0.w),
 
       decoration: BoxDecoration(
         border: Border.all(
@@ -778,6 +778,12 @@ class _ViewResercationsState extends State<ViewResercations> {
                                 backgroundColor: Colors.green),
                             onPressed: () {
                               payController.clear();
+                              payMode = paymodes.first.paymentName;
+                              payController.text =
+                                  (double.tryParse(balanceAmount.toString()) ??
+                                          0)
+                                      .toInt()
+                                      .toString();
 
                               showDialog(
                                 context: context,

@@ -457,6 +457,11 @@ class _ItemConfigState extends State<ItemConfig> {
                                                           width: 10.w,
                                                         ),
                                                         Container(
+                                                          constraints:
+                                                              BoxConstraints(
+                                                            maxWidth: 200
+                                                                .w, // Set the maximum width here
+                                                          ),
                                                           margin:
                                                               EdgeInsets.only(
                                                                   top: 0.w),
@@ -488,6 +493,11 @@ class _ItemConfigState extends State<ItemConfig> {
                                                           width: 10.w,
                                                         ),
                                                         Container(
+                                                          constraints:
+                                                              BoxConstraints(
+                                                            maxWidth: 200
+                                                                .w, // Set the maximum width here
+                                                          ),
                                                           margin:
                                                               EdgeInsets.only(
                                                                   top: 0.w),

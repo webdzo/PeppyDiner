@@ -132,9 +132,23 @@ class _EditItemconfigState extends State<EditItemconfig> {
                       const EdgeInsets.symmetric(vertical: 0, horizontal: 5),
                   labelText: "Item Name",
                   fillColor: Colors.white,
+                  labelStyle: const TextStyle(color: Colors.grey),
+                  floatingLabelStyle: TextStyle(color: HexColor("#d4ac2c")),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(5.0),
-                    borderSide: const BorderSide(),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: BorderSide(color: HexColor("#d4ac2c")),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: BorderSide(color: HexColor("#d4ac2c")),
                   ),
                   //fillColor: Colors.green
                 ),
@@ -163,9 +177,23 @@ class _EditItemconfigState extends State<EditItemconfig> {
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                   labelText: "Item Description",
                   fillColor: Colors.white,
+                  labelStyle: const TextStyle(color: Colors.grey),
+                  floatingLabelStyle: TextStyle(color: HexColor("#d4ac2c")),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(5.0),
-                    borderSide: const BorderSide(),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: BorderSide(color: HexColor("#d4ac2c")),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                    borderSide: BorderSide(color: HexColor("#d4ac2c")),
                   ),
                   //fillColor: Colors.green
                 ),
@@ -197,9 +225,23 @@ class _EditItemconfigState extends State<EditItemconfig> {
                           vertical: 0, horizontal: 5),
                       labelText: "Price",
                       fillColor: Colors.white,
+                      labelStyle: const TextStyle(color: Colors.grey),
+                      floatingLabelStyle: TextStyle(color: HexColor("#d4ac2c")),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5.0),
-                        borderSide: const BorderSide(),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: BorderSide(color: HexColor("#d4ac2c")),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: const BorderSide(color: Colors.grey),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: BorderSide(color: HexColor("#d4ac2c")),
                       ),
                       //fillColor: Colors.green
                     ),

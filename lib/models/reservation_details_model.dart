@@ -101,7 +101,7 @@ class Reservation {
     //taxGst = TaxGst.fromJson(json['tax_gst'] ?? {});
     flatDiscount = json['flat_discount'] ?? 0;
     serviceCharge = json['service_charge'] ?? 0;
-    balanceAmount = json['balance_amount'] ?? "0";
+    balanceAmount = json['balance_amount']?.toString() ?? "0";
     commission = json['commission'] ?? "0";
     advancePaid = json['advance_paid'] ?? "0";
     cake = Cake.fromJson(json['cake'] ?? {});
